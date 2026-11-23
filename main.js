@@ -107,4 +107,108 @@
       }, 350);
     }, 2400);
   }
+
+  /* ---------- Motion: 3D tilt, scroll reveal, hero parallax ----------
+     Transform/opacity only. All of it is skipped when the user
+     prefers reduced motion. The "js" class gates the reveal hidden
+     state in CSS, so content is never stuck invisible if this
+     script fails to load. */
+  document.documentElement.classList.add("js");
+  var reduceMotion = false;
+  try { reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+  var finePointer = false;
+  try { finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches; } catch (e) {}
+  if (!window.requestAnimationFrame) {
+    window.requestAnimationFrame = function (cb) { return setTimeout(cb, 16); };
+  }
+
+  /* Reveal-on-scroll: fade + rise, staggered within a grid. */
+  var revealTargets = document.querySelectorAll(
+    ".card-dark, .tier, .addon, .mock-band, .stat," +
+    " .section > .container > h2, .section > .container > .section-sub," +
+    " .mission, .faq-item, .tl-item, .page-head h1, .page-head p"
+  );
+  function revealNow(el) {
+    el.classList.add("visible");
+    el.style.transitionDelay = "";
+  }
+  if (reduceMotion || !("IntersectionObserver" in window)) {
+    for (var ri = 0; ri < revealTargets.length; ri++) {
+      revealTargets[ri].classList.add("reveal");
+      revealNow(revealTargets[ri]);
+    }
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      for (var ei = 0; ei < entries.length; ei++) {
+        var entry = entries[ei];
+        if (!entry.isIntersecting) continue;
+        var el = entry.target;
+        io.unobserve(el);
+        var sibs = el.parentNode ? el.parentNode.children : [];
+        var idx = 0;
+        for (var k = 0; k < sibs.length; k++) { if (sibs[k] === el) { idx = k; break; } }
+        var delay = Math.min(idx, 5) * 80;
+        if (delay) {
+          el.style.transitionDelay = delay + "ms";
+          (function (elm) {
+            setTimeout(function () { elm.style.transitionDelay = ""; }, 900);
+          })(el);
+        }
+        el.classList.add("visible");
+      }
+    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    for (var oi = 0; oi < revealTargets.length; oi++) {
+      revealTargets[oi].classList.add("reveal");
+      io.observe(revealTargets[oi]);
+    }
+  }
+
+  /* 3D tilt on glass cards (fine pointers only, max ~3 degrees). */
+  if (!reduceMotion && finePointer) {
+    var tiltEls = document.querySelectorAll(".card-dark, .tier, .addon, .mock-band, .stat");
+    for (var ti = 0; ti < tiltEls.length; ti++) {
+      (function (el) {
+        el.addEventListener("pointermove", function (ev) {
+          var r = el.getBoundingClientRect();
+          if (!r.width || !r.height) return;
+          var px = (ev.clientX - r.left) / r.width - 0.5;
+          var py = (ev.clientY - r.top) / r.height - 0.5;
+          el.style.setProperty("--ry", (px * 6).toFixed(2) + "deg");
+          el.style.setProperty("--rx", (-py * 6).toFixed(2) + "deg");
+        });
+        el.addEventListener("pointerleave", function () {
+          el.style.setProperty("--rx", "0deg");
+          el.style.setProperty("--ry", "0deg");
+        });
+      })(tiltEls[ti]);
+    }
+  }
+
+  /* Hero parallax: background layers move slower than the content.
+     Passive scroll listener + rAF, transform only, clamped so the
+     content moves at most ~33px. Only runs while a hero is on
+     screen, so it costs nothing elsewhere. */
+  var heroes = document.querySelectorAll(".hero");
+  if (heroes.length && !reduceMotion) {
+    var ticking = false;
+    function updateParallax() {
+      ticking = false;
+      for (var hi = 0; hi < heroes.length; hi++) {
+        var h = heroes[hi];
+        var rect = h.getBoundingClientRect();
+        if (rect.bottom < 0 || rect.top > window.innerHeight) {
+          if (h.style.getPropertyValue("--hero-px")) h.style.setProperty("--hero-px", "0px");
+          continue;
+        }
+        var px = Math.max(0, Math.min(220, -rect.top));
+        h.style.setProperty("--hero-px", Math.round(px) + "px");
+      }
+    }
+    function onScroll() {
+      if (!ticking) { ticking = true; window.requestAnimationFrame(updateParallax); }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    updateParallax();
+  }
 })();
