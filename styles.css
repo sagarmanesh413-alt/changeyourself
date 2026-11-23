@@ -101,6 +101,26 @@ img { max-width: 100%; }
   white-space: nowrap;
 }
 .login-btn:hover { background: rgba(255, 255, 255, 0.10); border-color: rgba(255, 255, 255, 0.7); }
+/* Theme toggle — last item in the nav, far right end (after Login).
+   Icon-only pill button; the icon shows the theme it will switch to
+   and is swapped by main.js. */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  margin-left: 6px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+}
+.theme-toggle:hover { background: rgba(255, 255, 255, 0.10); border-color: rgba(255, 255, 255, 0.7); }
+.theme-toggle svg { width: 18px; height: 18px; }
 
 /* ---------- Sections ---------- */
 .section { padding: 72px 0; }
@@ -199,6 +219,8 @@ img { max-width: 100%; }
 .btn-dark { background: transparent; color: #ffffff; border-color: rgba(255, 255, 255, 0.35); }
 .btn-dark:hover { border-color: rgba(255, 255, 255, 0.7); }
 .btn .arrow { font-weight: 700; }
+/* In-card "Learn more" links (purple accent; darker purple on light). */
+.card-link { color: #a78bfa; font-weight: 600; text-decoration: none; }
 
 /* ---------- Grids & cards ---------- */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -267,6 +289,19 @@ img { max-width: 100%; }
   font-weight: 600;
 }
 .mock-stats b { color: #ffffff; }
+/* "by ChangeXed" badge on the home mock-tests band. */
+.by-changexed {
+  display: inline-block;
+  margin: 0 auto 18px;
+  padding: 5px 14px;
+  border: 1px solid rgba(124, 58, 237, 0.5);
+  border-radius: 999px;
+  color: #a78bfa;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.by-changexed:hover { background: rgba(124, 58, 237, 0.15); }
 
 /* ---------- Closing CTA ---------- */
 .cta { position: relative; overflow: hidden; text-align: center; }
@@ -468,6 +503,28 @@ img { max-width: 100%; }
 .live-badge { background: var(--accent-1); color: #ffffff; }
 .soon-badge { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border); color: var(--muted); }
 
+/* ---------- ChangeXed wordmark (hub hero) ----------
+   Theme-aware: dark version (white text) on dark, light version
+   (black text) on light — swapped by CSS, no JS needed. */
+.changexed-wordmark img {
+  display: block;
+  width: min(420px, 82vw);
+  height: auto;
+  margin: 0 auto;
+}
+.changexed-wordmark .wordmark-light { display: none; }
+html[data-theme="light"] .changexed-wordmark .wordmark-dark { display: none; }
+html[data-theme="light"] .changexed-wordmark .wordmark-light { display: block; }
+.changexed-tagline {
+  display: block;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: clamp(18px, 3vw, 24px);
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  line-height: 1.3;
+}
+
 /* ---------- Glass cards + border beam (all cards) ----------
    Every card on the site shares one treatment: translucent glass
    with a deep-purple beam of light travelling around its border.
@@ -564,6 +621,105 @@ img { max-width: 100%; }
   .stat::before,
   .btn-white::before,
   .btn-dark::before { animation: none; }
+}
+
+/* ---------- Light theme ----------
+   Default is dark. html[data-theme="light"] (set pre-paint by the
+   inline script in <head>, toggled by #themeToggle) flips every
+   dark-only colour. Purple/blue accents and the deep-purple border
+   beam are unchanged — they stay visible on the light background.
+   Dark theme is untouched: no white cards there, all cards stay
+   transparent glassmorphism. */
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --text: #111111;
+  --muted: #52525b;
+  --muted-2: #71717a;
+  --border: rgba(0, 0, 0, 0.10);
+  --card: rgba(0, 0, 0, 0.03);
+}
+html[data-theme="light"] body {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.09) 1px, transparent 1.4px);
+}
+/* Top nav: light glass pill, dark text. */
+html[data-theme="light"] .nav {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(0, 0, 0, 0.10);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+}
+html[data-theme="light"] .nav .logo {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.14);
+}
+html[data-theme="light"] .nav a.nav-link { color: #111111; }
+html[data-theme="light"] .nav a.nav-link:hover { background: rgba(0, 0, 0, 0.06); }
+html[data-theme="light"] .login-btn {
+  border-color: rgba(0, 0, 0, 0.35);
+  color: #111111;
+}
+html[data-theme="light"] .login-btn:hover { background: rgba(0, 0, 0, 0.06); border-color: rgba(0, 0, 0, 0.6); }
+/* Theme toggle (far right of the nav) keeps its pill treatment in light. */
+html[data-theme="light"] .theme-toggle {
+  border-color: rgba(0, 0, 0, 0.35);
+  color: #111111;
+}
+html[data-theme="light"] .theme-toggle:hover { background: rgba(0, 0, 0, 0.06); border-color: rgba(0, 0, 0, 0.6); }
+/* Hero / badge / marquee. */
+html[data-theme="light"] .badge { border-color: rgba(0, 0, 0, 0.22); color: #3f3f46; }
+html[data-theme="light"] .marquee-track span { color: #3f3f46; }
+/* Buttons: white-bg/black-text becomes black-bg/white-text so the
+   primary action stays visible on a white page. */
+html[data-theme="light"] .btn-white { background: #111111; color: #ffffff; }
+html[data-theme="light"] .btn-white:hover { background: #000000; }
+html[data-theme="light"] .btn-dark { border-color: rgba(0, 0, 0, 0.35); color: #111111; }
+html[data-theme="light"] .btn-dark:hover { border-color: rgba(0, 0, 0, 0.7); }
+html[data-theme="light"] .card-link { color: #6d28d9; }
+/* Cards: light glass (white, subtle border) instead of dark glass.
+   The border beam is untouched and stays visible on white. */
+html[data-theme="light"] .card-dark,
+html[data-theme="light"] .tier,
+html[data-theme="light"] .addon,
+html[data-theme="light"] .mock-band,
+html[data-theme="light"] .stat {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(0, 0, 0, 0.10);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.10);
+}
+/* Mock band + stats. */
+html[data-theme="light"] .mock-stats { color: #3f3f46; }
+html[data-theme="light"] .mock-stats b { color: #111111; }
+html[data-theme="light"] .by-changexed { color: #6d28d9; }
+/* Footer. */
+html[data-theme="light"] .footer-links a { color: #3f3f46; }
+html[data-theme="light"] .footer-links a:hover { color: #000000; }
+/* Floating dock: white pill in both themes; light theme gets a
+   subtle border and a softer shadow. */
+html[data-theme="light"] .dock {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.18);
+}
+/* About: stats + timeline. */
+html[data-theme="light"] .stat-num { color: #111111; }
+html[data-theme="light"] .tl-year { color: #111111; }
+html[data-theme="light"] .tl-text b { color: #111111; }
+/* Pricing. */
+html[data-theme="light"] .tier-features li { color: #3f3f46; }
+html[data-theme="light"] .addon .tag { background: rgba(0, 0, 0, 0.06); color: #3f3f46; }
+/* ChangeXed hub. */
+html[data-theme="light"] .soon-badge { background: rgba(0, 0, 0, 0.06); }
+/* Hero light beams: slightly stronger so they read on white. */
+html[data-theme="light"] .hero::before {
+  background: linear-gradient(180deg, rgba(167, 139, 250, 0.30), rgba(167, 139, 250, 0.05) 65%, transparent);
+}
+html[data-theme="light"] .hero::after {
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.28), rgba(96, 165, 250, 0.05) 65%, transparent);
+}
+html[data-theme="light"] .cta::before {
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.26), rgba(96, 165, 250, 0.04) 65%, transparent);
+}
+html[data-theme="light"] .cta::after {
+  background: linear-gradient(180deg, rgba(167, 139, 250, 0.28), rgba(167, 139, 250, 0.04) 65%, transparent);
 }
 
 /* ---------- Responsive ---------- */
