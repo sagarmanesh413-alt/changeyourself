@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UGC NET Quick Quiz — 100 Most Probable Questions | ChangeXed</title>
+<meta name="description" content="ChangeXed — UGC NET quick quiz: 100 most probable questions, Paper 1 + Paper 2, in 10-question rounds with an instant explanation for every answer. Free.">
+<script>try{var t=localStorage.getItem("cy-theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;}}catch(e){}</script>
+<script>
+  // Boot watchdog: if the quiz script fails to start (old webview, blocked
+  // script, etc.), show a fallback panel with a Reload button instead of a
+  // blank page.
+  window.__bootTimer = setTimeout(function () {
+    if (!window.__booted) { var f = document.getElementById('boot-fallback'); if (f) f.style.display = 'flex'; }
+  }, 6000);
+</script>
+<link rel="stylesheet" href="/styles.css">
+<link rel="icon" href="/logo.png">
+</head>
+<body>
+<nav class="nav">
+  <a class="logo" href="/" aria-label="ChangeYourself home"><img src="/logo.png" alt="ChangeYourself"></a>
+  <a class="nav-link" href="/about/">About</a>
+  <a class="nav-link" href="/pricing/">Pricing</a>
+  <a class="nav-link" href="/changexed/">ChangeXed</a>
+  <button class="login-btn" id="loginBtn" type="button">Login</button>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+</nav>
+
+<div id="boot-fallback" style="display:none;position:fixed;inset:0;z-index:200;background:#000000;color:#ffffff;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:24px;">
+  <p style="font-size:18px;font-weight:700">The quiz didn't load.</p>
+  <p style="color:#a1a1aa">Your connection or browser may have blocked the script. Try reloading.</p>
+  <button onclick="location.reload()" type="button" style="padding:12px 24px;border-radius:999px;border:1px solid #ffffff;background:#ffffff;color:#000000;font-weight:700;cursor:pointer">Reload quiz</button>
+</div>
+
+<section class="page-head"><div class="container">
+  <h1>UGC NET Quick Quiz</h1>
+  <a class="by-changexed" href="/changexed/">by ChangeXed</a>
+  <p>100 most probable questions — Paper 1 + Paper 2. Ten-question rounds, Paper 1, Paper 2 or Mixed, with an instant explanation for every answer. Free, no sign-in.</p>
+</div></section>
+
+<section class="section" style="padding-top:0"><div class="container">
+<div id="quiz-app">
+  <div id="screen-home">
+    <div class="grid-3">
+      <div class="card-dark quiz-mode">
+        <h3>Paper 1</h3>
+        <p>50 most probable Paper 1 questions — teaching, research, reasoning, ICT, environment and higher education.</p>
+        <p class="quiz-best" id="best-p1">Best: —</p>
+        <button class="btn btn-white quiz-start" data-mode="p1" type="button">Start Paper 1 <span class="arrow">→</span></button>
+      </div>
+      <div class="card-dark quiz-mode">
+        <h3>Paper 2 — Psychology</h3>
+        <p>50 most probable Paper 2 Psychology questions — personality, testing, learning, memory, social and development.</p>
+        <p class="quiz-best" id="best-p2">Best: —</p>
+        <button class="btn btn-white quiz-start" data-mode="p2" type="button">Start Paper 2 <span class="arrow">→</span></button>
+      </div>
+      <div class="card-dark quiz-mode">
+        <h3>Mixed</h3>
+        <p>10 random questions from all 100 — Paper 1 and Paper 2 mixed, like the real exam.</p>
+        <p class="quiz-best" id="best-mixed">Best: —</p>
+        <button class="btn btn-white quiz-start" data-mode="mixed" type="button">Start Mixed <span class="arrow">→</span></button>
+      </div>
+    </div>
+    <p class="quiz-note">Your best scores are saved on this device. The same 100 questions also exist as a full 100-question mock test under “Most Probable Questions” in the <a class="card-link" href="/changexed/mock-tests/">Test Series</a>.</p>
+  </div>
+
+  <div id="screen-quiz" hidden>
+    <div class="card-dark quiz-card">
+      <div class="quiz-top"><span id="quiz-progress-text">Question 1 of 10</span><span class="quiz-tag" id="quiz-paper-tag">Paper 1</span></div>
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
+      <h2 class="quiz-q" id="quiz-q"></h2>
+      <div class="quiz-opts" id="quiz-opts"></div>
+      <div class="quiz-explain" id="quiz-explain" hidden></div>
+      <div class="quiz-actions"><button class="btn btn-white" id="quiz-next" type="button" hidden>Next question <span class="arrow">→</span></button></div>
+    </div>
+    <p class="quiz-note"><button class="card-link quiz-quit" id="quiz-quit" type="button">Quit this round</button></p>
+  </div>
+
+  <div id="screen-results" hidden>
+    <div class="card-dark quiz-results">
+      <h2>Round complete</h2>
+      <p class="quiz-score"><span id="res-score">0</span> / 10</p>
+      <p id="res-best" class="muted"></p>
+      <p id="res-msg"></p>
+      <div class="quiz-actions">
+        <button class="btn btn-white" id="res-again" type="button">Play again</button>
+        <button class="btn btn-dark" id="res-modes" type="button">Choose a mode</button>
+      </div>
+    </div>
+    <div id="res-review" style="margin-top:28px"></div>
+  </div>
+</div>
+</div></section>
+
+<footer class="footer"><div class="container"><div class="footer-links"><a href="/">Home</a><a href="/about/">About</a><a href="/pricing/">Pricing</a><a href="/changexed/mock-tests/">Mock Tests</a></div><img src="/logo.png" alt="ChangeYourself" class="footer-logo"><p class="footer-tag">ChangeYourself — Learn. Grow. Transform.</p><p class="footer-copy">© 2026 ChangeYourself.in</p></div></footer>
+
+<!-- No dock on this page: it would cover the quiz buttons, same as the mock-test page. -->
+<div class="toast" id="toast" role="status"></div>
+<script src="/main.js"></script>
+<script>
+(function () {
+  'use strict';
+  /* 100 most probable questions (50 Paper 1 + 50 Paper 2). Keys verified
+     against their explanations before import — 0 errors. */
+  var DATA = [{"p":"1","q":"Which of the following is the highest level of cognitive ability in Bloom's taxonomy?","o":["Knowing","Understanding","Analysing","Evaluating"],"a":3,"w":"Evaluating is the highest level in the original Bloom hierarchy (in the revised taxonomy it is Creating, above Evaluating)."},{"p":"1","q":"Which of the following factors does NOT impact teaching?","o":["Teacher's knowledge of the subject","Classroom activities that encourage learning","Socio-economic background of the teacher","Student's prior knowledge"],"a":2,"w":"Teaching is affected by the teacher's knowledge, classroom activities and the learner — not by the teacher's socio-economic background."},{"p":"1","q":"Teaching is best described as a tri-polar process involving:","o":["Teacher, student and curriculum","Teacher, school and society","Student, parents and teacher","Curriculum, examination and evaluation"],"a":0,"w":"The three poles of teaching are the teacher, the learner and the curriculum/content."},{"p":"1","q":"The principal of a school interviews teachers and students to explore how their participation in school programmes can be improved. This is an example of:","o":["Evaluation research","Fundamental research","Action research","Applied research"],"a":2,"w":"Action research is practitioner-led enquiry to solve an immediate, local problem and improve practice."},{"p":"1","q":"Which of the following is a characteristic of effective teaching?","o":["Covering the maximum syllabus in minimum time","Encouraging students to elaborate on an answer","Asking only recall-type questions","Maintaining strict silence in the class"],"a":1,"w":"Effective teaching uses elaboration, questioning and feedback — not mere coverage or silence."},{"p":"1","q":"Which level of teaching focuses on developing critical thinking and the ability to judge?","o":["Memory level","Understanding level","Reflective level","Autonomous development level"],"a":2,"w":"Reflective level (Morrison) aims at insight, critical thinking and independent judgement; memory level is mere recall."},{"p":"1","q":"Micro-teaching is mainly used for:","o":["Testing students' knowledge","Training teachers in specific teaching skills","Evaluating the curriculum","Counselling students"],"a":1,"w":"Micro-teaching is a scaled-down, skill-focused teacher-training technique (e.g. questioning, explaining, reinforcement)."},{"p":"1","q":"Which of the following is an example of a learner-centred method?","o":["Lecture method","Programmed instruction with self-pacing","Chalk-and-talk","Dictation"],"a":1,"w":"Learner-centred methods put the student in control of pace and activity; programmed instruction is a classic example."},{"p":"1","q":"A researcher wants to test whether a new teaching method improves scores. The variable that the researcher manipulates is called the:","o":["Dependent variable","Independent variable","Extraneous variable","Intervening variable"],"a":1,"w":"The independent variable is manipulated by the researcher; the dependent variable is the measured outcome."},{"p":"1","q":"Which of the following is the first step of the research process?","o":["Formulating the hypothesis","Identifying and defining the problem","Collecting data","Reviewing literature"],"a":1,"w":"Research begins with identifying and defining the problem; everything else follows from it."},{"p":"1","q":"A hypothesis that states 'there is no significant difference between the two groups' is a:","o":["Directional hypothesis","Null hypothesis","Working hypothesis","Alternative hypothesis"],"a":1,"w":"The null hypothesis (H0) asserts no difference / no relationship; it is what statistical tests actually test."},{"p":"1","q":"Which sampling method gives every member of the population an equal chance of selection?","o":["Purposive sampling","Quota sampling","Simple random sampling","Snowball sampling"],"a":2,"w":"In simple random sampling every unit has an equal, independent chance of being chosen."},{"p":"1","q":"The extent to which a test measures what it claims to measure is its:","o":["Reliability","Validity","Objectivity","Usability"],"a":1,"w":"Validity = measures what it claims to; reliability = consistency of measurement."},{"p":"1","q":"Using someone else's work without acknowledgement is called:","o":["Paraphrasing","Citation","Plagiarism","Summarising"],"a":2,"w":"Plagiarism is presenting another's work or ideas as one's own without credit."},{"p":"1","q":"Which of the following is a probability sampling technique?","o":["Convenience sampling","Judgemental sampling","Stratified random sampling","Volunteer sampling"],"a":2,"w":"Stratified random sampling is probability sampling; convenience, judgemental and volunteer sampling are non-probability."},{"p":"1","q":"In an experiment, the group that does NOT receive the treatment is the:","o":["Experimental group","Control group","Target group","Sample group"],"a":1,"w":"The control group provides the baseline against which the experimental group's change is compared."},{"p":"1","q":"In the communication process, the person who decodes the message is the:","o":["Sender","Encoder","Receiver","Channel"],"a":2,"w":"The sender encodes, the channel carries, and the receiver decodes the message."},{"p":"1","q":"Which of the following is a barrier to effective classroom communication?","o":["Use of simple language","Noise in the classroom","Eye contact with students","Feedback from learners"],"a":1,"w":"Physical noise is a classic barrier; simple language, eye contact and feedback help communication."},{"p":"1","q":"The term 'grapevine' in communication refers to:","o":["Formal written communication","Informal, unofficial communication network","Mass media communication","Computer-mediated communication"],"a":1,"w":"The grapevine is the informal channel through which rumours and unofficial information travel."},{"p":"1","q":"Which of the following is an example of non-verbal communication?","o":["A lecture","A written notice","A nod of agreement","A telephone call"],"a":2,"w":"Gestures, facial expressions and body language are non-verbal; lectures, notices and calls are verbal."},{"p":"1","q":"The most important function of feedback in communication is to:","o":["Make the message longer","Tell the sender the message was understood","Increase the speed of delivery","Reduce the number of receivers"],"a":1,"w":"Feedback closes the loop — it tells the sender whether the message was received and understood as intended."},{"p":"1","q":"A deductive argument is invalid if:","o":["Its premises and conclusion are all false","Its premises are true but its conclusion is false","Its premises are false but its conclusion is true","Its premises and conclusion are all true"],"a":1,"w":"A deductive argument is invalid exactly when true premises can yield a false conclusion. (Repeated in 2015 and 2017.)"},{"p":"1","q":"If the proposition 'All cats are animals' is false, which proposition can be claimed certainly to be true?","o":["Some cats are animals","Some cats are not animals","No cat is an animal","No animal is a cat"],"a":1,"w":"'All cats are animals' is an A-proposition; its contradictory O ('Some cats are not animals') must be true when A is false."},{"p":"1","q":"Among the following propositions, which two are related such that they cannot both be true but can both be false?","o":["A and I","A and E","I and O","E and I"],"a":1,"w":"A ('All S are P') and E ('No S is P') are contraries: they cannot both be true, but both can be false."},{"p":"1","q":"The next term in the series 2, 6, 12, 20, 30, … is:","o":["36","40","42","44"],"a":2,"w":"Differences are 4, 6, 8, 10, so the next difference is 12: 30 + 12 = 42."},{"p":"1","q":"In a certain code, TEACHER is written as UDBDIFS. How is STUDENT written?","o":["TUVEFOU","TUVEFO","UVTEFOU","TUVFFOU"],"a":0,"w":"Each letter shifts +1: S→T, T→U, U→V, D→E, E→F, N→O, T→U = TUVEFOU."},{"p":"1","q":"All roses are flowers. Some flowers are red. Which conclusion validly follows?","o":["All roses are red","Some roses are red","No conclusion about roses being red follows","All red things are roses"],"a":2,"w":"The middle term 'flowers' is undistributed in both premises, so no valid conclusion about roses and red follows."},{"p":"1","q":"Statement: 'All successful people are hardworking.' Conclusion: 'Ravi is hardworking, therefore Ravi is successful.' This reasoning is:","o":["Valid","Invalid — it affirms the consequent","Valid by conversion","Invalid — undistributed middle"],"a":1,"w":"Hardworking is the consequent; from 'if successful then hardworking' and 'Ravi is hardworking', success does not follow."},{"p":"1","q":"Which of the following is an example of an analogical argument?","o":["All men are mortal; Socrates is a man; so Socrates is mortal","The Earth has an atmosphere and life; Mars has an atmosphere, so it may have life","If it rains, the ground gets wet; it rained, so the ground is wet","2 + 2 = 4, so 4 − 2 = 2"],"a":1,"w":"Analogy infers similarity in one respect from similarity in other respects — Earth/Mars is the classic example."},{"p":"1","q":"The average of 5 numbers is 27. If one number is excluded, the average becomes 25. The excluded number is:","o":["33","35","37","30"],"a":1,"w":"Total of 5 = 135; total of remaining 4 = 100; excluded = 135 − 100 = 35."},{"p":"1","q":"A sum of money doubles in 10 years at simple interest. The rate of interest per annum is:","o":["5%","10%","12%","20%"],"a":1,"w":"Interest = principal in 10 years, so rate = 100/10 = 10% per annum."},{"p":"1","q":"The ratio of ages of A and B is 3 : 5. After 10 years the ratio will be 5 : 7. The present age of A is:","o":["15 years","20 years","25 years","30 years"],"a":0,"w":"Let ages be 3x and 5x: (3x+10)/(5x+10) = 5/7 → 21x + 70 = 25x + 50 → x = 5, so A = 3x = 15 years."},{"p":"1","q":"If 15% of a number is 45, the number is:","o":["200","250","300","350"],"a":2,"w":"15% = 45 → 1% = 3 → 100% = 300."},{"p":"1","q":"A train 200 m long crosses a pole in 10 seconds. Its speed is:","o":["36 km/h","72 km/h","60 km/h","54 km/h"],"a":1,"w":"Speed = 200/10 = 20 m/s = 20 × 18/5 = 72 km/h."},{"p":"1","q":"What is the value of 25% of 25% of 200?","o":["12.5","25","6.25","50"],"a":0,"w":"25% of 200 = 50; 25% of 50 = 12.5."},{"p":"1","q":"A pie chart shows the distribution of 3600 students: Science 25%, Arts 30%, Commerce 20%, Others 25%. How many students are in Arts?","o":["900","1080","720","1200"],"a":1,"w":"30% of 3600 = 0.30 × 3600 = 1080."},{"p":"1","q":"In a bar graph, the production of wheat in 2020 was 40 tonnes and in 2021 it was 50 tonnes. The percentage increase is:","o":["20%","25%","30%","10%"],"a":1,"w":"Increase = 10 on 40 → (10/40) × 100 = 25%."},{"p":"1","q":"A table shows the pass percentage of five schools: 80%, 75%, 90%, 85%, 70%. The average pass percentage is:","o":["78%","80%","82%","85%"],"a":1,"w":"(80 + 75 + 90 + 85 + 70)/5 = 400/5 = 80%."},{"p":"1","q":"Which of the following is the binary equivalent of the decimal number 13?","o":["1011","1101","1110","1001"],"a":1,"w":"13 = 8 + 4 + 1 = 1101 in binary."},{"p":"1","q":"The main function of an operating system is to:","o":["Create documents","Manage hardware and software resources","Browse the internet","Store data permanently"],"a":1,"w":"The operating system manages the computer's hardware and software resources and provides services to programs."},{"p":"1","q":"Which of the following is a web browser?","o":["Google Chrome","MS Word","Windows 11","Adobe Photoshop"],"a":0,"w":"Chrome is a browser; Word is a word processor, Windows is an operating system, Photoshop is an image editor."},{"p":"1","q":"What does 'www' stand for in a web address?","o":["World Wide Web","World Web Window","Wide World Web","Web World Wide"],"a":0,"w":"'www' stands for World Wide Web."},{"p":"1","q":"Which of the following is the largest source of water pollution in major rivers of India?","o":["Untreated sewage","Agriculture run-off","Unregulated small scale industries","Religious practices"],"a":0,"w":"Repeated verbatim in 2016 and 2018 — untreated (domestic) sewage is the largest source of river pollution in India."},{"p":"1","q":"The gas mainly responsible for global warming is:","o":["Oxygen","Nitrogen","Carbon dioxide","Hydrogen"],"a":2,"w":"Carbon dioxide is the principal anthropogenic greenhouse gas driving global warming."},{"p":"1","q":"The ozone layer is found in the:","o":["Troposphere","Stratosphere","Mesosphere","Thermosphere"],"a":1,"w":"The ozone layer sits in the stratosphere, roughly 15–35 km above the Earth."},{"p":"1","q":"Which of the following is a renewable source of energy?","o":["Coal","Petroleum","Solar energy","Natural gas"],"a":2,"w":"Solar energy is renewable; coal, petroleum and natural gas are finite fossil fuels."},{"p":"1","q":"The University Grants Commission (UGC) was established in the year:","o":["1948","1953","1956","1961"],"a":2,"w":"The UGC was set up in 1953 and became a statutory body under the UGC Act, 1956."},{"p":"1","q":"Which body is responsible for the accreditation of higher education institutions in India?","o":["UGC","AICTE","NAAC","NCERT"],"a":2,"w":"NAAC (National Assessment and Accreditation Council) assesses and accredits higher education institutions."},{"p":"1","q":"The National Education Policy 2020 recommends a new curricular structure of:","o":["10 + 2","5 + 3 + 3 + 4","4 + 4 + 4","8 + 4"],"a":1,"w":"NEP 2020 proposes the 5+3+3+4 structure, replacing 10+2."},{"p":"1","q":"The apex body for technical education in India is:","o":["UGC","AICTE","ICSSR","CSIR"],"a":1,"w":"AICTE (All India Council for Technical Education) is the statutory body for technical education."},{"p":"2","q":"A researcher hypothesises that noise adversely affects mental-task performance. In the study, noise level is the:","o":["Dependent variable","Independent variable","Extraneous variable","Confounding variable"],"a":1,"w":"The variable manipulated by the researcher (noise level) is the independent variable; performance is the dependent variable."},{"p":"2","q":"Which of the following is true of the null hypothesis?","o":["It predicts a significant difference","It states there is no difference or no relationship","It is the same as the research hypothesis","It can never be tested statistically"],"a":1,"w":"The null hypothesis (H0) asserts no difference / no relationship between variables; tests evaluate whether it can be rejected."},{"p":"2","q":"The correlation coefficient ranges between:","o":["0 and +1","-1 and +1","-10 and +10","0 and 100"],"a":1,"w":"Pearson's r ranges from −1 (perfect negative) through 0 (no relation) to +1 (perfect positive)."},{"p":"2","q":"Which test is used to compare the means of two independent groups?","o":["Chi-square test","t-test","ANOVA","Mann-Whitney U test only"],"a":1,"w":"The independent-samples t-test compares two group means; ANOVA is for three or more groups, chi-square for frequencies."},{"p":"2","q":"A distribution in which the mean, median and mode are equal is called:","o":["Positively skewed","Negatively skewed","Normal distribution","Bimodal distribution"],"a":2,"w":"In a normal (bell-shaped) distribution, mean = median = mode; skew pulls the mean away from the mode."},{"p":"2","q":"A test that gives nearly the same score when administered twice to the same person has high:","o":["Validity","Reliability","Objectivity","Standardisation"],"a":1,"w":"Reliability is consistency of measurement — test–retest reliability is exactly this stability over time."},{"p":"2","q":"Which of the following is a non-probability sampling method?","o":["Stratified random sampling","Cluster sampling","Purposive sampling","Systematic sampling"],"a":2,"w":"Purposive sampling is non-probability (judgement-based); stratified, cluster and systematic sampling are probability methods."},{"p":"2","q":"In an experiment, the placebo effect is controlled by using:","o":["A control group and double-blind procedure","A larger sample","A longer study","A correlational design"],"a":0,"w":"A control group (often with placebo) and double-blind procedures keep expectations from contaminating results."},{"p":"2","q":"According to Freud, the part of personality that operates on the reality principle is the:","o":["Id","Ego","Superego","Libido"],"a":1,"w":"The ego works on the reality principle, mediating between the id (pleasure principle) and the superego (morality)."},{"p":"2","q":"The psychosexual stage in which the Oedipus complex appears is the:","o":["Oral stage","Anal stage","Phallic stage","Latency stage"],"a":2,"w":"The Oedipus complex occurs in the phallic stage (about 3–6 years), when the child's focus is on the genitals."},{"p":"2","q":"Which of the following is a projective test of personality?","o":["MMPI","16 PF","Rorschach Inkblot Test","NEO-PI-R"],"a":2,"w":"The Rorschach is projective (ambiguous stimuli); MMPI, 16 PF and NEO-PI-R are objective/self-report inventories."},{"p":"2","q":"The Big Five personality factors are:","o":["Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism","Id, Ego, Superego, Libido, Thanatos","Introversion, Extraversion, Thinking, Feeling, Judging","Oral, Anal, Phallic, Latency, Genital"],"a":0,"w":"The Big Five (OCEAN) are Openness, Conscientiousness, Extraversion, Agreeableness and Neuroticism."},{"p":"2","q":"Attributing one's own unacceptable feelings to someone else is the defence mechanism of:","o":["Repression","Projection","Sublimation","Reaction formation"],"a":1,"w":"Projection = seeing one's own unacceptable impulses in others; repression pushes them out of awareness."},{"p":"2","q":"According to Carl Rogers, the self that a person wishes to be is the:","o":["Real self","Ideal self","Social self","False self"],"a":1,"w":"Rogers distinguished the real self (who one is) from the ideal self (who one wishes to be); incongruence causes distress."},{"p":"2","q":"The Thematic Apperception Test (TAT) was developed by:","o":["Hermann Rorschach","Henry Murray","Raymond Cattell","Hans Eysenck"],"a":1,"w":"The TAT (ambiguous pictures, make up a story) was developed by Henry Murray and Christiana Morgan."},{"p":"2","q":"The formula for the Intelligence Quotient (IQ) is:","o":["(CA / MA) × 100","(MA / CA) × 100","(MA + CA) × 100","(CA − MA) × 100"],"a":1,"w":"IQ = (Mental Age / Chronological Age) × 100, introduced by Stern from Binet's work."},{"p":"2","q":"Which of the following is a performance (non-verbal) test of intelligence?","o":["Stanford-Binet","Raven's Progressive Matrices","WAIS Verbal Scale","Army Alpha"],"a":1,"w":"Raven's Progressive Matrices is a non-verbal, culture-fair performance test; Stanford-Binet and WAIS verbal scales rely on language."},{"p":"2","q":"Spearman's two-factor theory of intelligence proposes:","o":["g and s factors","Fluid and crystallised intelligence","Seven primary mental abilities","Multiple intelligences"],"a":0,"w":"Spearman proposed a general factor (g) plus specific factors (s); fluid/crystallised is Cattell, seven abilities is Thurstone, multiple intelligences is Gardner."},{"p":"2","q":"Content validity refers to the extent to which a test:","o":["Predicts future performance","Covers a representative sample of the domain","Correlates with another test","Looks valid to the test-taker"],"a":1,"w":"Content validity = the test adequately samples the content domain it claims to measure; prediction is criterion validity."},{"p":"2","q":"The Wechsler Adult Intelligence Scale (WAIS) gives which scores?","o":["Only a single IQ","Verbal IQ, Performance IQ and Full Scale IQ","Only a performance IQ","Emotional and social quotients"],"a":1,"w":"WAIS yields Verbal IQ, Performance IQ and a Full Scale IQ (the current WAIS-IV uses index scores)."},{"p":"2","q":"Which IQ range indicates mild intellectual disability?","o":["90–110","70–79","50–70","35–49"],"a":2,"w":"Mild intellectual disability is roughly IQ 50–70 (with adaptive-functioning deficits); 90–110 is average."},{"p":"2","q":"In Pavlov's classical conditioning, the food that naturally produces salivation is the:","o":["Conditioned stimulus","Unconditioned stimulus","Neutral stimulus","Conditioned response"],"a":1,"w":"Food is the unconditioned stimulus (UCS) — it naturally triggers salivation, the unconditioned response."},{"p":"2","q":"A child who is praised for finishing homework is more likely to finish it again. This is an example of:","o":["Positive reinforcement","Negative reinforcement","Punishment","Extinction"],"a":0,"w":"Adding a pleasant stimulus (praise) to increase a behaviour is positive reinforcement."},{"p":"2","q":"Which reinforcement schedule produces the highest, most steady rate of responding?","o":["Fixed ratio","Fixed interval","Variable ratio","Variable interval"],"a":2,"w":"Variable-ratio schedules (e.g. gambling) produce the highest and most persistent response rates."},{"p":"2","q":"Learning by observing others and imitating them is called:","o":["Classical conditioning","Operant conditioning","Observational (social) learning","Insight learning"],"a":2,"w":"Bandura's social learning theory: behaviour is learned by observing models and their consequences."},{"p":"2","q":"When a learned response disappears because the conditioned stimulus is repeatedly presented without the unconditioned stimulus, it is:","o":["Generalisation","Discrimination","Extinction","Spontaneous recovery"],"a":2,"w":"Extinction is the weakening of a conditioned response when the CS is presented without the UCS."},{"p":"2","q":"According to Miller, the capacity of short-term memory is:","o":["3 ± 1 items","5 ± 2 items","7 ± 2 items","9 ± 2 items"],"a":2,"w":"Miller's 'magical number' is 7 ± 2 chunks in short-term (working) memory."},{"p":"2","q":"The forgetting curve was first described by:","o":["Ebbinghaus","Bartlett","Skinner","Watson"],"a":0,"w":"Hermann Ebbinghaus (1885) plotted the forgetting curve: rapid loss at first, then levelling off."},{"p":"2","q":"Which Gestalt principle explains why we see a broken circle as a complete circle?","o":["Proximity","Similarity","Closure","Continuity"],"a":2,"w":"Closure: the mind completes incomplete figures, perceiving a whole rather than fragments."},{"p":"2","q":"The process of converting information into a form that can be stored in memory is:","o":["Retrieval","Encoding","Storage","Rehearsal"],"a":1,"w":"Encoding is the first stage of memory — getting information in; storage keeps it, retrieval gets it out."},{"p":"2","q":"Which of the following is a depth cue that works with one eye only?","o":["Retinal disparity","Convergence","Linear perspective","Binocular disparity"],"a":2,"w":"Linear perspective is a monocular cue; retinal (binocular) disparity and convergence need both eyes."},{"p":"2","q":"Insight learning, studied by Köhler with chimpanzees, is best described as:","o":["Learning by trial and error","Sudden understanding of a problem's solution","Learning by reinforcement","Learning by imitation"],"a":1,"w":"Köhler's apes solved problems in a flash of insight — a sudden restructuring of the perceptual field."},{"p":"2","q":"Asch's classic experiments demonstrated the power of:","o":["Obedience to authority","Conformity to group pressure","Bystander apathy","Cognitive dissonance"],"a":1,"w":"Asch's line-judgement studies showed people conforming to a unanimous majority even when it was plainly wrong."},{"p":"2","q":"Milgram's obedience experiments found that most participants:","o":["Refused to continue","Obeyed the experimenter to the highest shock level","Helped the learner","Stopped at the first protest"],"a":1,"w":"In Milgram's study about 65% obeyed instructions to the maximum 450-volt level."},{"p":"2","q":"The fundamental attribution error is the tendency to:","o":["Blame situations for others' behaviour","Overemphasise personality and underemphasise the situation","Attribute success to luck","Ignore other people's motives"],"a":1,"w":"Observers over-attribute others' behaviour to dispositions and under-weight situational forces."},{"p":"2","q":"An attitude has three components — affect, behaviour and cognition. This is the:","o":["ABC model","Elaboration likelihood model","Balance theory","Dissonance theory"],"a":0,"w":"The ABC model: Affective (feelings), Behavioural (actions), Cognitive (beliefs) components of attitudes."},{"p":"2","q":"Prejudice is best defined as:","o":["Negative behaviour towards a group","A negative attitude towards members of a group","Positive stereotyping","In-group favouritism"],"a":1,"w":"Prejudice is an attitude (usually negative); discrimination is the behaviour that may follow from it."},{"p":"2","q":"In Maslow's hierarchy, the needs in correct order from lowest to highest are:","o":["Safety, physiological, esteem, love, self-actualisation","Physiological, safety, love/belonging, esteem, self-actualisation","Physiological, esteem, safety, love, self-actualisation","Love, safety, physiological, esteem, self-actualisation"],"a":1,"w":"Maslow: physiological → safety → love/belonging → esteem → self-actualisation."},{"p":"2","q":"According to the James–Lange theory of emotion:","o":["Emotion causes bodily changes","Bodily changes come first and are experienced as emotion","Emotion and bodily changes occur simultaneously","Cognition is necessary for emotion"],"a":1,"w":"James–Lange: we feel afraid because we tremble — the perception of bodily changes IS the emotion."},{"p":"2","q":"The Yerkes–Dodson law states that performance is best at:","o":["The lowest level of arousal","The highest level of arousal","A moderate level of arousal","Any level of arousal"],"a":2,"w":"Performance follows an inverted-U: too little or too much arousal hurts; moderate arousal is optimal."},{"p":"2","q":"A person who works hard mainly for the enjoyment of the work itself is motivated by:","o":["Extrinsic motivation","Intrinsic motivation","Drive reduction","Instinct"],"a":1,"w":"Intrinsic motivation comes from the activity itself; extrinsic motivation comes from external rewards."},{"p":"2","q":"Piaget's stage in which children acquire conservation and logical thinking about concrete objects is the:","o":["Sensorimotor stage","Preoperational stage","Concrete operational stage","Formal operational stage"],"a":2,"w":"Concrete operations (about 7–11 years) bring conservation, classification and reversible thinking about real objects."},{"p":"2","q":"In Ainsworth's Strange Situation, the securely attached infant:","o":["Ignores the mother on return","Is distressed at separation and comforted on reunion","Shows extreme distress and cannot be comforted","Avoids the mother entirely"],"a":1,"w":"Secure attachment: distress on separation, quick comfort and return to play on reunion."},{"p":"2","q":"Kohlberg's first level of moral development is the:","o":["Conventional level","Post-conventional level","Pre-conventional level","Principled level"],"a":2,"w":"Pre-conventional morality (obedience/punishment, then self-interest) precedes conventional and post-conventional levels."},{"p":"2","q":"Systematic desensitisation, used to treat phobias, is based on:","o":["Classical conditioning","Operant conditioning","Psychoanalysis","Humanistic therapy"],"a":0,"w":"Wolpe's systematic desensitisation pairs relaxation with a graded fear hierarchy — reciprocal inhibition of classical conditioning."},{"p":"2","q":"The DSM-5 is best described as:","o":["A therapy manual","A classification system for mental disorders","A personality test","A brain-imaging technique"],"a":1,"w":"The Diagnostic and Statistical Manual of Mental Disorders (DSM-5) is the standard classification of mental disorders."},{"p":"2","q":"Which of the following is a negative symptom of schizophrenia?","o":["Hallucinations","Delusions","Flat affect","Disorganised speech"],"a":2,"w":"Flat affect (reduced emotional expression) is a negative symptom; hallucinations and delusions are positive symptoms."},{"p":"2","q":"The neurotransmitter most closely linked to schizophrenia is:","o":["Serotonin","Dopamine","Acetylcholine","GABA"],"a":1,"w":"The dopamine hypothesis: overactivity of dopamine pathways is linked to the positive symptoms of schizophrenia."},{"p":"2","q":"The part of the brain most important for forming new long-term memories is the:","o":["Amygdala","Hypothalamus","Hippocampus","Cerebellum"],"a":2,"w":"The hippocampus is critical for consolidating new explicit memories; the amygdala handles emotional memory."},{"p":"2","q":"Which stage of sleep is associated with vivid dreaming?","o":["Stage 1 NREM","Stage 2 NREM","Slow-wave sleep","REM sleep"],"a":3,"w":"REM (rapid eye movement) sleep is the stage of vivid dreaming, with fast brain activity and muscle atonia."}];
+
+  /* ---------- Guarded storage: localStorage with in-memory fallback ----------
+     Plain localStorage throws in some phone webviews, which used to break
+     the whole script. Never call localStorage directly. */
+  var store = (function () {
+    var mem = {};
+    var ls = null;
+    try {
+      var t = '__cy_quiz_probe__';
+      window.localStorage.setItem(t, '1');
+      window.localStorage.removeItem(t);
+      ls = window.localStorage;
+    } catch (e) { ls = null; }
+    return {
+      get: function (k) {
+        try { if (ls) { var v = ls.getItem(k); if (v !== null) return v; } } catch (e) {}
+        return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null;
+      },
+      set: function (k, v) {
+        mem[k] = v;
+        try { if (ls) ls.setItem(k, v); } catch (e) {}
+      }
+    };
+  })();
+
+  /* ---------- Guarded scroll ---------- */
+  function safeScrollTop() {
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    catch (e) { try { window.scrollTo(0, 0); } catch (e2) {} }
+  }
+
+  function $(id) { return document.getElementById(id); }
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  var BEST_KEY = { p1: 'cy-quiz-best-p1', p2: 'cy-quiz-best-p2', mixed: 'cy-quiz-best-mixed' };
+  var MODE_LABEL = { p1: 'Paper 1', p2: 'Paper 2', mixed: 'Mixed' };
+  var ROUND = 10;
+  var mode = 'mixed', round = [], idx = 0, score = 0, answers = [];
+
+  function best(m) {
+    var n = parseInt(store.get(BEST_KEY[m]), 10);
+    return isNaN(n) ? 0 : n;
+  }
+  function paintBest() {
+    $('best-p1').textContent = store.get(BEST_KEY.p1) === null ? 'Best: —' : 'Best: ' + best('p1') + ' / 10';
+    $('best-p2').textContent = store.get(BEST_KEY.p2) === null ? 'Best: —' : 'Best: ' + best('p2') + ' / 10';
+    $('best-mixed').textContent = store.get(BEST_KEY.mixed) === null ? 'Best: —' : 'Best: ' + best('mixed') + ' / 10';
+  }
+  function show(id) {
+    var ids = ['screen-home', 'screen-quiz', 'screen-results'];
+    for (var i = 0; i < ids.length; i++) $(ids[i]).hidden = (ids[i] !== id);
+  }
+
+  function startRound(m) {
+    mode = m;
+    var pool = DATA.filter(function (q) {
+      return m === 'mixed' ? true : q.p === (m === 'p1' ? '1' : '2');
+    });
+    round = shuffle(pool.slice()).slice(0, ROUND);
+    idx = 0; score = 0; answers = [];
+    show('screen-quiz');
+    renderQuestion();
+    safeScrollTop();
+  }
+
+  function renderQuestion() {
+    var q = round[idx];
+    $('quiz-progress-text').textContent = 'Question ' + (idx + 1) + ' of ' + ROUND;
+    $('quiz-paper-tag').textContent = q.p === '1' ? 'Paper 1' : 'Paper 2';
+    $('quiz-progress-fill').style.width = (idx / ROUND * 100) + '%';
+    $('quiz-q').textContent = q.q;
+    var opts = $('quiz-opts');
+    opts.innerHTML = '';
+    q.o.forEach(function (opt, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'quiz-opt';
+      b.innerHTML = '<span class="opt-letter">' + 'ABCD'[i] + '</span><span>' + esc(opt) + '</span>';
+      b.addEventListener('click', function () { answer(i); });
+      opts.appendChild(b);
+    });
+    $('quiz-explain').hidden = true;
+    $('quiz-explain').innerHTML = '';
+    $('quiz-next').hidden = true;
+  }
+
+  function answer(i) {
+    var q = round[idx];
+    var buttons = $('quiz-opts').querySelectorAll('.quiz-opt');
+    for (var k = 0; k < buttons.length; k++) buttons[k].disabled = true;
+    var correct = (i === q.a);
+    if (correct) score++;
+    answers.push({ q: q, chosen: i, correct: correct });
+    buttons[q.a].classList.add('correct');
+    if (!correct) buttons[i].classList.add('wrong');
+    var ex = $('quiz-explain');
+    ex.innerHTML = '<b>' + (correct ? '✓ Correct.' : '✗ Not quite — the answer is ' + 'ABCD'[q.a] + '.') + '</b> ' + esc(q.w);
+    ex.hidden = false;
+    $('quiz-next').textContent = (idx + 1 === ROUND) ? 'See results →' : 'Next question →';
+    $('quiz-next').hidden = false;
+    $('quiz-progress-fill').style.width = ((idx + 1) / ROUND * 100) + '%';
+  }
+
+  function showResults() {
+    var b = best(mode);
+    var isBest = score > b;
+    if (isBest) { try { store.set(BEST_KEY[mode], String(score)); } catch (e) {} }
+    $('res-score').textContent = score;
+    $('res-best').textContent = isBest
+      ? 'New best for ' + MODE_LABEL[mode] + '!'
+      : ('Best for ' + MODE_LABEL[mode] + ': ' + best(mode) + ' / 10');
+    $('res-msg').textContent = score === 10
+      ? 'Perfect round — every answer right.'
+      : (score >= 7
+        ? 'Strong round — a little revision and the rest will follow.'
+        : 'Good practice — read the explanations below and try again.');
+    var wrong = answers.filter(function (a) { return !a.correct; });
+    var rev = $('res-review');
+    rev.innerHTML = '';
+    if (wrong.length === 0) {
+      rev.innerHTML = '<p class="muted" style="text-align:center">No wrong answers to review — well done.</p>';
+      var p0 = rev.querySelector('p');
+      if (p0) {
+        p0.classList.add('reveal');
+        setTimeout(function () { p0.classList.add('visible'); }, 60);
+      }
+    } else {
+      var h = document.createElement('h3');
+      h.textContent = 'Review your wrong answers (' + wrong.length + ')';
+      h.style.marginBottom = '8px';
+      h.classList.add('reveal');
+      rev.appendChild(h);
+      setTimeout(function () { h.classList.add('visible'); }, 60);
+      wrong.forEach(function (a, n) {
+        var div = document.createElement('div');
+        div.className = 'quiz-review-item reveal';
+        div.innerHTML =
+          '<p><b>' + (n + 1) + '. ' + esc(a.q.q) + '</b></p>' +
+          '<p>Your answer: ' + esc(a.q.o[a.chosen]) + '</p>' +
+          '<p>Correct answer: ' + esc(a.q.o[a.q.a]) + '</p>' +
+          '<p class="muted">' + esc(a.q.w) + '</p>';
+        rev.appendChild(div);
+        (function (elm, d) { setTimeout(function () { elm.classList.add('visible'); }, 120 + d * 80); })(div, n);
+      });
+    }
+    show('screen-results');
+    safeScrollTop();
+  }
+
+  $('quiz-next').addEventListener('click', function () {
+    idx++;
+    if (idx >= ROUND) { showResults(); return; }
+    renderQuestion();
+    safeScrollTop();
+  });
+  $('quiz-quit').addEventListener('click', function () {
+    show('screen-home'); paintBest(); safeScrollTop();
+  });
+  $('res-again').addEventListener('click', function () { startRound(mode); });
+  $('res-modes').addEventListener('click', function () {
+    show('screen-home'); paintBest(); safeScrollTop();
+  });
+  var starts = document.querySelectorAll('.quiz-start');
+  for (var s = 0; s < starts.length; s++) {
+    starts[s].addEventListener('click', function () { startRound(this.getAttribute('data-mode')); });
+  }
+
+  paintBest();
+  window.__booted = true;
+})();
+</script>
+</body>
+</html>
