@@ -108,7 +108,7 @@
     }, 2400);
   }
 
-  /* ---------- Motion: 3D tilt, scroll reveal, hero parallax ----------
+  /* ---------- Motion: scroll reveal, hero parallax ----------
      Transform/opacity only. All of it is skipped when the user
      prefers reduced motion. The "js" class gates the reveal hidden
      state in CSS, so content is never stuck invisible if this
@@ -160,59 +160,6 @@
     for (var oi = 0; oi < revealTargets.length; oi++) {
       revealTargets[oi].classList.add("reveal");
       io.observe(revealTargets[oi]);
-    }
-  }
-
-  /* 3D tilt on glass cards (fine pointers only, max ~3 degrees). */
-  if (!reduceMotion && finePointer) {
-    var tiltEls = document.querySelectorAll(".card-dark, .tier, .addon, .mock-band, .stat");
-    for (var ti = 0; ti < tiltEls.length; ti++) {
-      (function (el) {
-        el.addEventListener("pointermove", function (ev) {
-          var r = el.getBoundingClientRect();
-          if (!r.width || !r.height) return;
-          var px = (ev.clientX - r.left) / r.width - 0.5;
-          var py = (ev.clientY - r.top) / r.height - 0.5;
-          el.style.setProperty("--ry", (px * 6).toFixed(2) + "deg");
-          el.style.setProperty("--rx", (-py * 6).toFixed(2) + "deg");
-        });
-        el.addEventListener("pointerleave", function () {
-          el.style.setProperty("--rx", "0deg");
-          el.style.setProperty("--ry", "0deg");
-        });
-      })(tiltEls[ti]);
-    }
-  }
-
-  /* Interactive hero geometry: pointer-driven 3D. Moving the
-     pointer over a hero tilts every shape toward it and shifts the
-     depth layers at different speeds (deeper shapes move more).
-     The .25s CSS transition on the shapes smooths the follow; on
-     leave the shapes ease back to rest. Idle spin is CSS; touch
-     devices keep the idle spin + scroll parallax only. */
-  if (!reduceMotion && finePointer) {
-    var heroList = document.querySelectorAll(".hero");
-    for (var si = 0; si < heroList.length; si++) {
-      (function (hero) {
-        var shapes = hero.querySelectorAll(".hero-shapes .shape");
-        if (!shapes.length) return;
-        var setPose = function (nx, ny) {
-          for (var i = 0; i < shapes.length; i++) {
-            var sh = shapes[i];
-            var d = parseFloat(sh.getAttribute("data-depth") || "1");
-            sh.style.setProperty("--tilt-y", (nx * 26 * d).toFixed(2) + "deg");
-            sh.style.setProperty("--tilt-x", (-ny * 26 * d).toFixed(2) + "deg");
-            sh.style.setProperty("--px", (nx * 34 * d).toFixed(1) + "px");
-            sh.style.setProperty("--py", (ny * 34 * d).toFixed(1) + "px");
-          }
-        };
-        hero.addEventListener("pointermove", function (ev) {
-          var r = hero.getBoundingClientRect();
-          if (!r.width || !r.height) return;
-          setPose((ev.clientX - r.left) / r.width - 0.5, (ev.clientY - r.top) / r.height - 0.5);
-        });
-        hero.addEventListener("pointerleave", function () { setPose(0, 0); });
-      })(heroList[si]);
     }
   }
 
