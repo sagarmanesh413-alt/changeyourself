@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pricing — ChangeYourself.in</title>
-<meta name="description" content="Simple pricing for ChangeYourself — start free, upgrade to Pro for the full UGC NET mock tests and mentorship.">
+<meta name="description" content="Simple pricing for ChangeYourself — start free with the UGC NET mock tests and quiz.">
 <script>try{var t=localStorage.getItem("cy-theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;}}catch(e){}</script>
 <link rel="stylesheet" href="/styles.css">
   <link rel="icon" href="/logo.png">
@@ -21,7 +21,7 @@
 
 <div class="page-head"><div class="container">
   <h1>Pricing</h1>
-  <p>Start free. Upgrade when you are ready — no credit card required to start.</p>
+  <p>Start free. Paid plans are coming soon — no credit card required to start.</p>
 </div></div>
 
 <div class="container"><div class="tiers">
@@ -30,8 +30,8 @@
     <div class="tier-price">₹0</div>
     <p class="tier-desc">For trying things out.</p>
     <ul class="tier-features">
-      <li>Career assessment (basic)</li>
-      <li>Community access</li>
+      <li>Career assessment (basic) <span class="tag">Coming soon</span></li>
+      <li>Community access <span class="tag">Coming soon</span></li>
       <li>3 UGC NET mock tests free</li>
       <li>Motivational resources</li>
     </ul>
@@ -44,11 +44,11 @@
     <p class="tier-desc">For serious aspirants.</p>
     <ul class="tier-features">
       <li><b>All 20 UGC NET mock tests</b></li>
-      <li>AI Assistant (unlimited)</li>
-      <li>Career roadmaps</li>
-      <li>Progress tracking</li>
+      <li>AI Assistant (unlimited) <span class="tag">Coming soon</span></li>
+      <li>Career roadmaps <span class="tag">Coming soon</span></li>
+      <li>Progress tracking <span class="tag">Coming soon</span></li>
     </ul>
-    <a class="btn btn-white" id="btn-pro" href="/changexed/mock-tests/">Upgrade to Pro</a>
+    <button class="btn btn-white" id="btn-pro" type="button" disabled>Pro — Coming Soon</button>
     <p class="pay-note" id="note-pro"></p>
   </div>
   <div class="tier">
@@ -57,11 +57,11 @@
     <p class="tier-desc">For full guidance.</p>
     <ul class="tier-features">
       <li>Everything in Pro</li>
-      <li>1-on-1 mentorship sessions</li>
-      <li>Resume builder &amp; review</li>
-      <li>Priority support</li>
+      <li>1-on-1 mentorship sessions <span class="tag">Coming soon</span></li>
+      <li>Resume builder &amp; review <span class="tag">Coming soon</span></li>
+      <li>Priority support <span class="tag">Coming soon</span></li>
     </ul>
-    <a class="btn btn-white" id="btn-premium" href="/changexed/mock-tests/">Upgrade to Premium</a>
+    <button class="btn btn-white" id="btn-premium" type="button" disabled>Premium — Coming Soon</button>
     <p class="pay-note" id="note-premium"></p>
   </div>
   <div class="tier">
@@ -69,10 +69,10 @@
     <div class="tier-price">Custom</div>
     <p class="tier-desc">For colleges &amp; coaching centres.</p>
     <ul class="tier-features">
-      <li>Bulk mock-test access for students</li>
-      <li>Admin dashboard &amp; reports</li>
-      <li>Custom branding</li>
-      <li>Dedicated support</li>
+      <li>Bulk mock-test access for students <span class="tag">Coming soon</span></li>
+      <li>Admin dashboard &amp; reports <span class="tag">Coming soon</span></li>
+      <li>Custom branding <span class="tag">Coming soon</span></li>
+      <li>Dedicated support <span class="tag">Coming soon</span></li>
     </ul>
     <a class="btn btn-white" href="#" data-soon="Contact details coming soon.">Contact Us</a>
   </div>
@@ -85,7 +85,7 @@
       <h3>UGC NET Test Series &mdash; Full Access</h3>
       <p>All 20 mock tests, all subjects. Mock Tests 1&ndash;3 are free.</p>
       <p><b>&#8377;199</b> one-time</p>
-      <a class="btn btn-white" id="btn-mocks" href="/changexed/mock-tests/">Unlock All 20 Tests</a>
+      <a class="btn btn-white" id="btn-mocks" href="/changexed/mock-tests/">Try the Free Tests</a>
       <p class="pay-note" id="note-mocks"></p>
     </div>
     <div class="addon">
@@ -131,7 +131,7 @@
   <a class="btn btn-white" href="/changexed/">Try a Mock Test Free</a>
 </div></section>
 
-<footer class="footer"><div class="container"><div class="footer-links"><a href="/">Home</a><a href="/about/">About</a><a href="/pricing/">Pricing</a><a href="/changexed/mock-tests/">Mock Tests</a></div><img src="/logo.png" alt="ChangeYourself" class="footer-logo"><p class="footer-tag">ChangeYourself — Learn. Grow. Transform.</p><p class="footer-copy">© 2026 ChangeYourself.in</p></div></footer>
+<footer class="footer"><div class="container"><div class="footer-links"><a href="/">Home</a><a href="/about/">About</a><a href="/pricing/">Pricing</a><a href="/changexed/mock-tests/">Mock Tests</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://www.youtube.com/@ChangeXed" target="_blank" rel="noopener">Contact</a></div><img src="/logo.png" alt="ChangeYourself" class="footer-logo"><p class="footer-tag">ChangeYourself — Learn. Grow. Transform.</p><p class="footer-copy">© 2026 ChangeYourself.in</p></div></footer>
 
 <div class="dock">
   <a href="/" title="Home" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></a>
@@ -148,28 +148,48 @@
 <script>
 /* PAYMENT LINKS — owner config.
    Paste your Razorpay / Instamojo payment URLs below.
-   While a link is empty, its button shows "Payment link coming soon —
-   mock tests are free for now" and links to /changexed/mock-tests/. */
+   While a link is empty, its plan cannot be bought: the Pro/Premium
+   buttons stay disabled as "Coming Soon", and the Mock Tests button
+   stays a link to the free tests (Tests 1–3). */
 var PAYMENT_LINKS = {
   pro: "",
   premium: "",
   mocktests: ""
 };
 (function () {
-  function wire(id, noteId, url) {
+  /* Paid-plan buttons: disabled "Coming Soon" until a payment link exists. */
+  function wireBuy(id, noteId, url, buyLabel, soonLabel, soonNote) {
     var btn = document.getElementById(id);
     var note = document.getElementById(noteId);
     if (!btn) return;
     if (url) {
-      btn.setAttribute("href", url);
+      btn.removeAttribute("disabled");
+      btn.textContent = buyLabel;
+      btn.addEventListener("click", function () { window.location.href = url; });
     } else {
-      btn.setAttribute("href", "/changexed/mock-tests/");
-      if (note) note.textContent = "Payment link coming soon \u2014 Mock Tests 1\u20133 are free for now.";
+      btn.setAttribute("disabled", "");
+      btn.textContent = soonLabel;
+      if (note) note.textContent = soonNote;
     }
   }
-  wire("btn-pro", "note-pro", PAYMENT_LINKS.pro);
-  wire("btn-premium", "note-premium", PAYMENT_LINKS.premium);
-  wire("btn-mocks", "note-mocks", PAYMENT_LINKS.mocktests);
+  wireBuy("btn-pro", "note-pro", PAYMENT_LINKS.pro,
+    "Upgrade to Pro", "Pro \u2014 Coming Soon", "Pro is not available to buy yet.");
+  wireBuy("btn-premium", "note-premium", PAYMENT_LINKS.premium,
+    "Upgrade to Premium", "Premium \u2014 Coming Soon", "Premium is not available to buy yet.");
+  /* Mock Tests plan: the free tests are live, so the button stays a link
+     to them until a payment link exists. */
+  var mocksBtn = document.getElementById("btn-mocks");
+  var mocksNote = document.getElementById("note-mocks");
+  if (mocksBtn) {
+    if (PAYMENT_LINKS.mocktests) {
+      mocksBtn.setAttribute("href", PAYMENT_LINKS.mocktests);
+      mocksBtn.textContent = "Unlock All 20 Tests";
+    } else {
+      mocksBtn.setAttribute("href", "/changexed/mock-tests/");
+      mocksBtn.textContent = "Try the Free Tests";
+      if (mocksNote) mocksNote.textContent = "The \u20B9199 plan is coming soon \u2014 Mock Tests 1\u20133 are free for now.";
+    }
+  }
 })();
 </script>
 <script src="/main.js"></script>
