@@ -738,7 +738,7 @@ html[data-theme="light"] .cta::after {
   .hero-sub { font-size: 16px; }
 }
 
-/* ---------- 3D tilt, scroll reveal & hero parallax ----------
+/* ---------- Scroll reveal & hero parallax ----------
    All motion is transform/opacity only (no layout thrash), and it
    all switches off under prefers-reduced-motion. The reveal hidden
    state only applies when JS runs (html.js, added by main.js), so
@@ -754,34 +754,17 @@ html.js .reveal:not(.card-dark):not(.tier):not(.addon):not(.mock-band):not(.stat
   transition: opacity .7s ease, transform .7s cubic-bezier(.22,1,.36,1);
 }
 
-/* --- 3D tilt on glass cards ---
-   Pointer-driven rotateX/rotateY via --rx/--ry (set by main.js),
-   composed with the reveal offset in one transform so the two
-   never fight. The border beam tilts with the card. Max tilt is
-   about 3 degrees — subtle, not seasick. */
+/* --- Flat reveal on glass cards ---
+   The cards rise with the reveal offset only — no tilt, no 3D. */
 .card-dark,
 .tier,
 .addon,
 .mock-band,
 .stat {
-  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--reveal-y, 0px));
+  transform: translateY(var(--reveal-y, 0px));
   transition: transform .45s cubic-bezier(.22,1,.36,1), opacity .7s ease;
 }
 
-/* --- Interactive 3D geometry in heroes ---
-   Angular geometry only — cubes, a pyramid and a faceted diamond.
-   No circles, orbs or rings. Each .shape is an outer wrapper
-   (position + pointer tilt via --tilt-x/--tilt-y and depth shift
-   via --px/--py, set by main.js) holding an inner .geo that spins
-   slowly on its own. Pointer tilt, idle spin and scroll parallax
-   live on separate elements, so they never fight. Accent colours
-   only — they read on both the black and the white background. */
-.hero-shapes {
-  position: absolute; inset: 0; z-index: 0; overflow: hidden;
-  pointer-events: none;
-  perspective: 1000px;
-  transform: translateY(calc(var(--hero-px, 0px) * 0.30));
-}
 .hero-grid {
   position: absolute; left: 0; right: 0; top: -140px; bottom: -140px; z-index: 0;
   pointer-events: none;
@@ -789,117 +772,22 @@ html.js .reveal:not(.card-dark):not(.tier):not(.addon):not(.mock-band):not(.stat
   background-size: 52px 52px;
   transform: translateY(calc(var(--hero-px, 0px) * 0.45));
 }
-.hero-shapes .shape {
-  position: absolute;
-  pointer-events: none;
-  transform: translate3d(var(--px, 0px), var(--py, 0px), var(--z, 0px))
-             rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))
-             scale(var(--hov, 1));
-  transition: transform .25s cubic-bezier(.22,1,.36,1);
-  transform-style: preserve-3d;
-}
-/* Only fine pointers can hover the shapes; touch users keep the
-   idle spin and never get a dead tap target over the hero. */
-@media (hover: hover) and (pointer: fine) {
-  .hero-shapes .shape { pointer-events: auto; }
-}
-.hero-shapes .shape:hover { --hov: 1.12; }
-.hero-shapes .shape:hover .face { filter: brightness(1.45); }
-.hero-shapes .geo {
-  position: relative;
-  transform-style: preserve-3d;
-  animation: geo-spin var(--spin, 24s) linear infinite;
-}
-.hero-shapes .geo-rev { animation-direction: reverse; }
-@keyframes geo-spin {
-  from { transform: rotateX(-14deg) rotateY(0deg); }
-  to { transform: rotateX(-14deg) rotateY(360deg); }
-}
-.hero-shapes .face {
-  position: absolute; display: block;
-  border: 1.5px solid rgba(124,58,237,.55);
-  background: rgba(124,58,237,.16);
-  transition: filter .3s ease;
-}
-/* Cube: six square faces, --s is the edge length. */
-.geo-cube { width: var(--s, 120px); height: var(--s, 120px); }
-.geo-cube .face { inset: 0; }
-.geo-cube .f-front { transform: translateZ(calc(var(--s, 120px) / 2)); background: rgba(124,58,237,.20); }
-.geo-cube .f-back { transform: rotateY(180deg) translateZ(calc(var(--s, 120px) / 2)); background: rgba(124,58,237,.10); }
-.geo-cube .f-right { transform: rotateY(90deg) translateZ(calc(var(--s, 120px) / 2)); background: rgba(59,130,246,.18); border-color: rgba(59,130,246,.55); }
-.geo-cube .f-left { transform: rotateY(-90deg) translateZ(calc(var(--s, 120px) / 2)); background: rgba(59,130,246,.10); border-color: rgba(59,130,246,.55); }
-.geo-cube .f-top { transform: rotateX(90deg) translateZ(calc(var(--s, 120px) / 2)); background: rgba(167,139,250,.26); border-color: rgba(167,139,250,.60); }
-.geo-cube .f-bottom { transform: rotateX(-90deg) translateZ(calc(var(--s, 120px) / 2)); background: rgba(124,58,237,.08); }
-/* Pyramid: four triangular faces + a square base. --bw is the base
-   width, --vh the vertical height, --sh the slant height. */
-.geo-pyramid { width: var(--bw, 110px); height: var(--vh, 95px); }
-.geo-pyramid .p-face {
-  width: var(--bw, 110px); height: var(--sh, 110px);
-  left: 0; top: calc(var(--vh, 95px) - var(--sh, 110px));
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  transform-origin: 50% 100%;
-  transform: rotateY(var(--ry, 0deg)) translateZ(calc(var(--bw, 110px) / 2)) rotateX(30deg);
-}
-.geo-pyramid .p1 { --ry: 0deg; background: rgba(124,58,237,.22); }
-.geo-pyramid .p2 { --ry: 90deg; background: rgba(59,130,246,.20); border-color: rgba(59,130,246,.55); }
-.geo-pyramid .p3 { --ry: 180deg; background: rgba(124,58,237,.12); }
-.geo-pyramid .p4 { --ry: 270deg; background: rgba(167,139,250,.22); border-color: rgba(167,139,250,.60); }
-.geo-pyramid .p-base {
-  width: var(--bw, 110px); height: var(--bw, 110px);
-  left: 0; top: calc((var(--vh, 95px) - var(--bw, 110px)) / 2);
-  transform: rotateX(90deg) translateZ(calc(var(--vh, 95px) / 2));
-  background: rgba(124,58,237,.08);
-}
-/* Diamond: two faceted plates at different depths + a bright core. */
-.geo-diamond { width: var(--ds, 90px); height: var(--ds, 90px); }
-.geo-diamond .face { inset: 0; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
-.geo-diamond .d-front { transform: translateZ(var(--dd, 16px)); background: rgba(167,139,250,.24); border-color: rgba(167,139,250,.60); }
-.geo-diamond .d-mid { transform: translateZ(0) scale(.55); background: rgba(124,58,237,.34); border-color: rgba(124,58,237,.70); }
-.geo-diamond .d-back { transform: translateZ(calc(var(--dd, 16px) * -1)); background: rgba(59,130,246,.14); border-color: rgba(59,130,246,.55); }
-/* Placement, depth and idle-spin speed per shape. */
-.shape-cube-1 { top: 10%; left: 5%; --s: 120px; --z: 70px; --spin: 24s; }
-.shape-pyramid-1 { top: 6%; right: 14%; --bw: 110px; --vh: 95px; --sh: 110px; --z: 30px; --spin: 30s; }
-.shape-diamond-1 { top: 52%; right: 6%; --ds: 90px; --dd: 16px; --z: -60px; --spin: 20s; }
-.shape-cube-2 { bottom: 8%; left: 13%; --s: 80px; --z: -30px; --spin: 34s; }
 /* Hero parallax: the content drifts slower than the scroll, the
    background layers slower still — a few dozen px at most.
    --hero-px is set on .hero by main.js, clamped to 220px, so the
    content moves at most ~33px. */
 .hero .container { transform: translateY(calc(var(--hero-px, 0px) * 0.15)); }
-/* Light theme: the same accent geometry, slightly stronger so it
-   reads on white; the parallax grid uses dark dots. */
+/* Light theme: the parallax grid uses dark dots. */
 html[data-theme="light"] .hero-grid {
   background-image: radial-gradient(rgba(0, 0, 0, 0.10) 1.5px, transparent 2px);
 }
-html[data-theme="light"] .hero-shapes .face { border-color: rgba(124,58,237,.68); }
-html[data-theme="light"] .geo-cube .f-front { background: rgba(124,58,237,.28); }
-html[data-theme="light"] .geo-cube .f-right { background: rgba(59,130,246,.26); border-color: rgba(59,130,246,.68); }
-html[data-theme="light"] .geo-cube .f-left { background: rgba(59,130,246,.16); border-color: rgba(59,130,246,.68); }
-html[data-theme="light"] .geo-cube .f-top { background: rgba(167,139,250,.34); border-color: rgba(167,139,250,.70); }
-html[data-theme="light"] .geo-pyramid .p1 { background: rgba(124,58,237,.30); }
-html[data-theme="light"] .geo-pyramid .p2 { background: rgba(59,130,246,.28); border-color: rgba(59,130,246,.68); }
-html[data-theme="light"] .geo-pyramid .p4 { background: rgba(167,139,250,.30); border-color: rgba(167,139,250,.70); }
-html[data-theme="light"] .geo-diamond .d-front { background: rgba(167,139,250,.32); border-color: rgba(167,139,250,.70); }
-html[data-theme="light"] .geo-diamond .d-mid { background: rgba(124,58,237,.42); }
-html[data-theme="light"] .geo-diamond .d-back { background: rgba(59,130,246,.20); border-color: rgba(59,130,246,.68); }
 
 /* --- Reduced motion: everything stops, everything stays visible. --- */
 @media (prefers-reduced-motion: reduce) {
   .card-dark, .tier, .addon, .mock-band, .stat { transform: none; transition: none; }
-  .hero-shapes .geo { animation: none; }
-  .hero-shapes .shape { transform: none; transition: none; }
-  .hero .container, .hero-shapes, .hero-grid { transform: none; }
+  .hero .container, .hero-grid { transform: none; }
   html.js .reveal { --reveal-y: 0px; opacity: 1; transform: none; transition: none; }
   .marquee-track { animation: none; }
   .rot-word { transition: none; }
   html { scroll-behavior: auto; }
-}
-
-/* Smaller shapes on phones so they never crowd the hero text. */
-@media (max-width: 640px) {
-  .shape-cube-1 { --s: 84px; }
-  .shape-cube-2 { --s: 56px; }
-  .shape-pyramid-1 { --bw: 80px; --vh: 69px; --sh: 80px; }
-  .shape-diamond-1 { --ds: 64px; --dd: 12px; }
-}
 }
