@@ -40,7 +40,7 @@ img { max-width: 100%; }
 /* ---------- Floating top nav (transparent glass pill) ----------
    Transparent so it blends into the black dotted-grid background.
    A faint dark glass + blur keeps the white text readable when the
-   fixed nav scrolls over the white "Why Choose" cards. */
+   fixed nav scrolls over the page content. */
 .nav {
   position: fixed;
   top: 16px;
@@ -212,14 +212,6 @@ img { max-width: 100%; }
 }
 .card-dark h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
 .card-dark p { color: var(--muted); font-size: 15px; }
-.card-white {
-  padding: 28px;
-  background: #ffffff;
-  border-radius: var(--radius);
-  color: #000000;
-}
-.card-white h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #000000; }
-.card-white p { color: #52525b; font-size: 15px; }
 .icon-circle {
   display: flex;
   align-items: center;
@@ -475,6 +467,78 @@ img { max-width: 100%; }
 }
 .live-badge { background: var(--accent-1); color: #ffffff; }
 .soon-badge { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border); color: var(--muted); }
+
+/* ---------- Glass cards + travelling beam (all cards) ----------
+   Every card on the site shares one treatment: translucent glass
+   with a diagonal light beam that sweeps across on a loop.
+   The "Why Choose" cards are glass too — no white cards anywhere. */
+.card-dark,
+.tier,
+.addon,
+.mock-band,
+.stat {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+/* Keep card content above the beam so text stays readable. */
+.card-dark > *,
+.tier > *:not(.tier-badge),
+.addon > *,
+.mock-band > *,
+.stat > * {
+  position: relative;
+  z-index: 1;
+}
+/* The "Most Popular" badge now sits inside the card, because the
+   beam needs overflow hidden on the tier. */
+.tier-badge { z-index: 2; top: 12px; }
+.tier.popular { padding-top: 48px; }
+/* Travelling beam: one diagonal light streak sweeping across each card. */
+.card-dark::after,
+.tier::after,
+.addon::after,
+.mock-band::after,
+.stat::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: 0;
+  width: 45%;
+  background: linear-gradient(105deg, transparent, rgba(167, 139, 250, 0.28) 45%, rgba(96, 165, 250, 0.28) 55%, transparent);
+  transform: translateX(-260%) skewX(-12deg);
+  animation: card-beam 6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes card-beam {
+  from { transform: translateX(-260%) skewX(-12deg); }
+  to { transform: translateX(320%) skewX(-12deg); }
+}
+/* Stagger the sweep so cards don't all flash at once. */
+.card-dark:nth-child(2)::after,
+.tier:nth-child(2)::after,
+.addon:nth-child(2)::after,
+.stat:nth-child(2)::after { animation-delay: 1.5s; }
+.card-dark:nth-child(3)::after,
+.tier:nth-child(3)::after,
+.addon:nth-child(3)::after,
+.stat:nth-child(3)::after { animation-delay: 3s; }
+.card-dark:nth-child(4)::after,
+.tier:nth-child(4)::after,
+.addon:nth-child(4)::after,
+.stat:nth-child(4)::after { animation-delay: 4.5s; }
+@media (prefers-reduced-motion: reduce) {
+  .card-dark::after,
+  .tier::after,
+  .addon::after,
+  .mock-band::after,
+  .stat::after { animation: none; }
+}
 
 /* ---------- Responsive ---------- */
 @media (max-width: 640px) {
