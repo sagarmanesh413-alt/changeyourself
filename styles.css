@@ -737,3 +737,117 @@ html[data-theme="light"] .cta::after {
   .dock a svg { width: 18px; height: 18px; }
   .hero-sub { font-size: 16px; }
 }
+
+/* ---------- 3D tilt, scroll reveal & hero parallax ----------
+   All motion is transform/opacity only (no layout thrash), and it
+   all switches off under prefers-reduced-motion. The reveal hidden
+   state only applies when JS runs (html.js, added by main.js), so
+   content is never stuck invisible if JS fails or is disabled. */
+
+/* --- Scroll reveal: fade + rise, staggered by JS within a grid. --- */
+html.js .reveal { --reveal-y: 26px; opacity: 0; }
+html.js .reveal.visible { --reveal-y: 0px; opacity: 1; }
+/* Plain elements (headings, mission blocks, faq/timeline items):
+   the transform comes straight from the reveal offset. */
+html.js .reveal:not(.card-dark):not(.tier):not(.addon):not(.mock-band):not(.stat) {
+  transform: translateY(var(--reveal-y, 26px));
+  transition: opacity .7s ease, transform .7s cubic-bezier(.22,1,.36,1);
+}
+
+/* --- 3D tilt on glass cards ---
+   Pointer-driven rotateX/rotateY via --rx/--ry (set by main.js),
+   composed with the reveal offset in one transform so the two
+   never fight. The border beam tilts with the card. Max tilt is
+   about 3 degrees — subtle, not seasick. */
+.card-dark,
+.tier,
+.addon,
+.mock-band,
+.stat {
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--reveal-y, 0px));
+  transition: transform .45s cubic-bezier(.22,1,.36,1), opacity .7s ease;
+}
+
+/* --- Floating 3D shapes in heroes ---
+   Layered translucent orbs and rings in the accent palette, at
+   different translateZ depths inside a perspective container, so
+   they read as a small 3D scene. They drift slowly (transform
+   only) and parallax with the hero. Accent colours only — they
+   read on both the black and the white background. */
+.hero-shapes {
+  position: absolute; inset: 0; z-index: 0; overflow: hidden;
+  pointer-events: none;
+  perspective: 900px;
+  transform: translateY(calc(var(--hero-px, 0px) * 0.30));
+}
+.hero-grid {
+  position: absolute; left: 0; right: 0; top: -140px; bottom: -140px; z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.5px, transparent 2px);
+  background-size: 52px 52px;
+  transform: translateY(calc(var(--hero-px, 0px) * 0.45));
+}
+.hero-shapes .shape {
+  position: absolute; border-radius: 50%;
+  animation: shape-drift 14s ease-in-out infinite alternate;
+}
+.shape-orb-1 {
+  width: 180px; height: 180px; top: 10%; left: 5%; --z: 70px;
+  background: radial-gradient(circle at 35% 35%, rgba(167,139,250,.55), rgba(124,58,237,.16) 60%, transparent 75%);
+}
+.shape-orb-2 {
+  width: 120px; height: 120px; top: 52%; right: 6%; --z: -60px;
+  background: radial-gradient(circle at 35% 35%, rgba(96,165,250,.5), rgba(59,130,246,.14) 60%, transparent 75%);
+  animation-duration: 18s; animation-delay: -4s;
+}
+.shape-ring-1 {
+  width: 140px; height: 140px; top: 6%; right: 15%; --z: 30px;
+  border: 1.5px solid rgba(124,58,237,.5);
+  animation-duration: 16s; animation-delay: -8s;
+}
+.shape-ring-2 {
+  width: 90px; height: 90px; bottom: 8%; left: 13%; --z: -30px;
+  border: 1.5px solid rgba(96,165,250,.45);
+  animation-duration: 20s; animation-delay: -2s;
+}
+@keyframes shape-drift {
+  from { transform: translate3d(0, -12px, var(--z, 0px)) rotate(-2deg); }
+  to { transform: translate3d(0, 14px, var(--z, 0px)) rotate(2deg); }
+}
+/* Hero parallax: the content drifts slower than the scroll, the
+   background layers slower still — a few dozen px at most.
+   --hero-px is set on .hero by main.js, clamped to 220px, so the
+   content moves at most ~33px. */
+.hero .container { transform: translateY(calc(var(--hero-px, 0px) * 0.15)); }
+/* Light theme: the same accent shapes, slightly stronger so they
+   read on white; the parallax grid uses dark dots. */
+html[data-theme="light"] .hero-grid {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.10) 1.5px, transparent 2px);
+}
+html[data-theme="light"] .shape-orb-1 {
+  background: radial-gradient(circle at 35% 35%, rgba(167,139,250,.6), rgba(124,58,237,.22) 60%, transparent 75%);
+}
+html[data-theme="light"] .shape-orb-2 {
+  background: radial-gradient(circle at 35% 35%, rgba(96,165,250,.55), rgba(59,130,246,.2) 60%, transparent 75%);
+}
+html[data-theme="light"] .shape-ring-1 { border-color: rgba(124,58,237,.6); }
+html[data-theme="light"] .shape-ring-2 { border-color: rgba(59,130,246,.55); }
+
+/* --- Reduced motion: everything stops, everything stays visible. --- */
+@media (prefers-reduced-motion: reduce) {
+  .card-dark, .tier, .addon, .mock-band, .stat { transform: none; transition: none; }
+  .hero-shapes .shape { animation: none; }
+  .hero .container, .hero-shapes, .hero-grid { transform: none; }
+  html.js .reveal { --reveal-y: 0px; opacity: 1; transform: none; transition: none; }
+  .marquee-track { animation: none; }
+  .rot-word { transition: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* Smaller shapes on phones so they never crowd the hero text. */
+@media (max-width: 640px) {
+  .shape-orb-1 { width: 120px; height: 120px; }
+  .shape-orb-2 { width: 84px; height: 84px; }
+  .shape-ring-1 { width: 96px; height: 96px; }
+  .shape-ring-2 { width: 64px; height: 64px; }
+}
