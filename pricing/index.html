@@ -30,7 +30,7 @@
     <ul class="tier-features">
       <li>Career assessment (basic)</li>
       <li>Community access</li>
-      <li>2 UGC NET mock tests free</li>
+      <li>3 UGC NET mock tests free</li>
       <li>Motivational resources</li>
     </ul>
     <a class="btn btn-white" href="/changexed/mock-tests/">Get Started Free</a>
@@ -80,9 +80,11 @@
   <h2>Add-ons</h2>
   <div class="addon-grid">
     <div class="addon">
-      <h3>Extra Mock Test Sets</h3>
-      <p>More full-length practice sets beyond the 20 included in Pro.</p>
-      <span class="tag">Coming soon</span>
+      <h3>UGC NET Mock Tests &mdash; Full Access</h3>
+      <p>All 20 mock tests, all subjects. Mock Tests 1&ndash;3 are free.</p>
+      <p><b>&#8377;199</b> one-time</p>
+      <a class="btn btn-white" id="btn-mocks" href="/changexed/mock-tests/">Unlock All 20 Tests</a>
+      <p class="pay-note" id="note-mocks"></p>
     </div>
     <div class="addon">
       <h3>1-on-1 Mentorship Session</h3>
@@ -101,7 +103,7 @@
   <h2>Frequently Asked Questions</h2>
   <div class="faq-item">
     <h3>Are the mock tests free right now?</h3>
-    <p>Yes. While payment links are being set up, all 20 mock tests are free for everyone. Once Pro payments open, the full set moves to Pro.</p>
+    <p>Mock Tests 1&ndash;3 are free for everyone. The remaining 17 tests in each subject unlock with the &#8377;199 Mock Tests plan (one-time payment, all subjects). Pro members get all 20 tests included.</p>
   </div>
   <div class="faq-item">
     <h3>What is UGC NET?</h3>
@@ -117,7 +119,7 @@
   </div>
   <div class="faq-item">
     <h3>How do I pay for Pro?</h3>
-    <p>Payment links are coming soon. Until then, everything is free — start with a mock test today.</p>
+    <p>Payment links are coming soon. Until then, Mock Tests 1–3 are free — start with a mock test today.</p>
   </div>
 </div></div></section>
 
@@ -148,7 +150,8 @@
    mock tests are free for now" and links to /changexed/mock-tests/. */
 var PAYMENT_LINKS = {
   pro: "",
-  premium: ""
+  premium: "",
+  mocktests: ""
 };
 (function () {
   function wire(id, noteId, url) {
@@ -159,11 +162,12 @@ var PAYMENT_LINKS = {
       btn.setAttribute("href", url);
     } else {
       btn.setAttribute("href", "/changexed/mock-tests/");
-      if (note) note.textContent = "Payment link coming soon — mock tests are free for now.";
+      if (note) note.textContent = "Payment link coming soon \u2014 Mock Tests 1\u20133 are free for now.";
     }
   }
   wire("btn-pro", "note-pro", PAYMENT_LINKS.pro);
   wire("btn-premium", "note-premium", PAYMENT_LINKS.premium);
+  wire("btn-mocks", "note-mocks", PAYMENT_LINKS.mocktests);
 })();
 </script>
 <script src="/main.js"></script>
