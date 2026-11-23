@@ -218,6 +218,10 @@ img { max-width: 100%; }
 .btn-white:hover { background: #ececec; }
 .btn-dark { background: transparent; color: #ffffff; border-color: rgba(255, 255, 255, 0.35); }
 .btn-dark:hover { border-color: rgba(255, 255, 255, 0.7); }
+/* Disabled buttons (e.g. paid plans not yet purchasable): visibly inert,
+   no travelling beam. */
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn:disabled::before { animation: none; }
 .btn .arrow { font-weight: 700; }
 /* In-card "Learn more" links (purple accent; darker purple on light). */
 .card-link { color: #a78bfa; font-weight: 600; text-decoration: none; }
@@ -705,7 +709,7 @@ html[data-theme="light"] .tl-year { color: #111111; }
 html[data-theme="light"] .tl-text b { color: #111111; }
 /* Pricing. */
 html[data-theme="light"] .tier-features li { color: #3f3f46; }
-html[data-theme="light"] .addon .tag { background: rgba(0, 0, 0, 0.06); color: #3f3f46; }
+html[data-theme="light"] .tag { background: rgba(0, 0, 0, 0.06); color: #3f3f46; }
 /* ChangeXed hub. */
 html[data-theme="light"] .soon-badge { background: rgba(0, 0, 0, 0.06); }
 /* Hero light beams: slightly stronger so they read on white. */
@@ -869,3 +873,10 @@ html[data-theme="light"] .quiz-tag { color: #6d28d9; background: rgba(124, 58, 2
 @media (prefers-reduced-motion: reduce) {
   .hero .container { animation: none; }
 }
+
+/* ---------- Legal pages (Privacy, Terms) ---------- */
+.legal h2 { font-size: 20px; margin: 28px 0 10px; }
+.legal h2:first-child { margin-top: 0; }
+.legal p { color: var(--muted); margin-bottom: 12px; }
+.legal ul { color: var(--muted); padding-left: 22px; margin-bottom: 12px; }
+.legal li { margin-bottom: 6px; }
