@@ -37,7 +37,10 @@ img { max-width: 100%; }
 .text-center { text-align: center; }
 .muted { color: var(--muted); }
 
-/* ---------- Floating top nav (white pill) ---------- */
+/* ---------- Floating top nav (transparent glass pill) ----------
+   Transparent so it blends into the black dotted-grid background.
+   A faint dark glass + blur keeps the white text readable when the
+   fixed nav scrolls over the white "Why Choose" cards. */
 .nav {
   position: fixed;
   top: 16px;
@@ -49,9 +52,11 @@ img { max-width: 100%; }
   gap: 2px;
   max-width: calc(100vw - 24px);
   padding: 7px 9px;
-  background: #ffffff;
+  background: rgba(0, 0, 0, 0.35);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
 }
 .nav .logo {
   display: flex;
@@ -60,7 +65,8 @@ img { max-width: 100%; }
   width: 34px;
   height: 34px;
   margin-right: 4px;
-  background: #000000;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 9px;
   text-decoration: none;
   flex-shrink: 0;
@@ -77,26 +83,26 @@ img { max-width: 100%; }
 .nav a.nav-link {
   padding: 7px 13px;
   border-radius: 999px;
-  color: #000000;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
 }
-.nav a.nav-link:hover { background: #f0f0f0; }
+.nav a.nav-link:hover { background: rgba(255, 255, 255, 0.10); }
 .login-btn {
   margin-left: 4px;
   padding: 8px 16px;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 999px;
-  background: #000000;
+  background: transparent;
   color: #ffffff;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
 }
-.login-btn:hover { background: #222222; }
+.login-btn:hover { background: rgba(255, 255, 255, 0.10); border-color: rgba(255, 255, 255, 0.7); }
 
 /* ---------- Sections ---------- */
 .section { padding: 72px 0; }
@@ -116,7 +122,34 @@ img { max-width: 100%; }
 }
 
 /* ---------- Hero ---------- */
-.hero { padding: 168px 0 84px; text-align: center; }
+.hero { position: relative; overflow: hidden; padding: 168px 0 84px; text-align: center; }
+.hero .container, .cta .container { position: relative; z-index: 1; }
+/* Light beams — pure CSS, no images. Soft diagonal shafts of light
+   from the top of the section, fading out before the text ends.
+   Kept very subtle so text stays fully readable. */
+.hero::before, .hero::after,
+.cta::before, .cta::after {
+  content: "";
+  position: absolute;
+  top: -25%;
+  height: 150%;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero::before {
+  left: 8%;
+  width: 150px;
+  background: linear-gradient(180deg, rgba(167, 139, 250, 0.20), rgba(167, 139, 250, 0.03) 65%, transparent);
+  transform: rotate(18deg);
+  filter: blur(6px);
+}
+.hero::after {
+  right: 10%;
+  width: 190px;
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.18), rgba(96, 165, 250, 0.03) 65%, transparent);
+  transform: rotate(-15deg);
+  filter: blur(8px);
+}
 .badge {
   display: inline-block;
   padding: 7px 16px;
@@ -170,6 +203,7 @@ img { max-width: 100%; }
 
 /* ---------- Grids & cards ---------- */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .card-dark {
   padding: 28px;
   background: var(--card);
@@ -244,7 +278,21 @@ img { max-width: 100%; }
 .mock-stats b { color: #ffffff; }
 
 /* ---------- Closing CTA ---------- */
-.cta { text-align: center; }
+.cta { position: relative; overflow: hidden; text-align: center; }
+.cta::before {
+  left: 14%;
+  width: 130px;
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.16), rgba(96, 165, 250, 0.02) 65%, transparent);
+  transform: rotate(16deg);
+  filter: blur(6px);
+}
+.cta::after {
+  right: 12%;
+  width: 170px;
+  background: linear-gradient(180deg, rgba(167, 139, 250, 0.18), rgba(167, 139, 250, 0.02) 65%, transparent);
+  transform: rotate(-18deg);
+  filter: blur(8px);
+}
 .cta .chevron { color: var(--muted); font-size: 22px; margin-bottom: 10px; }
 .cta h2 { margin-bottom: 16px; }
 .cta p { max-width: 620px; margin: 0 auto 30px; color: var(--muted); font-size: 17px; }
@@ -438,7 +486,7 @@ img { max-width: 100%; }
 @media (max-width: 640px) {
   .section { padding: 56px 0; }
   .hero { padding: 140px 0 64px; }
-  .grid-2, .team-grid, .tiers { grid-template-columns: 1fr; }
+  .grid-2, .grid-3, .team-grid, .tiers { grid-template-columns: 1fr; }
   .addon-grid { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2, 1fr); }
   .nav { gap: 0; padding: 6px 7px; top: 10px; }
