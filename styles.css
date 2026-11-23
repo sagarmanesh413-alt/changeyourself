@@ -71,14 +71,12 @@ img { max-width: 100%; }
   text-decoration: none;
   flex-shrink: 0;
 }
-.nav .logo span {
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #a78bfa, #60a5fa);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.nav .logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
 }
 .nav a.nav-link {
   padding: 7px 13px;
@@ -184,6 +182,7 @@ img { max-width: 100%; }
 
 /* ---------- Buttons ---------- */
 .btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -301,6 +300,7 @@ img { max-width: 100%; }
 .footer-links a { color: #d4d4d8; font-size: 14px; font-weight: 600; text-decoration: none; }
 .footer-links a:hover { color: #ffffff; }
 .footer-tag { color: var(--muted); font-size: 15px; margin-bottom: 10px; }
+.footer-logo { width: 32px; height: 32px; border-radius: 8px; display: block; margin: 0 auto 10px; }
 .footer-copy { color: var(--muted-2); font-size: 13px; }
 
 /* ---------- Floating bottom dock ---------- */
@@ -468,10 +468,15 @@ img { max-width: 100%; }
 .live-badge { background: var(--accent-1); color: #ffffff; }
 .soon-badge { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border); color: var(--muted); }
 
-/* ---------- Glass cards + travelling beam (all cards) ----------
+/* ---------- Glass cards + border beam (all cards) ----------
    Every card on the site shares one treatment: translucent glass
-   with a diagonal light beam that sweeps across on a loop.
+   with a deep-purple beam of light travelling around its border.
    The "Why Choose" cards are glass too — no white cards anywhere. */
+@property --beam-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
 .card-dark,
 .tier,
 .addon,
@@ -495,49 +500,70 @@ img { max-width: 100%; }
   z-index: 1;
 }
 /* The "Most Popular" badge now sits inside the card, because the
-   beam needs overflow hidden on the tier. */
+   cards use overflow hidden. */
 .tier-badge { z-index: 2; top: 12px; }
 .tier.popular { padding-top: 48px; }
-/* Travelling beam: one diagonal light streak sweeping across each card. */
-.card-dark::after,
-.tier::after,
-.addon::after,
-.mock-band::after,
-.stat::after {
+/* Border beam: a short deep-purple segment of light travelling
+   around the border ring. A rotating conic gradient, masked to
+   the border only, sitting on top of the card's own border. */
+.card-dark::before,
+.tier::before,
+.addon::before,
+.mock-band::before,
+.stat::before,
+.btn-white::before,
+.btn-dark::before {
   content: "";
   position: absolute;
-  top: -20%;
-  bottom: -20%;
-  left: 0;
-  width: 45%;
-  background: linear-gradient(105deg, transparent, rgba(167, 139, 250, 0.28) 45%, rgba(96, 165, 250, 0.28) 55%, transparent);
-  transform: translateX(-260%) skewX(-12deg);
-  animation: card-beam 6s ease-in-out infinite;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--beam-angle, 0deg),
+    transparent 0deg,
+    transparent 312deg,
+    #6d28d9 326deg,
+    #a78bfa 340deg,
+    #6d28d9 350deg,
+    transparent 360deg);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 6px rgba(124, 58, 237, 0.55));
+  animation: border-beam 4s linear infinite;
   pointer-events: none;
+  z-index: 2;
 }
-@keyframes card-beam {
-  from { transform: translateX(-260%) skewX(-12deg); }
-  to { transform: translateX(320%) skewX(-12deg); }
+@keyframes border-beam {
+  to { --beam-angle: 360deg; }
 }
-/* Stagger the sweep so cards don't all flash at once. */
-.card-dark:nth-child(2)::after,
-.tier:nth-child(2)::after,
-.addon:nth-child(2)::after,
-.stat:nth-child(2)::after { animation-delay: 1.5s; }
-.card-dark:nth-child(3)::after,
-.tier:nth-child(3)::after,
-.addon:nth-child(3)::after,
-.stat:nth-child(3)::after { animation-delay: 3s; }
-.card-dark:nth-child(4)::after,
-.tier:nth-child(4)::after,
-.addon:nth-child(4)::after,
-.stat:nth-child(4)::after { animation-delay: 4.5s; }
+/* Stagger the rotation so the beams are not all in sync. */
+.card-dark:nth-child(2)::before,
+.tier:nth-child(2)::before,
+.addon:nth-child(2)::before,
+.stat:nth-child(2)::before,
+.btn-white:nth-child(2)::before,
+.btn-dark:nth-child(2)::before { animation-delay: -1s; }
+.card-dark:nth-child(3)::before,
+.tier:nth-child(3)::before,
+.addon:nth-child(3)::before,
+.stat:nth-child(3)::before,
+.btn-white:nth-child(3)::before,
+.btn-dark:nth-child(3)::before { animation-delay: -2s; }
+.card-dark:nth-child(4)::before,
+.tier:nth-child(4)::before,
+.addon:nth-child(4)::before,
+.stat:nth-child(4)::before,
+.btn-white:nth-child(4)::before,
+.btn-dark:nth-child(4)::before { animation-delay: -3s; }
 @media (prefers-reduced-motion: reduce) {
-  .card-dark::after,
-  .tier::after,
-  .addon::after,
-  .mock-band::after,
-  .stat::after { animation: none; }
+  .card-dark::before,
+  .tier::before,
+  .addon::before,
+  .mock-band::before,
+  .stat::before,
+  .btn-white::before,
+  .btn-dark::before { animation: none; }
 }
 
 /* ---------- Responsive ---------- */
