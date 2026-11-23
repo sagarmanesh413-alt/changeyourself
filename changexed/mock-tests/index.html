@@ -312,8 +312,52 @@
       .load-note { text-align: center; color: var(--ink-soft); padding: 40px 16px; font-size: 1.05rem; }
       .err-note { text-align: center; color: var(--red); padding: 40px 16px; }
     </style>
-  </head>
+  <style>
+/* ---------- ChangeYourself site header (logo + main menu) ---------- */
+body { padding-top: 76px; }
+.nav { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 2px; max-width: calc(100vw - 24px); padding: 7px 9px; background: rgba(0, 0, 0, 0.35); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 999px; }
+.nav .logo { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; margin-right: 4px; background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 9px; text-decoration: none; flex-shrink: 0; }
+.nav .logo span { font-size: 15px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, #a78bfa, #60a5fa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nav a.nav-link { padding: 7px 13px; border-radius: 999px; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.nav a.nav-link:hover { background: rgba(255, 255, 255, 0.10); }
+.login-btn { margin-left: 4px; padding: 8px 16px; border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 999px; background: transparent; color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.login-btn:hover { background: rgba(255, 255, 255, 0.10); border-color: rgba(255, 255, 255, 0.7); }
+.cy-toast { display: none; position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 80; background: #171d33; color: #e8ebf5; border: 1px solid #303a5c; border-radius: 999px; padding: 10px 18px; font-size: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.4); max-width: calc(100vw - 32px); text-align: center; }
+.cy-toast.show { display: block; }
+/* Keep the exam's sticky bar and modals clear of the fixed site nav. */
+.exam-bar { top: 76px; }
+.modal-back { z-index: 70; }
+@media (max-width: 640px) { .nav { gap: 0; padding: 6px 7px; top: 10px; } .nav a.nav-link { padding: 6px 9px; font-size: 13px; } .login-btn { padding: 7px 12px; font-size: 13px; } }
+</style>
+</head>
   <body>
+<nav class="nav">
+  <a class="logo" href="/" aria-label="ChangeYourself home"><span>CY</span></a>
+  <a class="nav-link" href="/about/">About</a>
+  <a class="nav-link" href="/pricing/">Pricing</a>
+  <a class="nav-link" href="/changexed/">ChangeXed</a>
+  <button class="login-btn" id="loginBtn" type="button">Login</button>
+</nav>
+<div class="cy-toast" id="cyToast" role="status"></div>
+<script>
+(function () {
+  var toast = document.getElementById("cyToast");
+  var timer = null;
+  function showToast(msg) {
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add("show");
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(function () { toast.classList.remove("show"); }, 4000);
+  }
+  var loginBtn = document.getElementById("loginBtn");
+  if (loginBtn) {
+    loginBtn.addEventListener("click", function () {
+      showToast("Login is coming soon \u2014 the mock tests are free for now.");
+    });
+  }
+})();
+</script>
     <div id="boot-fallback" role="alert">
       <div class="box">
         <h2>The app didn't start</h2>
