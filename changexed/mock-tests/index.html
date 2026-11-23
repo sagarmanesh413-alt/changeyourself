@@ -329,6 +329,13 @@ body { padding-top: 76px; }
 .modal-back { z-index: 70; }
 @media (max-width: 640px) { .nav { gap: 0; padding: 6px 7px; top: 10px; } .nav a.nav-link { padding: 6px 9px; font-size: 13px; } .login-btn { padding: 7px 12px; font-size: 13px; } }
 </style>
+<style>
+/* ---------- Free tier: sets 1-3 free, sets 4-20 locked (Rs 199 plan) ---------- */
+.badge.locked { background: rgba(245, 158, 11, 0.16); color: #fbbf24; }
+.start-btn.lock-btn { background: transparent; border: 1px solid var(--purple); color: #c4b5fd; }
+.free-note { margin-top: 12px; font-size: 0.95rem; color: var(--ink-soft); }
+.free-note a { color: #c4b5fd; font-weight: 700; }
+</style>
 </head>
   <body>
 <nav class="nav">
@@ -372,6 +379,7 @@ body { padding-top: 76px; }
         <section class="hero">
           <h1>UGC NET Mock Tests</h1>
           <p class="sub">20 full mock papers on the December 2026 syllabus — Paper 1 (General) + Paper 2 (Psychology), with real previous-year questions and new practice questions, each with an explanation. Sit them like the real exam and learn from the full review afterwards.</p>
+          <p class="free-note">Mock Tests 1–3 are free. <a href="/pricing/">Unlock all 20 for ₹199</a>.</p>
           <div class="format-grid">
             <div class="format-cell"><b>150</b><span>Questions per paper</span></div>
             <div class="format-cell"><b>180 min</b><span>3 hours, auto-submit</span></div>
@@ -591,11 +599,11 @@ body { padding-top: 76px; }
           var b = best[n];
           html += '<article class="set-card">' +
             '<div class="top"><h3>Mock Test ' + n + '</h3>' +
-            (b ? '<span class="badge done">Attempted</span>' : '<span class="badge fresh">Not attempted</span>') + '</div>' +
+            (n > 3 ? '<span class="badge locked">Locked \u00b7 \u20b9199</span>' : (b ? '<span class="badge done">Attempted</span>' : '<span class="badge fresh">Not attempted</span>')) + '</div>' +
             '<div class="meta">Paper 1 + Paper 2 · 150 questions · 300 marks · 180 min</div>' +
             (b ? '<div class="best">Best score: <b>' + b.score + ' / 300</b> (' + b.pct + '%)</div>'
                : '<div class="best" style="color:var(--ink-soft)">No attempt yet — best score will appear here.</div>') +
-            '<button type="button" class="start-btn" data-set="' + n + '">' + (b ? 'Retake Mock Test ' + n : 'Start Mock Test ' + n) + '</button>' +
+            '<button type="button" class="start-btn' + (n > 3 ? ' lock-btn' : '') + '" data-set="' + n + '">' + (n > 3 ? 'Unlock Mock Test ' + n + ' \u2014 \u20b9199' : (b ? 'Retake Mock Test ' + n : 'Start Mock Test ' + n)) + '</button>' +
             '</article>';
         }
         $('set-grid').innerHTML = html;
@@ -627,6 +635,7 @@ body { padding-top: 76px; }
       var lastResult = null;
 
       function startSet(n) {
+        if (n > 3) { showUnlock(n); return; }
         if (loadingSet === n) return;
         loadingSet = n;
         loadSetData(n, function (qs) {
@@ -868,5 +877,33 @@ body { padding-top: 76px; }
       if (window.__bootTimer) { clearTimeout(window.__bootTimer); window.__bootTimer = null; }
     })();
     </script>
-  </body>
+  
+<div class="modal-back" id="unlock-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="unlock-title">
+    <h3 id="unlock-title">Unlock all 20 mock tests</h3>
+    <p>Mock Tests 1&ndash;3 are free. Mock Test <span id="unlock-set">4</span> is part of the paid plan &mdash; <b>&#8377;199</b> unlocks all 20 mock tests, all subjects.</p>
+    <div class="row">
+      <button type="button" id="unlock-close">Not now</button>
+      <button type="button" class="confirm" id="unlock-go">See the &#8377;199 plan</button>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  function showUnlock(n) {
+    var s = document.getElementById('unlock-set');
+    if (s) s.textContent = n;
+    var m = document.getElementById('unlock-modal');
+    if (m) m.className = 'modal-back open';
+  }
+  window.showUnlock = showUnlock;
+  var closeBtn = document.getElementById('unlock-close');
+  if (closeBtn) closeBtn.addEventListener('click', function () { document.getElementById('unlock-modal').className = 'modal-back'; });
+  var goBtn = document.getElementById('unlock-go');
+  if (goBtn) goBtn.addEventListener('click', function () { window.location.href = '/pricing/'; });
+  var back = document.getElementById('unlock-modal');
+  if (back) back.addEventListener('click', function (e) { if (e.target === back) back.className = 'modal-back'; });
+})();
+</script>
+</body>
 </html>
