@@ -126,7 +126,9 @@
   var revealTargets = document.querySelectorAll(
     ".card-dark, .tier, .addon, .mock-band, .stat," +
     " .section > .container > h2, .section > .container > .section-sub," +
-    " .mission, .faq-item, .tl-item, .page-head h1, .page-head p"
+    " .section > .container > p, .section > .container > .btn," +
+    " .mission, .faq-item, .faq h2, .tl-item, .page-head h1, .page-head p," +
+    " .page-head .by-changexed, .quiz-note"
   );
   function revealNow(el) {
     el.classList.add("visible");
