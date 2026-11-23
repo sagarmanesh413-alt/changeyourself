@@ -785,7 +785,8 @@ html[data-theme="light"] .hero-grid {
 /* --- Reduced motion: everything stops, everything stays visible. --- */
 @media (prefers-reduced-motion: reduce) {
   .card-dark, .tier, .addon, .mock-band, .stat { transform: none; transition: none; }
-  .hero .container, .hero-grid { transform: none; }
+  .hero .container, .hero-grid, .hero-illus { transform: none; }
+  .hero-illus img { animation: none; }
   html.js .reveal { --reveal-y: 0px; opacity: 1; transform: none; transition: none; }
   .marquee-track { animation: none; }
   .rot-word { transition: none; }
@@ -819,4 +820,33 @@ html[data-theme="light"] .hero-grid {
 }
 @media (max-width: 640px) {
   .journey-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Home hero illustrations ----------
+   Four generated 3D illustrations (book, brain, stairs, plant) as
+   transparent PNGs, one per journey stage, placed around the
+   headline like the reference screenshot. The wrapper div rides
+   the existing scroll parallax (--hero-px, a different factor per
+   corner); the img itself does the gentle float. Transform/opacity
+   only. Behind the hero text (z-index 0 vs container z-index 1),
+   so the headline, nav and dock are never covered. */
+.hero-illus { position: absolute; z-index: 0; pointer-events: none; }
+.hero-illus img { display: block; width: 100%; height: auto; animation: hero-float 7s ease-in-out infinite; }
+.hero-illus-book { left: 3%; top: 132px; width: 250px; transform: translateY(calc(var(--hero-px, 0px) * 0.30)); }
+.hero-illus-brain { right: 3%; top: 118px; width: 250px; transform: translateY(calc(var(--hero-px, 0px) * 0.22)); }
+.hero-illus-stairs { left: 2.5%; bottom: 28px; width: 225px; transform: translateY(calc(var(--hero-px, 0px) * 0.55)); }
+.hero-illus-plant { right: 3%; bottom: 24px; width: 235px; transform: translateY(calc(var(--hero-px, 0px) * 0.42)); }
+.hero-illus-brain img { animation-duration: 8s; animation-delay: -2s; }
+.hero-illus-stairs img { animation-duration: 7.5s; animation-delay: -1s; }
+.hero-illus-plant img { animation-duration: 6.5s; animation-delay: -3s; }
+@keyframes hero-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@media (max-width: 1500px) {
+  .hero-illus-book, .hero-illus-brain { width: 190px; }
+  .hero-illus-stairs, .hero-illus-plant { width: 175px; }
+}
+@media (max-width: 1150px) {
+  .hero-illus-book, .hero-illus-brain, .hero-illus-stairs, .hero-illus-plant { width: 130px; opacity: .6; }
+}
+@media (max-width: 700px) {
+  .hero-illus { display: none; }
 }
