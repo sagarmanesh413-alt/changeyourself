@@ -1,5 +1,5 @@
 /* ChangeYourself — shared site JS (Home, About, Pricing only).
-   The mock-tests app at /mock-tests/ is a standalone file and does not load this. */
+   The mock-tests app at /changexed/mock-tests/ is a standalone file and does not load this. */
 (function () {
   "use strict";
 
