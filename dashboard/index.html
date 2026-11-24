@@ -122,6 +122,13 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-side-theme:hover { color: var(--text); }
 .dash-side-theme svg { width: 18px; height: 18px; flex-shrink: 0; }
 
+/* View tabs: the sidebar is hidden on phones, so these switch views
+   there. Hidden on desktop, where the sidebar does the job. */
+.dash-view-tabs { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; }
+.dash-view-tab { padding: 9px 16px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.dash-view-tab.active { background: #7c3aed; border-color: #7c3aed; color: #ffffff; }
+@media (min-width: 1024px) { .dash-view-tabs { display: none; } }
+
 /* Topbar: live search over the history + a real time range. */
 .dash-topbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .dash-search { flex: 1; min-width: 200px; padding: 11px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font: inherit; font-size: 15px; }
@@ -159,19 +166,21 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   /* Rows stretch to equal height, so a shorter card fills the space
      beside its taller neighbour instead of leaving a gap. */
   #dash-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
-  #dash-content > .card-dark, #dash-content > #dash-overview, #dash-content > #dash-topbar { margin-bottom: 0; }
+  #dash-content > .card-dark, #dash-content > #dash-overview, #dash-content > #dash-topbar, #dash-content > .dash-view-tabs { margin-bottom: 0; }
   #dash-content > #dash-onboard-note,
   #dash-content > #dash-details-card,
   #dash-content > .dash-customise-row,
   #dash-content > #dash-customise,
   #dash-content > #dash-topbar,
   #dash-content > #dash-overview,
+  #dash-content > #dash-mock-history-card,
   #dash-content > #dash-quiz-history-card,
   #dash-content > #dash-analysis-banner,
   #dash-content > #dash-analysis-heading,
   #dash-content > #dash-trend-card,
   #dash-content > #dash-time-card,
-  #dash-content > #dash-focus-card { grid-column: 1 / -1; }
+  #dash-content > #dash-focus-card,
+  #dash-content > .dash-view-tabs { grid-column: 1 / -1; }
 }
 
 /* Fit the dashboard to the space: the content fills the main column
@@ -263,11 +272,11 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
        Analytics / Settings jump to sections on this page; Learn goes to
        the mock tests. The bottom card is the real plan, not an upsell. -->
   <aside class="dash-side dash-hide-until-profile" id="dash-side" aria-label="Dashboard sections">
-    <button type="button" class="dash-side-link active" data-side-target="top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Dashboard</button>
-    <button type="button" class="dash-side-link" data-side-target="dash-mock-history-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><polyline points="9 14 11 16 15 12"/></svg>My Tests</button>
-    <button type="button" class="dash-side-link" data-side-target="dash-level-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</button>
+    <button type="button" class="dash-side-link active" data-side-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Dashboard</button>
+    <button type="button" class="dash-side-link" data-side-view="mytests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><polyline points="9 14 11 16 15 12"/></svg>My Tests</button>
+    <button type="button" class="dash-side-link" data-side-view="analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</button>
     <a class="dash-side-link" href="/changexed/mock-tests/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Learn</a>
-    <button type="button" class="dash-side-link" data-side-target="dash-details-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Settings</button>
+    <button type="button" class="dash-side-link" data-side-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Settings</button>
     <div class="dash-side-week">
       <h4>📅 This week</h4>
       <p id="dash-side-week-text">—</p>
@@ -412,6 +421,15 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
         <option value="30">Last 30 days</option>
         <option value="90">Last 90 days</option>
       </select>
+    </div>
+
+    <!-- View tabs: the sidebar is hidden on phones, so these switch
+         views there. Same buttons, same behaviour as the sidebar. -->
+    <div class="dash-view-tabs" role="tablist" aria-label="Dashboard views">
+      <button type="button" class="dash-view-tab active" data-side-view="dashboard">Dashboard</button>
+      <button type="button" class="dash-view-tab" data-side-view="mytests">My Tests</button>
+      <button type="button" class="dash-view-tab" data-side-view="analytics">Analytics</button>
+      <button type="button" class="dash-view-tab" data-side-view="settings">Settings</button>
     </div>
 
     <!-- Your overview: four tiles of real numbers (the reference
@@ -704,10 +722,8 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
   function setFilter(slug) {
     visibleSubjects = slug ? [slug] : null;
     renderAll();
-    try {
-      var el = $('dash-level-card');
-      if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } catch (e) {}
+    /* The analysis lives in the Analytics view — go there. */
+    showView('analytics');
   }
   function addSubject(slug) {
     if (!slug || !visibleSubjects) return;
@@ -807,6 +823,41 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     var st = layoutStore();
     if (st) { try { st.setItem(LAYOUT_KEY, raw); } catch (e) {} }
   }
+  /* ---------- Dashboard views ----------
+     The sidebar (and the phone tabs) switch between four views; only
+     one view's sections are shown at a time, so the dashboard never
+     scrolls through everything at once. The Analytics view is the
+     attached reference layout, on its own page of the dashboard.
+     Dashboard: overview + plan + progress. My Tests: both histories.
+     Analytics: the analysis banner + five cards. Settings: your
+     details + Customise. Learn is a link, not a view. */
+  var VIEW_SECTIONS = {
+    dashboard: ['dash-overview', 'dash-plan', 'dash-progress'],
+    mytests: ['dash-mock-history-card', 'dash-quiz-history-card'],
+    analytics: ['dash-analysis-banner', 'dash-analysis-heading', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card'],
+    settings: ['dash-details-card', 'dash-customise-row', 'dash-customise']
+  };
+  var currentView = 'dashboard';
+  function applyVisibility() {
+    Object.keys(VIEW_SECTIONS).forEach(function (v) {
+      VIEW_SECTIONS[v].forEach(function (id) {
+        var el = $(id);
+        if (!el) return;
+        el.style.display = (v === currentView && dashLayout.hidden.indexOf(id) === -1) ? '' : 'none';
+      });
+    });
+  }
+  function showView(name) {
+    if (!VIEW_SECTIONS[name]) return;
+    currentView = name;
+    var tb = $('dash-topbar');
+    if (tb) tb.hidden = (name === 'settings');
+    Array.prototype.slice.call(document.querySelectorAll('[data-side-view]')).forEach(function (l) {
+      l.classList.toggle('active', l.getAttribute('data-side-view') === name);
+    });
+    applyVisibility();
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { try { window.scrollTo(0, 0); } catch (e2) {} }
+  }
   function applyLayout() {
     var content = $('dash-content');
     if (!content) return;
@@ -815,17 +866,7 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
       var el = $(id);
       if (el) content.appendChild(el);
     });
-    /* The analysis banner + heading are pinned, not sections: keep
-       them directly above the first analysis card. */
-    var lvl = $('dash-level-card');
-    var ban = $('dash-analysis-banner'), head = $('dash-analysis-heading');
-    if (lvl && ban) content.insertBefore(ban, lvl);
-    if (lvl && head) content.insertBefore(head, lvl);
-    DASH_SECTIONS.forEach(function (s) {
-      var el = $(s.id);
-      if (!el) return;
-      el.style.display = dashLayout.hidden.indexOf(s.id) !== -1 ? 'none' : '';
-    });
+    applyVisibility();
     RESIZABLE.forEach(function (id) {
       var el = $(id);
       if (!el) return;
@@ -1479,15 +1520,11 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     var note = $('dash-onboard-note');
     if (note) note.hidden = done;
     /* The details card follows the gate: an incomplete profile opens
-       the form in place; a complete profile shows the details. */
+       the form in place; a complete profile shows the details. An
+       incomplete profile lands on the Settings view, where the form
+       lives. */
     setProfileMode(!done);
-    if (!done) {
-      /* Guarded scroll: some phone webviews throw on scroll calls. */
-      try {
-        var f = $('dash-form');
-        if (f && f.scrollIntoView) f.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } catch (e) {}
-    }
+    if (!done) showView('settings');
   }
   function renderProfile() {
     var md = (sessionUser && sessionUser.user_metadata) || {};
@@ -1954,29 +1991,23 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     if (btn) btn.hidden = false;
   });
 
-  /* ---------- Sidebar, search, range ----------
-     Sidebar links jump to a section — unhiding it first if the user
-     hid it in Customise. The sidebar theme button reuses the nav
+  /* ---------- Sidebar, tabs, search, range ----------
+     Sidebar buttons and phone tabs switch views — never an empty
+     view: if every section in the view is hidden in Customise,
+     unhide them all. The sidebar theme button reuses the nav
      toggle's exact behaviour (same button, same paint). */
-  var sideLinks = Array.prototype.slice.call(document.querySelectorAll('.dash-side-link[data-side-target]'));
-  sideLinks.forEach(function (link) {
+  var viewSwitchers = Array.prototype.slice.call(document.querySelectorAll('[data-side-view]'));
+  viewSwitchers.forEach(function (link) {
     link.addEventListener('click', function () {
-      sideLinks.forEach(function (l) { l.classList.remove('active'); });
-      link.classList.add('active');
-      var target = link.getAttribute('data-side-target');
-      if (target === 'top') {
-        try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
-        return;
-      }
-      var el = $(target);
-      if (!el) return;
-      var hi = dashLayout.hidden.indexOf(target);
-      if (hi !== -1) {
-        dashLayout.hidden.splice(hi, 1);
+      var view = link.getAttribute('data-side-view');
+      if (!view) return;
+      var secs = VIEW_SECTIONS[view] || [];
+      if (secs.length && secs.every(function (id) { return dashLayout.hidden.indexOf(id) !== -1; })) {
+        dashLayout.hidden = dashLayout.hidden.filter(function (id) { return secs.indexOf(id) === -1; });
         saveLayout();
         applyLayout();
       }
-      try { if (el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+      showView(view);
     });
   });
   var sideTheme = $('dash-side-theme');
@@ -1986,13 +2017,13 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
   });
   var viewProfile = $('dash-view-profile');
   if (viewProfile) viewProfile.addEventListener('click', function () {
-    var el = $('dash-details-card');
-    if (!el) return;
-    try { if (el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    showView('settings');
   });
   var searchInput = $('dash-search');
   if (searchInput) searchInput.addEventListener('input', function () {
     searchQuery = String(searchInput.value || '').trim().toLowerCase();
+    /* Searching is a My Tests action — show the filtered history. */
+    if (currentView !== 'mytests') showView('mytests');
     renderHistory();
   });
   var rangeSel = $('dash-range');
