@@ -138,9 +138,11 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-side.open { transform: translateX(0); visibility: visible; }
 .dash-side-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, .55); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 @media (min-width: 1024px) {
-  .dash-side { position: sticky; top: 76px; bottom: auto; left: auto; z-index: 1; flex: 0 0 232px; width: 232px; max-width: none; height: calc(100vh - 92px); margin: 0; border-radius: 20px; transform: none; visibility: visible; transition: width .3s ease, flex-basis .3s ease; }
+  .dash-side { position: fixed; top: 76px; bottom: auto; left: 20px; z-index: 5; width: 232px; max-width: none; height: calc(100vh - 92px); margin: 0; border-radius: 20px; transform: none; visibility: visible; transition: width .3s ease; }
+  .dash-main { margin-left: 252px; transition: margin-left .3s ease; }
+  .dash-shell.side-collapsed .dash-main { margin-left: 92px; }
   .dash-shell { padding: 0 20px; }
-  .dash-side.collapsed { flex-basis: 72px; width: 72px; }
+  .dash-side.collapsed { width: 72px; }
   .dash-side.collapsed .dash-side-logo span, .dash-side.collapsed .dash-side-link span, .dash-side.collapsed .dash-side-plan, .dash-side.collapsed .dash-side-plus, .dash-side.collapsed .dash-side-theme { display: none; }
   .dash-side.collapsed .dash-side-link { justify-content: center; padding: 11px 0; }
   .dash-side.collapsed .dash-side-head { justify-content: center; padding: 4px 0 12px; }
@@ -2869,6 +2871,8 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
   function applySideCollapsed() {
     if (!sideEl) return;
     sideEl.classList.toggle('collapsed', sideCollapsed);
+    var shell = sideEl.parentElement;
+    if (shell) shell.classList.toggle('side-collapsed', sideCollapsed);
     var btn = $('dash-collapse');
     if (btn) btn.setAttribute('aria-expanded', sideCollapsed ? 'false' : 'true');
   }
