@@ -128,20 +128,18 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
    slide-out drawer. The active item is a translucent purple glass,
    not a solid block. */
 .dash-shell { display: flex; align-items: stretch; gap: 20px; padding: 0 20px; }
-/* The dashboard is a full app shell: the site's top nav is hidden
-   here (the sidebar + topbar are the navigation), so the sidebar
-   can occupy the complete viewport height, and the hero needs no
-   160px clearance for a nav that is not there. */
-body > nav.nav { display: none; }
-.dash-main .page-head { padding: 28px 0 32px; text-align: left; }
+/* The dashboard hero keeps its text left-aligned (the shared
+   .page-head centres text by default). The site nav is visible
+   above the dashboard, so the hero keeps its 160px clearance. */
+.dash-main .page-head { text-align: left; }
 .dash-main .page-head p, .dash-main .dash-profile { text-align: left; }
 .dash-main { flex: 1; min-width: 0; }
 .dash-side { display: flex; flex-direction: column; gap: 4px; position: fixed; left: 0; top: 0; bottom: 0; z-index: 80; width: 272px; max-width: 82vw; padding: 16px 12px; border-radius: 0 20px 20px 0; overflow-y: auto; overflow-x: hidden; transform: translateX(-105%); visibility: hidden; transition: transform .3s ease, visibility .3s ease, width .3s ease, flex-basis .3s ease; }
 .dash-side.open { transform: translateX(0); visibility: visible; }
 .dash-side-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, .55); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 @media (min-width: 1024px) {
-  .dash-side { position: sticky; top: 0; bottom: auto; left: auto; z-index: 1; flex: 0 0 232px; width: 232px; max-width: none; height: 100vh; margin: 0; border-radius: 0 20px 20px 0; transform: none; visibility: visible; transition: width .3s ease, flex-basis .3s ease; }
-  .dash-shell { padding: 0 20px 0 0; }
+  .dash-side { position: sticky; top: 76px; bottom: auto; left: auto; z-index: 1; flex: 0 0 232px; width: 232px; max-width: none; height: calc(100vh - 92px); margin: 0; border-radius: 20px; transform: none; visibility: visible; transition: width .3s ease, flex-basis .3s ease; }
+  .dash-shell { padding: 0 20px; }
   .dash-side.collapsed { flex-basis: 72px; width: 72px; }
   .dash-side.collapsed .dash-side-logo span, .dash-side.collapsed .dash-side-link span, .dash-side.collapsed .dash-side-plan, .dash-side.collapsed .dash-side-plus, .dash-side.collapsed .dash-side-theme { display: none; }
   .dash-side.collapsed .dash-side-link { justify-content: center; padding: 11px 0; }
