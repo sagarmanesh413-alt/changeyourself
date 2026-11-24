@@ -86,8 +86,24 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-hist-item { border-bottom: 1px solid var(--border); }
 .dash-hist-item:last-child { border-bottom: none; }
 #dash-content .dash-hist-row { border-bottom: none; }
+/* History rows: a structured table — test, date, score, accuracy,
+   time, and a chevron. On phones only the test, the score and the
+   chevron show. */
+.dash-hist-row { display: grid; grid-template-columns: minmax(0, 1fr) 110px 90px 70px 80px 16px; gap: 12px; align-items: center; padding: 12px 4px; }
 .dash-hist-row.clickable { cursor: pointer; }
+.dash-hist-row:hover { background: rgba(124, 58, 237, .05); border-radius: 10px; }
+.dash-hist-main { min-width: 0; }
+.dash-hist-title { font-weight: 600; font-size: 15px; }
+.dash-hist-meta { font-size: 13px; margin-top: 2px; }
+.dash-hist-cell { font-size: 14px; white-space: nowrap; }
+.dash-hist-score { font-weight: 700; }
+.dash-hist-chev { color: var(--muted); font-size: 20px; text-align: center; transition: transform .25s ease; }
+.dash-hist-item.open .dash-hist-chev { transform: rotate(90deg); }
 .dash-hist-details { padding: 4px 0 14px; }
+@media (max-width: 640px) {
+  .dash-hist-row { grid-template-columns: minmax(0, 1fr) auto 16px; }
+  .dash-hist-hide-m { display: none; }
+}
 .dash-trend { display: flex; align-items: flex-end; gap: 8px; height: 150px; }
 .dash-trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
 .dash-trend-bar { width: 100%; max-width: 44px; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, #7c3aed, #3b82f6); }
@@ -105,19 +121,48 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
    colour, card and background stays the site's own (black + dotted
    grid, glass cards, purple/blue accents). No 3D illustration, no
    neon glow, no invented numbers. */
-.dash-shell { display: flex; align-items: flex-start; }
-.dash-side { display: none; }
+/* ---- Liquid Glass sidebar (the reference's left nav) ----
+   A floating glass panel, top-aligned with the main content and
+   stretching to the viewport bottom. Collapses to icons only
+   (labels hide, tooltips show on hover); on phones it becomes a
+   slide-out drawer. The active item is a translucent purple glass,
+   not a solid block. */
+.dash-shell { display: flex; align-items: stretch; gap: 20px; padding: 0 20px; }
 .dash-main { flex: 1; min-width: 0; }
+.dash-side { display: flex; flex-direction: column; gap: 4px; position: fixed; left: 0; top: 0; bottom: 0; z-index: 80; width: 272px; max-width: 82vw; padding: 16px 12px; border-radius: 0 20px 20px 0; overflow-y: auto; overflow-x: hidden; transform: translateX(-105%); visibility: hidden; transition: transform .3s ease, visibility .3s ease, width .3s ease, flex-basis .3s ease; }
+.dash-side.open { transform: translateX(0); visibility: visible; }
+.dash-side-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, .55); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 @media (min-width: 1024px) {
-  .dash-side { display: flex; flex-direction: column; gap: 4px; flex: 0 0 216px; width: 216px; position: sticky; top: 96px; height: calc(100vh - 112px); margin: 24px 0 0 24px; padding: 16px 12px; border: 1px solid var(--border); border-radius: 18px; background: var(--card); overflow-y: auto; }
+  .dash-side { position: sticky; top: 76px; bottom: auto; left: auto; z-index: 1; flex: 0 0 232px; width: 232px; max-width: none; height: calc(100vh - 92px); margin: 0; border-radius: 20px; transform: none; visibility: visible; transition: width .3s ease, flex-basis .3s ease; }
+  .dash-side.collapsed { flex-basis: 72px; width: 72px; }
+  .dash-side.collapsed .dash-side-logo span, .dash-side.collapsed .dash-side-link span, .dash-side.collapsed .dash-side-plan, .dash-side.collapsed .dash-side-theme { display: none; }
+  .dash-side.collapsed .dash-side-link { justify-content: center; padding: 11px 0; }
+  .dash-side.collapsed .dash-side-head { justify-content: center; padding: 4px 0 12px; }
+  .dash-side.collapsed .dash-side-collapse svg { transform: rotate(180deg); }
+  .dash-side.collapsed .dash-side-link { position: relative; }
+  .dash-side.collapsed .dash-side-link:hover::after { content: attr(data-tip); position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%); padding: 6px 10px; border-radius: 8px; background: rgba(30, 30, 35, .95); color: #ffffff; font-size: 13px; font-weight: 600; white-space: nowrap; box-shadow: 0 4px 16px rgba(0, 0, 0, .35); z-index: 10; }
 }
+.dash-side-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 12px; }
+.dash-side-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; font-size: 15px; }
+.dash-side-logo img { width: 34px; height: 34px; border-radius: 8px; display: block; }
+.dash-side-collapse { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .05); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.dash-side-collapse:hover { color: var(--text); background: rgba(124, 58, 237, .12); }
+.dash-side-collapse svg { width: 16px; height: 16px; transition: transform .3s ease; }
+.dash-side-nav { display: flex; flex-direction: column; gap: 4px; }
 .dash-side-link { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; color: var(--muted); font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; background: none; font: inherit; text-align: left; width: 100%; }
 .dash-side-link:hover { color: var(--text); background: rgba(124, 58, 237, .08); }
-.dash-side-link.active { color: #ffffff; background: #7c3aed; }
+.dash-side-link.active { color: #ffffff; background: rgba(124, 58, 237, .22); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12); }
 .dash-side-link svg { width: 20px; height: 20px; flex-shrink: 0; }
-.dash-side-plan { margin-top: auto; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: rgba(124, 58, 237, .08); }
+.dash-side-plan { margin-top: auto; padding: 14px; border: 1px solid rgba(124, 58, 237, .18); border-radius: 14px; background: rgba(124, 58, 237, .10); }
+.dash-side-plan-icon { display: block; width: 28px; height: 28px; color: #fbbf24; margin-bottom: 8px; }
+.dash-side-plan-icon svg { width: 28px; height: 28px; }
 .dash-side-plan p { font-size: 13px; color: var(--muted); margin: 0 0 10px; line-height: 1.5; }
 .dash-side-plan .card-link { font-size: 14px; }
+.dash-side-theme { display: flex; gap: 3px; padding: 3px; border-radius: 11px; border: 1px solid rgba(255, 255, 255, .10); background: rgba(255, 255, 255, .04); margin-top: 12px; }
+.dash-side-theme button { flex: 1; padding: 8px; border-radius: 8px; border: none; background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.dash-side-theme button:hover { color: var(--text); }
+.dash-side-theme button[aria-pressed="true"] { background: #7c3aed; color: #ffffff; }
+.dash-side-theme svg { width: 18px; height: 18px; }
 
 /* View tabs: the sidebar is hidden on phones, so these switch views
    there. Hidden on desktop, where the sidebar does the job. */
@@ -126,11 +171,27 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-view-tab.active { background: #7c3aed; border-color: #7c3aed; color: #ffffff; }
 @media (min-width: 1024px) { .dash-view-tabs { display: none; } }
 
-/* Topbar: live search over the history + a real time range. */
-.dash-topbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-.dash-search { flex: 1; min-width: 200px; padding: 11px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.10); background: rgba(255, 255, 255, 0.04); color: var(--text); font: inherit; font-size: 15px; }
+/* Topbar: search, notifications, and the account menu — the
+   reference's top row. A clean row, not a panel. */
+.dash-topbar { display: flex; gap: 10px; align-items: center; }
+.dash-menu-btn { display: none; flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.10); background: rgba(255, 255, 255, 0.04); color: var(--text); cursor: pointer; align-items: center; justify-content: center; }
+@media (max-width: 1023px) { .dash-menu-btn { display: flex; } }
+.dash-icon-btn { flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.10); background: rgba(255, 255, 255, 0.04); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.dash-menu-btn svg, .dash-icon-btn svg { width: 20px; height: 20px; }
+.dash-menu-btn:hover, .dash-icon-btn:hover { background: rgba(124, 58, 237, .12); }
+.dash-search { flex: 1; min-width: 0; padding: 11px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.10); background: rgba(255, 255, 255, 0.04); color: var(--text); font: inherit; font-size: 15px; }
 html[data-theme="light"] .dash-search { border-color: rgba(0, 0, 0, 0.10); background: rgba(0, 0, 0, 0.03); }
 .dash-search::placeholder { color: var(--muted); }
+.dash-bell-wrap, .dash-user { position: relative; flex-shrink: 0; }
+.dash-avatar-btn { display: flex; align-items: center; gap: 4px; padding: 0; border: none; background: none; cursor: pointer; }
+.dash-avatar-btn > svg { width: 16px; height: 16px; color: var(--muted); }
+.dash-avatar-sm { width: 36px; height: 36px; font-size: 15px; }
+.dash-pop { position: absolute; right: 0; top: calc(100% + 10px); z-index: 60; min-width: 220px; padding: 14px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.10); background: rgba(30, 30, 35, .92); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); box-shadow: 0 12px 32px rgba(0, 0, 0, .35); }
+.dash-pop p { margin: 0 0 6px; font-size: 14px; }
+.dash-pop p:last-child { margin-bottom: 0; }
+.dash-user-menu { min-width: 180px; padding: 6px; }
+.dash-user-menu button { display: block; width: 100%; padding: 10px 12px; border: none; background: none; color: var(--text); font: inherit; font-size: 14px; font-weight: 600; text-align: left; border-radius: 9px; cursor: pointer; }
+.dash-user-menu button:hover { background: rgba(124, 58, 237, .12); }
 /* Time range: a segmented control (All / 30 / 90 days) — clearer
    and faster than a dropdown for three options. */
 .dash-range-seg { display: flex; gap: 3px; padding: 3px; border-radius: 11px; border: 1px solid rgba(255, 255, 255, 0.10); background: rgba(255, 255, 255, 0.04); flex-shrink: 0; }
@@ -145,14 +206,23 @@ html[data-theme="light"] .dash-range-seg { border-color: rgba(0, 0, 0, 0.10); ba
 /* Study-goal icons are inline SVGs now, not emoji. */
 .dash-goal-icon svg { width: 18px; height: 18px; }
 
-/* Your overview: four tiles of real numbers. */
+/* Your overview: the reference's four metric cards, each with a
+   sparkline at the bottom and a change pill only when the data
+   supports one. A gentle lift on hover. */
 .dash-overview { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-.dash-ov-tile { padding: 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); }
-.dash-ov-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; background: rgba(124, 58, 237, .12); color: #a78bfa; }
+.dash-ov-tile { position: relative; overflow: hidden; padding: 18px 18px 14px; border-radius: 18px; transition: transform .25s ease, box-shadow .25s ease; }
+.dash-ov-tile:hover { transform: translateY(-2px); }
+.dash-ov-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+.dash-ov-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(124, 58, 237, .12); color: #a78bfa; }
+.dash-ov-icon-gold { background: rgba(245, 158, 11, .14); color: #fbbf24; }
 .dash-ov-icon svg { width: 19px; height: 19px; }
-.dash-ov-label { font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 6px; }
+.dash-ov-change { padding: 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; background: rgba(34, 197, 94, .15); color: #4ade80; white-space: nowrap; }
+.dash-ov-change.down { background: rgba(239, 68, 68, .15); color: #f87171; }
 .dash-ov-value { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
-.dash-ov-sub { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+.dash-ov-label { font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: .07em; text-transform: uppercase; margin-top: 4px; }
+.dash-ov-sub { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+.dash-ov-spark { height: 30px; margin-top: 8px; }
+.dash-ov-spark svg { display: block; width: 100%; height: 100%; }
 @media (max-width: 640px) {
   .dash-overview { grid-template-columns: repeat(2, 1fr); }
 }
@@ -247,10 +317,72 @@ html[data-theme="light"] .dash-view-tabs, html[data-theme="light"] .dash-glass-s
     0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
-/* The topbar is a clean row, not a panel — the search and the time
-   range sit directly on the page, the way a professional dashboard
-   does it. */
-.dash-topbar { padding: 0; border: none; margin-bottom: 16px; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* Glass layers: the sidebar is the deepest layer (stronger blur),
+   the popovers are the lightest. The user's Appearance controls
+   still drive them all — each layer is an offset from the same
+   base, not a separate setting. */
+.dash-side {
+  -webkit-backdrop-filter: blur(calc(var(--dash-blur) + 6px)) saturate(var(--dash-saturation));
+  backdrop-filter: blur(calc(var(--dash-blur) + 6px)) saturate(var(--dash-saturation));
+}
+.dash-pop {
+  -webkit-backdrop-filter: blur(calc(var(--dash-blur) + 4px)) saturate(var(--dash-saturation));
+  backdrop-filter: blur(calc(var(--dash-blur) + 4px)) saturate(var(--dash-saturation));
+}
+
+/* Ambient light: two soft purple glows behind the dashboard, drifting
+   almost imperceptibly. They sit behind the content, never on it.
+   The blur is static; only the position animates, so it stays cheap. */
+.dash-main { position: relative; }
+.dash-main::before, .dash-main::after { content: ""; position: fixed; z-index: 0; pointer-events: none; border-radius: 50%; filter: blur(90px); opacity: .16; }
+.dash-main::before { width: 480px; height: 480px; right: -120px; top: -80px; background: #7c3aed; animation: dash-drift 26s ease-in-out infinite alternate; }
+.dash-main::after { width: 380px; height: 380px; left: 18%; bottom: -140px; background: #3b82f6; opacity: .10; animation: dash-drift 32s ease-in-out infinite alternate-reverse; }
+@keyframes dash-drift { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-30px, 24px, 0); } }
+.dash-main > * { position: relative; z-index: 1; }
+
+/* Entrance: cards fade and rise in, staggered, when a view shows.
+   The JS adds .dash-anim to the content and removes it after the
+   animation, so the hover lift still works afterwards. */
+@keyframes dash-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+#dash-content.dash-anim > * { animation: dash-rise .45s cubic-bezier(.22, .61, .36, 1) both; }
+#dash-content.dash-anim > *:nth-child(2) { animation-delay: .04s; }
+#dash-content.dash-anim > *:nth-child(3) { animation-delay: .08s; }
+#dash-content.dash-anim > *:nth-child(4) { animation-delay: .12s; }
+#dash-content.dash-anim > *:nth-child(5) { animation-delay: .16s; }
+#dash-content.dash-anim > *:nth-child(6) { animation-delay: .20s; }
+#dash-content.dash-anim > *:nth-child(7) { animation-delay: .24s; }
+#dash-content.dash-anim > *:nth-child(8) { animation-delay: .28s; }
+
+/* Chart cards: a header row (title + filter) and a shared tooltip
+   for the interactive charts. The chart containers are positioned
+   so the tooltip anchors to them. */
+.dash-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.dash-card-head h3 { margin: 0; }
+#dash-score-line, #dash-speed { position: relative; }
+.dash-chart-tip { position: absolute; z-index: 5; pointer-events: none; padding: 8px 10px; border-radius: 10px; background: rgba(20, 20, 25, .95); border: 1px solid rgba(255, 255, 255, .12); color: #ffffff; font-size: 12px; line-height: 1.5; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); white-space: nowrap; transform: translate(-50%, -115%); }
+.dash-chart-tip b { color: #c4b5fd; }
+
+/* Accuracy ring: the segments sweep in when the card renders. */
+#dash-donut circle { transition: stroke-dashoffset .8s ease, stroke-dasharray .8s ease; }
+
+/* Performance bars: grow from the baseline, staggered by column. */
+.dash-trend-bar { transform-origin: bottom; animation: dash-bar-in .5s cubic-bezier(.22, .61, .36, 1) both; }
+.dash-trend-col:nth-child(2) .dash-trend-bar { animation-delay: .05s; }
+.dash-trend-col:nth-child(3) .dash-trend-bar { animation-delay: .10s; }
+.dash-trend-col:nth-child(4) .dash-trend-bar { animation-delay: .15s; }
+.dash-trend-col:nth-child(5) .dash-trend-bar { animation-delay: .20s; }
+.dash-trend-col:nth-child(6) .dash-trend-bar { animation-delay: .25s; }
+.dash-trend-col:nth-child(7) .dash-trend-bar { animation-delay: .30s; }
+.dash-trend-col:nth-child(8) .dash-trend-bar { animation-delay: .35s; }
+@keyframes dash-bar-in { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.dash-trend-col { position: relative; }
+.dash-trend-bar.latest { box-shadow: 0 0 16px rgba(124, 58, 237, .45); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-hero-orbit, .dash-main::before, .dash-main::after, .dash-trend-bar { animation: none; }
+  #dash-content.dash-anim > * { animation: none; }
+  .dash-ov-tile, .dash-side, #dash-donut circle { transition: none; }
+}
 
 /* The view tabs are the dock now (the component's bottom dock): a
    glass pill holding the four views, the active one solid purple. */
@@ -323,13 +455,26 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
   .dash-time-left { flex: none; }
 }
 
-/* Hero row: the greeting on the left, the profile strip on the
-   right — so the wide hero has no empty half. Stacks on phones. */
-.dash-hero-row { display: grid; grid-template-columns: 1fr; gap: 20px; align-items: center; }
-.dash-hero-row .dash-profile { flex-wrap: wrap; margin: 0; }
+/* Hero row: the greeting on the left, the profile card below it,
+   and a quiet glass orb on the right (a flat icon + an orbit ring,
+   not a 3D render). Stacks on phones, where the orb hides. */
+.dash-hero-row { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: center; }
+.dash-hero-row .dash-profile { flex-wrap: wrap; margin: 14px 0 0; }
+.dash-hero-name { background: linear-gradient(90deg, #c4b5fd, #7c3aed); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.dash-profile-main #dash-profile-name { font-size: 16px; font-weight: 700; color: var(--text); }
+.dash-profile-subject { margin-left: auto; padding: 5px 10px; border-radius: 999px; background: rgba(124, 58, 237, .12); color: #a78bfa; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.dash-profile-subject:empty { display: none; }
+.dash-hero-visual { display: none; }
 @media (min-width: 1024px) {
-  .dash-hero-row { grid-template-columns: 1fr 1fr; }
+  .dash-hero-row { grid-template-columns: 1fr 220px; }
+  .dash-hero-visual { display: block; position: relative; height: 190px; }
+  .dash-hero-glow { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(124, 58, 237, .45), rgba(124, 58, 237, 0) 65%); filter: blur(10px); }
+  .dash-hero-orbit { position: absolute; left: 50%; top: 50%; width: 170px; height: 170px; margin: -85px 0 0 -85px; border: 1px solid rgba(167, 139, 250, .25); border-radius: 50%; animation: dash-orbit 24s linear infinite; }
+  .dash-hero-orbit::after { content: ""; position: absolute; left: 50%; top: -4px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: #a78bfa; }
+  .dash-hero-orb { position: absolute; left: 50%; top: 50%; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #c4b5fd; background: rgba(124, 58, 237, .16); border: 1px solid rgba(167, 139, 250, .35); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 12px 32px rgba(124, 58, 237, .25); }
+  .dash-hero-orb svg { width: 44px; height: 44px; }
 }
+@keyframes dash-orbit { to { transform: rotate(360deg); } }
 
 </style>
 </style>
@@ -350,16 +495,28 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
        Analytics / Settings jump to sections on this page; Learn goes to
        the mock tests. The bottom card is the real plan, not an upsell. -->
   <aside class="dash-side dash-hide-until-profile" id="dash-side" aria-label="Dashboard sections">
-    <button type="button" class="dash-side-link active" data-side-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Dashboard</button>
-    <button type="button" class="dash-side-link" data-side-view="mytests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><polyline points="9 14 11 16 15 12"/></svg>My Tests</button>
-    <button type="button" class="dash-side-link" data-side-view="analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</button>
-    <a class="dash-side-link" href="/changexed/mock-tests/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Learn</a>
-    <button type="button" class="dash-side-link" data-side-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Settings</button>
+    <div class="dash-side-head">
+      <a class="dash-side-logo" href="/" aria-label="ChangeYourself home"><img src="/logo.png" alt="ChangeYourself"><span>ChangeYourself</span></a>
+      <button class="dash-side-collapse" id="dash-collapse" type="button" aria-label="Collapse sidebar" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button>
+    </div>
+    <nav class="dash-side-nav" aria-label="Dashboard">
+      <button type="button" class="dash-side-link active" data-side-view="dashboard" data-tip="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Dashboard</span></button>
+      <button type="button" class="dash-side-link" data-side-view="mytests" data-tip="My Tests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><polyline points="9 14 11 16 15 12"/></svg><span>My Tests</span></button>
+      <button type="button" class="dash-side-link" data-side-view="analytics" data-tip="Analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Analytics</span></button>
+      <a class="dash-side-link" href="/changexed/mock-tests/" data-tip="Learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>Learn</span></a>
+      <button type="button" class="dash-side-link" data-side-view="settings" data-tip="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span>Settings</span></button>
+    </nav>
     <div class="dash-side-plan">
+      <span class="dash-side-plan-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/></svg></span>
       <p id="dash-side-plan-text">Checking your plan…</p>
       <a class="card-link" id="dash-side-plan-link" href="/pricing/">See pricing →</a>
     </div>
+    <div class="dash-side-theme" role="group" aria-label="Theme">
+      <button type="button" id="dash-theme-dark" aria-pressed="true" aria-label="Dark theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      <button type="button" id="dash-theme-light" aria-pressed="false" aria-label="Light theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+    </div>
   </aside>
+  <div class="dash-side-backdrop" id="dash-side-backdrop" hidden></div>
   <div class="dash-main">
 
 <div class="page-head"><div class="container">
@@ -368,17 +525,23 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       <h1 id="dash-hero-title">Your dashboard</h1>
       <p>Let's keep pushing your limits and grow together.</p>
     </div>
-    <!-- Profile strip: lives in the hero now, so the wide hero has
-         no empty half. -->
+    <!-- Profile card: lives in the hero, so the wide hero has no
+         empty half. The account actions moved to the topbar avatar
+         menu. -->
     <div class="card-dark dash-profile">
       <div class="dash-avatar" id="dash-avatar" aria-hidden="true">?</div>
       <div class="dash-profile-main">
+        <p id="dash-profile-name">—</p>
         <p id="dash-email" class="muted">—</p>
         <p class="muted" id="dash-member">Member since —</p>
       </div>
-      <button class="btn btn-dark" id="dash-view-profile" type="button">View profile →</button>
-      <button class="btn btn-dark" id="dash-signout" type="button">Sign out</button>
+      <span class="dash-profile-subject" id="dash-profile-subject"></span>
     </div>
+  </div>
+  <div class="dash-hero-visual" aria-hidden="true">
+    <span class="dash-hero-glow"></span>
+    <span class="dash-hero-orbit"></span>
+    <span class="dash-hero-orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/><path d="M22 10v6"/></svg></span>
   </div>
 </div></div>
 
@@ -511,13 +674,21 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       <button type="button" class="btn btn-dark" id="dash-glass-reset">Reset appearance</button>
     </div>
 
-    <!-- Topbar: live search over the history + a real time range. -->
+    <!-- Topbar: search, notifications, and the account menu — the
+         reference's top row. The time range moved to the trend card. -->
     <div class="dash-topbar dash-hide-until-profile" id="dash-topbar">
-      <input type="search" class="dash-search" id="dash-search" placeholder="Search your tests… (subject, set, date)" aria-label="Search your test history">
-      <div class="dash-range-seg" id="dash-range" role="group" aria-label="Time range">
-        <button type="button" data-range="0" aria-pressed="true">All time</button>
-        <button type="button" data-range="30" aria-pressed="false">Last 30 days</button>
-        <button type="button" data-range="90" aria-pressed="false">Last 90 days</button>
+      <button class="dash-menu-btn" id="dash-menu-btn" type="button" aria-label="Open navigation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <input type="search" class="dash-search" id="dash-search" placeholder="Search anything… (⌘ K)" aria-label="Search your test history">
+      <div class="dash-bell-wrap">
+        <button class="dash-icon-btn" id="dash-bell" type="button" aria-label="Notifications" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+        <div class="dash-pop" id="dash-notif" hidden><p><strong>You're all caught up.</strong></p><p class="muted">No new notifications.</p></div>
+      </div>
+      <div class="dash-user">
+        <button class="dash-avatar-btn" id="dash-avatar-btn" type="button" aria-label="Account menu" aria-expanded="false"><span class="dash-avatar dash-avatar-sm" id="dash-top-avatar">?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="dash-pop dash-user-menu" id="dash-user-menu" hidden>
+          <button id="dash-view-profile" type="button">View profile →</button>
+          <button id="dash-signout" type="button">Sign out</button>
+        </div>
       </div>
     </div>
 
@@ -530,33 +701,49 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       <button type="button" class="dash-view-tab" data-side-view="settings">Settings</button>
     </div>
 
-    <!-- Your overview: four tiles of real numbers (the reference
-         layout's top row). No rank — there is no ranking system; the
-         fourth tile is the real average score. -->
+    <!-- Your overview: the reference's four metric cards — Total Mock
+         Tests, Quiz Rounds, Average Score, Best Score — each with a
+         sparkline and a change pill only when the data supports one. -->
     <div class="dash-overview dash-hide-until-profile" id="dash-overview">
       <div class="dash-ov-tile">
-        <div class="dash-ov-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-        <div class="dash-ov-label">Total Tests</div>
+        <div class="dash-ov-top">
+          <div class="dash-ov-icon dash-ov-icon-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v6a5 5 0 0 1-10 0z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2 1.5 3 4 3"/><path d="M17 6h3a1 1 0 0 1 1 1c0 2-1.5 3-4 3"/></svg></div>
+          <span class="dash-ov-change" id="ov-tests-change" hidden></span>
+        </div>
         <div class="dash-ov-value" id="ov-tests">0</div>
+        <div class="dash-ov-label">Total Mock Tests</div>
         <div class="dash-ov-sub" id="ov-tests-sub">—</div>
+        <div class="dash-ov-spark" id="ov-tests-spark" aria-hidden="true"></div>
       </div>
       <div class="dash-ov-tile">
-        <div class="dash-ov-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-        <div class="dash-ov-label">Questions Attempted</div>
-        <div class="dash-ov-value" id="ov-questions">0</div>
-        <div class="dash-ov-sub" id="ov-questions-sub">—</div>
+        <div class="dash-ov-top">
+          <div class="dash-ov-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <span class="dash-ov-change" id="ov-quizzes-change" hidden></span>
+        </div>
+        <div class="dash-ov-value" id="ov-quizzes">0</div>
+        <div class="dash-ov-label">Quiz Rounds</div>
+        <div class="dash-ov-sub" id="ov-quizzes-sub">—</div>
+        <div class="dash-ov-spark" id="ov-quizzes-spark" aria-hidden="true"></div>
       </div>
       <div class="dash-ov-tile">
-        <div class="dash-ov-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
-        <div class="dash-ov-label">Learning Streak</div>
-        <div class="dash-ov-value" id="ov-streak">0 Days</div>
-        <div class="dash-ov-sub" id="ov-streak-sub">—</div>
-      </div>
-      <div class="dash-ov-tile">
-        <div class="dash-ov-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-        <div class="dash-ov-label">Average Score</div>
+        <div class="dash-ov-top">
+          <div class="dash-ov-icon dash-ov-icon-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          <span class="dash-ov-change" id="ov-avg-change" hidden></span>
+        </div>
         <div class="dash-ov-value" id="ov-avg">—</div>
+        <div class="dash-ov-label">Average Score</div>
         <div class="dash-ov-sub" id="ov-avg-sub">—</div>
+        <div class="dash-ov-spark" id="ov-avg-spark" aria-hidden="true"></div>
+      </div>
+      <div class="dash-ov-tile">
+        <div class="dash-ov-top">
+          <div class="dash-ov-icon dash-ov-icon-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/></svg></div>
+          <span class="dash-ov-change" id="ov-best-change" hidden></span>
+        </div>
+        <div class="dash-ov-value" id="ov-best">—</div>
+        <div class="dash-ov-label">Best Score</div>
+        <div class="dash-ov-sub" id="ov-best-sub">—</div>
+        <div class="dash-ov-spark" id="ov-best-spark" aria-hidden="true"></div>
       </div>
     </div>
 
@@ -594,7 +781,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       <span class="dash-banner-brain" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
     </div>
 
-    <h3 class="dash-analysis-heading dash-hide-until-profile" id="dash-analysis-heading">Your Current Level</h3>
+    <h3 class="dash-analysis-heading dash-hide-until-profile" id="dash-analysis-heading">Your Accuracy</h3>
 
     <div class="card-dark dash-hide-until-profile" id="dash-level-card">
       <div class="dash-analysis-grid">
@@ -607,7 +794,15 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     </div>
 
     <div class="card-dark dash-hide-until-profile" id="dash-score-card">
-      <h3 id="dash-score-title">Average Score</h3>
+      <div class="dash-card-head">
+        <h3 id="dash-score-title">Average Score Trend</h3>
+        <div class="dash-range-seg" id="dash-range" role="group" aria-label="Time range">
+          <button type="button" data-range="7" aria-pressed="false">7D</button>
+          <button type="button" data-range="30" aria-pressed="false">30D</button>
+          <button type="button" data-range="90" aria-pressed="false">90D</button>
+          <button type="button" data-range="0" aria-pressed="true">All</button>
+        </div>
+      </div>
       <div id="dash-score-line"></div>
       <div id="dash-bars"></div>
       <div id="dash-mastery-wrap" hidden>
@@ -618,13 +813,13 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     </div>
 
     <div class="card-dark dash-hide-until-profile" id="dash-trend-card">
-      <h3>📅 Score Trend</h3>
+      <h3>Performance History</h3>
       <div class="dash-trend" id="dash-trend"></div>
       <p class="muted" id="dash-trend-note" style="font-size:13px;"></p>
     </div>
 
     <div class="card-dark dash-hide-until-profile" id="dash-time-card">
-      <h3>⏱️ Time per Question</h3>
+      <h3>Time per Question</h3>
       <div class="dash-time-flex">
         <div class="dash-time-left">
           <div class="dash-time-big" id="dash-avg-time">—</div>
@@ -639,7 +834,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 
     <div class="card-dark dash-hide-until-profile" id="dash-focus-card">
       <div class="dash-focus-main">
-        <h3>💡 Where to put more effort</h3>
+        <h3>Insights &amp; Next Steps</h3>
         <p id="dash-focus-head"></p>
         <ul class="dash-focus" id="dash-focus"></ul>
       </div>
@@ -877,11 +1072,11 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     { id: 'dash-overview', label: 'Your overview' },
     { id: 'dash-plan', label: 'Your plan' },
     { id: 'dash-goals', label: 'Study goals' },
-    { id: 'dash-level-card', label: 'Your Current Level' },
+    { id: 'dash-level-card', label: 'Your Accuracy' },
     { id: 'dash-score-card', label: 'Average Score' },
     { id: 'dash-trend-card', label: 'Score Trend' },
     { id: 'dash-time-card', label: 'Time per Question' },
-    { id: 'dash-focus-card', label: 'Where to put more effort' },
+    { id: 'dash-focus-card', label: 'Insights & Next Steps' },
     { id: 'dash-progress', label: 'Progress by subject' },
     { id: 'dash-mock-history-card', label: 'Mock test history' },
     { id: 'dash-quiz-history-card', label: 'Quiz history' },
@@ -1080,6 +1275,18 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       l.classList.toggle('active', l.getAttribute('data-side-view') === name);
     });
     applyVisibility();
+    /* Staggered entrance: the cards rise in when the view changes.
+       The class is removed after the animation so the hover lift
+       still works. */
+    var content = $('dash-content');
+    if (content) {
+      content.classList.remove('dash-anim');
+      void content.offsetWidth;
+      content.classList.add('dash-anim');
+      setTimeout(function () { content.classList.remove('dash-anim'); }, 700);
+    }
+    closeDrawer();
+    closePops();
     try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { try { window.scrollTo(0, 0); } catch (e2) {} }
   }
   function applyLayout() {
@@ -1272,6 +1479,111 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     if (!q) return null;
     return Math.round((a.duration_seconds / q) * 10) / 10;
   }
+  /* ---------- Interactive line chart (the reference's trend charts)
+       A smooth curve with a gradient fill, data points, hover
+       tooltips, and a draw-in entrance. The x-axis is time-based
+       (the completion dates), so the spacing is honest. The tooltip
+       is a positioned div, so it works at any width. */
+  function smoothPath(pts) {
+    if (pts.length < 2) return '';
+    var d = 'M ' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+    for (var i = 0; i < pts.length - 1; i++) {
+      var p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+      var c1x = p1.x + (p2.x - p0.x) / 6, c1y = p1.y + (p2.y - p0.y) / 6;
+      var c2x = p2.x - (p3.x - p1.x) / 6, c2y = p2.y - (p3.y - p1.y) / 6;
+      d += ' C ' + c1x.toFixed(1) + ' ' + c1y.toFixed(1) + ' ' + c2x.toFixed(1) + ' ' + c2y.toFixed(1) + ' ' + p2.x.toFixed(1) + ' ' + p2.y.toFixed(1);
+    }
+    return d;
+  }
+  function shortDate(t) {
+    try { return new Date(t).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }); } catch (e) { return ''; }
+  }
+  function lineChart(container, points, opts) {
+    /* points: [{ t: ms, y: number, tip: 'title', sub: 'detail' }].
+       opts: { yMin, yMax, yTicks, yFmt, bubble, bubbleFmt, gradId, aria } */
+    container.innerHTML = '';
+    if (!points.length) return;
+    var W = 560, H = 170, PL = 36, PR = 12, PT = 14, PB = 26;
+    var tMin = points[0].t, tMax = points[points.length - 1].t;
+    var tSpan = (tMax - tMin) || 1;
+    var yMin = opts.yMin != null ? opts.yMin : 0, yMax = opts.yMax != null ? opts.yMax : 100;
+    var ySpan = (yMax - yMin) || 1;
+    var pts = points.map(function (p) {
+      return {
+        x: PL + ((p.t - tMin) / tSpan) * (W - PL - PR),
+        y: PT + ((yMax - p.y) / ySpan) * (H - PT - PB),
+        tip: p.tip, sub: p.sub, v: p.y
+      };
+    });
+    var gid = opts.gradId || 'dash-line-grad';
+    var svg = '<svg width="100%" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(opts.aria || 'Trend chart') + '">' +
+      '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#7c3aed" stop-opacity="0.35"/><stop offset="1" stop-color="#7c3aed" stop-opacity="0.02"/></linearGradient></defs>';
+    (opts.yTicks || [yMin, (yMin + yMax) / 2, yMax]).forEach(function (v) {
+      var y = PT + ((yMax - v) / ySpan) * (H - PT - PB);
+      svg += '<line x1="' + PL + '" y1="' + y.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + y.toFixed(1) + '" stroke="rgba(128,128,128,.2)" stroke-width="1"/>' +
+        '<text x="' + (PL - 6) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="currentColor" opacity="0.6">' + (opts.yFmt ? opts.yFmt(v) : v) + '</text>';
+    });
+    var d = smoothPath(pts);
+    if (pts.length > 1 && d) {
+      svg += '<path d="' + d + ' L ' + pts[pts.length - 1].x.toFixed(1) + ' ' + (H - PB) + ' L ' + pts[0].x.toFixed(1) + ' ' + (H - PB) + ' Z" fill="url(#' + gid + ')"/>' +
+        '<path class="dash-chart-line" d="' + d + '" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+    }
+    svg += pts.map(function (q, i) {
+      return '<circle class="dash-chart-dot" data-i="' + i + '" cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="4" fill="#7c3aed" stroke="#ffffff" stroke-width="1.5"/>';
+    }).join('');
+    if (opts.bubble && pts.length) {
+      var last = pts[pts.length - 1];
+      var bx = Math.max(PL, Math.min(W - PR - 48, last.x - 24));
+      var by = Math.max(PT, last.y - 40);
+      svg += '<g><rect x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="48" height="24" rx="8" fill="#7c3aed"/><text x="' + (bx + 24).toFixed(1) + '" y="' + (by + 16).toFixed(1) + '" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">' + esc(opts.bubbleFmt ? opts.bubbleFmt(last.v) : String(last.v)) + '</text></g>';
+    }
+    var labIdx = [];
+    if (points.length === 1) labIdx = [0];
+    else {
+      var nLab = Math.min(6, points.length);
+      for (var li = 0; li < nLab; li++) labIdx.push(Math.round((li * (points.length - 1)) / (nLab - 1)));
+    }
+    labIdx.forEach(function (i, k) {
+      var anchor = k === 0 ? 'start' : (k === labIdx.length - 1 ? 'end' : 'middle');
+      var x = Math.max(PL, Math.min(W - PR, pts[i].x));
+      svg += '<text x="' + x.toFixed(1) + '" y="' + (H - 6) + '" text-anchor="' + anchor + '" font-size="10" fill="currentColor" opacity="0.6">' + esc(shortDate(points[i].t)) + '</text>';
+    });
+    svg += '</svg>';
+    container.innerHTML = svg;
+    var tip = document.createElement('div');
+    tip.className = 'dash-chart-tip';
+    tip.hidden = true;
+    container.appendChild(tip);
+    function showTip(i) {
+      var q = pts[i];
+      tip.innerHTML = '<b>' + esc(q.tip) + '</b>' + (q.sub ? '<br>' + esc(q.sub) : '');
+      tip.style.left = (q.x / W * 100) + '%';
+      tip.style.top = (q.y / H * 100) + '%';
+      tip.hidden = false;
+    }
+    Array.prototype.forEach.call(container.querySelectorAll('.dash-chart-dot'), function (dot) {
+      dot.addEventListener('mouseenter', function () { showTip(+dot.getAttribute('data-i')); });
+      dot.addEventListener('mouseleave', function () { tip.hidden = true; });
+      dot.addEventListener('click', function () { showTip(+dot.getAttribute('data-i')); });
+    });
+    /* Draw-in: the line sweeps from left to right on render. Guarded
+       — jsdom has no getTotalLength, so the animation is skipped
+       there and the line simply shows. */
+    var line = container.querySelector('.dash-chart-line');
+    if (line) {
+      try {
+        var len = line.getTotalLength();
+        if (len) {
+          line.style.transition = 'stroke-dashoffset 1s ease';
+          line.style.strokeDasharray = len;
+          line.style.strokeDashoffset = len;
+          requestAnimationFrame(function () { line.style.strokeDashoffset = '0'; });
+        }
+      } catch (e) { /* no animation — the line still shows */ }
+    }
+  }
+
   function renderAnalysis() {
     var mocks = mockAttempts();
     var quizzes = quizAttempts();
@@ -1373,23 +1685,29 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       ]);
     }
 
-    /* --- Donut: correct / wrong / skipped --- */
+    /* --- Accuracy ring: one purple ring for the overall accuracy
+         (the reference), with the breakdown in the legend. The arc
+         sweeps in when the card renders. --- */
     var pool = mocks.length ? mocks : quizzes;
     var tot = { c: 0, w: 0, s: 0 };
     pool.forEach(function (a) { tot.c += a.correct || 0; tot.w += a.wrong || 0; tot.s += a.skipped || 0; });
     var sum = tot.c + tot.w + tot.s;
     var C = 2 * Math.PI * 52;
-    function seg(frac, offset, color) {
-      var len = Math.max(0, frac * C);
-      return '<circle cx="70" cy="70" r="52" fill="none" stroke="' + color + '" stroke-width="16" stroke-dasharray="' + len.toFixed(1) + ' ' + (C - len).toFixed(1) + '" stroke-dashoffset="' + (-offset).toFixed(1) + '" transform="rotate(-90 70 70)"/>';
-    }
     var acc = sum ? Math.round((tot.c / sum) * 100) : 0;
-    var fC = sum ? tot.c / sum : 0, fW = sum ? tot.w / sum : 0, fS = sum ? tot.s / sum : 0;
-    $('dash-donut').innerHTML =
+    var donut = $('dash-donut');
+    donut.innerHTML =
+      '<defs><linearGradient id="dash-acc-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>' +
       '<circle cx="70" cy="70" r="52" fill="none" stroke="rgba(128,128,128,.25)" stroke-width="16"/>' +
-      seg(fC, 0, '#22c55e') + seg(fW, fC * C, '#ef4444') + seg(fS, (fC + fW) * C, '#71717a') +
+      '<circle class="dash-donut-arc" cx="70" cy="70" r="52" fill="none" stroke="url(#dash-acc-grad)" stroke-width="16" stroke-linecap="round" stroke-dasharray="0 ' + C.toFixed(1) + '" transform="rotate(-90 70 70)"/>' +
       '<text x="70" y="67" text-anchor="middle" fill="currentColor" font-size="24" font-weight="800">' + acc + '%</text>' +
       '<text x="70" y="86" text-anchor="middle" fill="currentColor" font-size="11" opacity="0.7">accuracy</text>';
+    var arc = donut.querySelector('.dash-donut-arc');
+    if (arc) {
+      var arcLen = (acc / 100) * C;
+      requestAnimationFrame(function () {
+        arc.setAttribute('stroke-dasharray', arcLen.toFixed(1) + ' ' + (C - arcLen).toFixed(1));
+      });
+    }
     var legend = $('dash-legend');
     legend.innerHTML = '';
     [['Correct', tot.c, '#22c55e'], ['Wrong', tot.w, '#ef4444'], ['Skipped', tot.s, '#71717a']].forEach(function (row) {
@@ -1405,54 +1723,44 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       legend.appendChild(d);
     });
 
-    /* --- Average Score: line chart by set (one subject), bars by
-         subject (all subjects). --- */
+    /* --- Average Score Trend: an interactive line chart of your
+         mock scores over time (one subject), or bars by subject
+         (all subjects). The per-set view lives on in the mastery
+         strip below. --- */
     var scoreLine = $('dash-score-line');
     var bars = $('dash-bars');
     var scoreTitle = $('dash-score-title');
     if (single) {
-      if (scoreTitle) scoreTitle.textContent = 'Average Score by Set — ' + subjName;
+      if (scoreTitle) scoreTitle.textContent = 'Average Score Trend — ' + subjName;
       if (bars) bars.style.display = 'none';
       if (scoreLine) scoreLine.style.display = '';
-      var bySet = {};
-      mocks.forEach(function (a) { if (a.set_number == null) return; (bySet[a.set_number] = bySet[a.set_number] || []).push(a); });
-      var setNums = Object.keys(bySet).sort(function (x, y) { return x - y; });
-      scoreLine.innerHTML = '';
-      if (!setNums.length) {
-        scoreLine.appendChild(emptyNote('No set data yet.'));
+      if (!ordered.length) {
+        scoreLine.innerHTML = '';
+        scoreLine.appendChild(emptyNote('No mock tests yet. Take your first mock test to see your trend.'));
       } else {
-        var setPts = setNums.map(function (n) { return { n: +n, avg: avgPct(bySet[n]) }; }).filter(function (q) { return q.avg != null; });
-        var W = 560, H = 170, PL = 34, PR = 10, PT = 12, PB = 24;
-        var pts = setPts.map(function (q, i) {
+        var trendPts = ordered.map(function (a) {
+          var p = pct(a);
+          var t = a.completed_at ? new Date(a.completed_at).getTime() : 0;
           return {
-            x: PL + (setPts.length === 1 ? (W - PL - PR) / 2 : (i * (W - PL - PR)) / Math.max(1, setPts.length - 1)),
-            y: PT + ((100 - q.avg) / 100) * (H - PT - PB), v: q.avg, n: q.n
+            t: t, y: p == null ? 0 : p,
+            tip: (a.set_number != null ? 'Set ' + a.set_number + ' · ' : '') + fmtDate(a.completed_at),
+            sub: (p == null ? '—' : p + '%') + ' · ' + a.score + ' / ' + a.total
           };
-        });
-        var lastPt = pts[pts.length - 1];
-        var bubX = Math.max(PL, Math.min(W - PR - 48, lastPt.x - 24));
-        var bubY = Math.max(PT, lastPt.y - 40);
-        var lineSvg = '<svg width="100%" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Average score by set">' +
-          [0, 50, 100].map(function (v) {
-            var y = PT + ((100 - v) / 100) * (H - PT - PB);
-            return '<line x1="' + PL + '" y1="' + y.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + y.toFixed(1) + '" stroke="rgba(128,128,128,.2)" stroke-width="1"/>' +
-              '<text x="' + (PL - 6) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="currentColor" opacity="0.6">' + v + '%</text>';
-          }).join('');
-        if (pts.length > 1) {
-          lineSvg += '<polygon points="' + pts.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' ') + ' ' + lastPt.x.toFixed(1) + ' ' + (H - PB) + ' ' + pts[0].x.toFixed(1) + ' ' + (H - PB) + '" fill="rgba(124,58,237,0.15)"/>' +
-            '<polyline points="' + pts.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' ') + '" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+        }).filter(function (q) { return q.t > 0; });
+        if (!trendPts.length) {
+          scoreLine.innerHTML = '';
+          scoreLine.appendChild(emptyNote('No dated tests yet.'));
+        } else {
+          lineChart(scoreLine, trendPts, {
+            yMin: 0, yMax: 100, yTicks: [0, 25, 50, 75, 100],
+            yFmt: function (v) { return v + '%'; },
+            bubble: true, bubbleFmt: function (v) { return v + '%'; },
+            gradId: 'dash-trend-grad', aria: 'Average score trend over time'
+          });
         }
-        lineSvg += pts.map(function (q) {
-          return '<circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="4" fill="#7c3aed" stroke="#ffffff" stroke-width="1.5"><title>Set ' + q.n + ' · ' + q.v + '%</title></circle>';
-        }).join('') +
-          '<g><rect x="' + bubX.toFixed(1) + '" y="' + bubY.toFixed(1) + '" width="48" height="24" rx="8" fill="#7c3aed"/><text x="' + (bubX + 24).toFixed(1) + '" y="' + (bubY + 16).toFixed(1) + '" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">' + lastPt.v + '%</text></g>' +
-          '<text x="' + PL + '" y="' + (H - 6) + '" font-size="10" fill="currentColor" opacity="0.6">Set ' + pts[0].n + '</text>' +
-          '<text x="' + (W - PR) + '" y="' + (H - 6) + '" text-anchor="end" font-size="10" fill="currentColor" opacity="0.6">Set ' + lastPt.n + '</text>' +
-          '</svg>';
-        scoreLine.innerHTML = lineSvg;
       }
     } else {
-      if (scoreTitle) scoreTitle.textContent = 'Average Score by Subject';
+      if (scoreTitle) scoreTitle.textContent = 'Subject-wise Progress';
       if (scoreLine) scoreLine.style.display = 'none';
       if (bars) bars.style.display = '';
       bars.innerHTML = '';
@@ -1465,7 +1773,9 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       });
     }
 
-    /* --- Score Trend: bars of the last 8 mock scores by date. --- */
+    /* --- Performance History: bars of the last 8 mock scores by
+         date. The latest bar is highlighted; hovering a bar shows
+         its details in a tooltip (set, date, score). --- */
     var trend = $('dash-trend');
     trend.innerHTML = '';
     var last8 = ordered.slice(-8);
@@ -1473,6 +1783,11 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     if (last8.length < 2) {
       note.textContent = 'Take at least 2 mock tests to see your trend.';
     } else {
+      var trendTip = document.createElement('div');
+      trendTip.className = 'dash-chart-tip';
+      trendTip.hidden = true;
+      trend.style.position = 'relative';
+      trend.appendChild(trendTip);
       last8.forEach(function (a, i) {
         var p = pct(a);
         var col = document.createElement('div');
@@ -1481,9 +1796,18 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
         pctLab.className = 'dash-trend-pct';
         pctLab.textContent = (p == null ? '—' : p + '%');
         var bar = document.createElement('div');
-        bar.className = 'dash-trend-bar' + (p == null ? '' : p < 50 ? ' weak' : p < 70 ? ' mid' : ' strong');
+        bar.className = 'dash-trend-bar' + (p == null ? '' : p < 50 ? ' weak' : p < 70 ? ' mid' : ' strong') + (i === last8.length - 1 ? ' latest' : '');
         bar.style.height = Math.max(4, Math.round((p == null ? 0 : p) * 0.7)) + '%';
-        bar.title = (a.set_number != null ? 'Set ' + a.set_number + ' · ' : '') + fmtDate(a.completed_at) + ' · ' + p + '%';
+        var tipTitle = (a.set_number != null ? 'Set ' + a.set_number + ' · ' : '') + fmtDate(a.completed_at);
+        var tipSub = (p == null ? '—' : p + '%') + ' · ' + a.score + ' / ' + a.total;
+        bar.title = tipTitle + ' · ' + tipSub;
+        col.addEventListener('mouseenter', function () {
+          trendTip.innerHTML = '<b>' + esc(tipTitle) + '</b><br>' + esc(tipSub);
+          trendTip.style.left = (col.offsetLeft + col.offsetWidth / 2) + 'px';
+          trendTip.style.top = '0px';
+          trendTip.hidden = false;
+        });
+        col.addEventListener('mouseleave', function () { trendTip.hidden = true; });
         var lab = document.createElement('div');
         lab.className = 'dash-trend-label';
         try {
@@ -1576,26 +1900,28 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
           } else pill.hidden = true;
         } else pill.hidden = true;
       }
-      /* Mini line chart of sec/question over the timed tests. */
+      /* Time line chart: sec/question over the timed tests, with
+         hover tooltips (set, date, seconds per question). */
       var maxS = 1;
       sp.forEach(function (x) { if (x.s > maxS) maxS = x.s; });
-      var TW = 560, TH = 110, TPL = 8, TPR = 8, TPT = 14, TPB = 10;
-      var tpts = sp.map(function (x, i) {
+      var timePts = sp.map(function (x) {
+        var t = x.a.completed_at ? new Date(x.a.completed_at).getTime() : 0;
         return {
-          x: TPL + (sp.length === 1 ? (TW - TPL - TPR) / 2 : (i * (TW - TPL - TPR)) / Math.max(1, sp.length - 1)),
-          y: TPT + ((maxS - x.s) / maxS) * (TH - TPT - TPB), s: x.s, a: x.a
+          t: t, y: x.s,
+          tip: (x.a.set_number != null ? 'Set ' + x.a.set_number + ' · ' : '') + fmtDate(x.a.completed_at),
+          sub: x.s + 's per question'
         };
-      });
-      var tSvg = '<svg width="100%" viewBox="0 0 ' + TW + ' ' + TH + '" role="img" aria-label="Seconds per question over time">';
-      if (tpts.length > 1) {
-        tSvg += '<polygon points="' + tpts.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' ') + ' ' + tpts[tpts.length - 1].x.toFixed(1) + ' ' + (TH - TPB) + ' ' + tpts[0].x.toFixed(1) + ' ' + (TH - TPB) + '" fill="rgba(124,58,237,0.15)"/>' +
-          '<polyline points="' + tpts.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' ') + '" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+      }).filter(function (q) { return q.t > 0; });
+      if (timePts.length) {
+        lineChart(speedBox, timePts, {
+          yMin: 0, yMax: Math.ceil(maxS / 10) * 10 || 10,
+          yTicks: [0, Math.round(maxS / 2), Math.ceil(maxS / 10) * 10 || 10],
+          yFmt: function (v) { return v + 's'; },
+          bubble: false, gradId: 'dash-time-grad', aria: 'Seconds per question over time'
+        });
+      } else {
+        speedBox.innerHTML = '';
       }
-      tSvg += tpts.map(function (q) {
-        return '<circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="4" fill="#7c3aed" stroke="#ffffff" stroke-width="1.5"><title>' +
-          esc((q.a.set_number != null ? 'Set ' + q.a.set_number + ' · ' : '') + q.s + 's per question') + '</title></circle>';
-      }).join('') + '</svg>';
-      speedBox.innerHTML = tSvg;
       var med = median(sp.map(function (x) { return x.s; }));
       var speedNote = 'Median: ' + med + 's per question across your last ' + sp.length + (sp.length === 1 ? ' test' : ' tests') + '.';
       var fast = [], slow = [];
@@ -1768,15 +2094,22 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     var name = (profileRow && profileRow.full_name) || md.full_name || md.name || '';
     var email = (sessionUser && sessionUser.email) || (profileRow && profileRow.email) || '';
     var memberSince = fmtDate((profileRow && profileRow.created_at) || (sessionUser && sessionUser.created_at));
-    /* The name lives in the page header, not in the profile card. */
+    /* The name lives in the page header (in a purple gradient, like
+       the reference) and in the profile card. */
     var hero = $('dash-hero-title');
     if (hero) {
       var first = String(name || '').trim().split(/\s+/)[0] || '';
-      hero.textContent = first ? ('Welcome back, ' + first) : 'Your dashboard';
+      hero.innerHTML = first ? ('Welcome back, <span class="dash-hero-name">' + esc(first) + '</span>') : 'Your dashboard';
     }
     $('dash-email').textContent = email;
     $('dash-member').textContent = memberSince ? 'Member since ' + memberSince : '';
     $('dash-avatar').textContent = initialsFor(name);
+    var topAvatar = $('dash-top-avatar');
+    if (topAvatar) topAvatar.textContent = initialsFor(name);
+    var profName = $('dash-profile-name');
+    if (profName) profName.textContent = name || '—';
+    var profSubj = $('dash-profile-subject');
+    if (profSubj) profSubj.textContent = (profileRow && profileRow.target_subject) ? ('UGC NET · ' + (SUBJECT_NAMES[profileRow.target_subject] || profileRow.target_subject)) : '';
 
     var fields = $('dash-fields');
     fields.innerHTML = '';
@@ -1838,42 +2171,103 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       actions.appendChild(t);
     }
   }
-  /* ---------- Your overview: four tiles of real numbers ----------
-     Total Tests (mocks in range), Questions Attempted (all questions
-     in range), Learning Streak (consecutive days, always all-time),
-     Average Score (mocks in range, with the real trend underneath).
-     The old stats (quiz rounds, best score) live on as sub-lines —
-     nothing is lost. */
+  /* ---------- Sparklines + change pills (the reference's metric
+       cards) ----------
+     A sparkline is a tiny trend line from the user's own tests — the
+     cumulative count for the count tiles, the scores for the average,
+     the running best for the best score. A change pill compares the
+     recent half of your tests with the earlier half, and only shows
+     when there are enough tests for the comparison to mean anything. */
+  function spark(id, values) {
+    var el = $(id);
+    if (!el) return;
+    el.innerHTML = '';
+    if (!values || values.length < 2) return;
+    var W = 120, H = 30, min = Math.min.apply(null, values), max = Math.max.apply(null, values);
+    var span = (max - min) || 1;
+    var pts = values.map(function (v, i) {
+      return { x: (i * W) / Math.max(1, values.length - 1), y: 26 - ((v - min) / span) * 22 };
+    });
+    var line = pts.map(function (q) { return q.x.toFixed(1) + ',' + q.y.toFixed(1); }).join(' ');
+    el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true">' +
+      '<polygon points="' + line + ' ' + W + ',' + H + ' 0,' + H + '" fill="rgba(124,58,237,0.15)"/>' +
+      '<polyline points="' + line + '" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
+      '<circle cx="' + pts[pts.length - 1].x.toFixed(1) + '" cy="' + pts[pts.length - 1].y.toFixed(1) + '" r="2.5" fill="#a78bfa"/></svg>';
+  }
+  function halfChange(vals) {
+    if (!vals || vals.length < 4) return null;
+    var half = Math.floor(vals.length / 2);
+    var earlier = vals.slice(0, half), recent = vals.slice(half);
+    var eAvg = earlier.reduce(function (s, v) { return s + v; }, 0) / earlier.length;
+    var rAvg = recent.reduce(function (s, v) { return s + v; }, 0) / recent.length;
+    if (!eAvg) return null;
+    var chg = Math.round(((rAvg - eAvg) / eAvg) * 100);
+    return Math.abs(chg) < 1 ? null : chg;
+  }
+  function setChange(id, chg) {
+    var el = $(id);
+    if (!el) return;
+    if (chg == null) { el.hidden = true; return; }
+    el.hidden = false;
+    el.textContent = (chg > 0 ? '↑ ' : '↓ ') + Math.abs(chg) + '%';
+    el.classList.toggle('down', chg < 0);
+  }
+  function cumCounts(list) {
+    return (list || []).map(function (a, i) { return i + 1; });
+  }
+  function runningBest(list) {
+    var best = null, out = [];
+    (list || []).forEach(function (a) {
+      var p = pct(a);
+      if (p == null) return;
+      if (best == null || p > best) best = p;
+      out.push(best);
+    });
+    return out;
+  }
+  /* ---------- Your overview: the reference's four metric cards ----
+     Total Mock Tests, Quiz Rounds, Average Score, Best Score — each
+     with a sparkline and a change pill only when the data supports
+     one. The streak and the question count still live on the page
+     (the level strip and the "This week" line), so nothing is lost. */
   function renderOverview() {
     var mocks = mockAttempts();
     var quizzes = quizAttempts();
     var ov = $('dash-overview');
     if (!ov) return;
     $('ov-tests').textContent = mocks.length;
-    var q = 0;
-    mocks.concat(quizzes).forEach(function (a) { q += (a.correct || 0) + (a.wrong || 0) + (a.skipped || 0); });
-    $('ov-questions').textContent = q;
-    var streak = streakDays();
-    $('ov-streak').textContent = streak + (streak === 1 ? ' Day' : ' Days');
+    $('ov-quizzes').textContent = quizzes.length;
     var avg = avgPct(mocks);
     var best = null;
     mocks.map(pct).forEach(function (p) { if (p != null && (best == null || p > best)) best = p; });
     $('ov-avg').textContent = avg == null ? '0%' : avg + '%';
+    $('ov-best').textContent = best == null ? '0%' : best + '%';
     var rangeTxt = dateRangeDays ? 'in the last ' + dateRangeDays + ' days' : 'all time';
-    $('ov-tests-sub').textContent = quizzes.length + (quizzes.length === 1 ? ' quiz round' : ' quiz rounds') + ' · ' + rangeTxt;
-    $('ov-questions-sub').textContent = 'Across mocks and quizzes · ' + rangeTxt;
-    $('ov-streak-sub').textContent = 'Consecutive days with a test · all time';
+    var q = 0;
+    mocks.concat(quizzes).forEach(function (a) { q += (a.correct || 0) + (a.wrong || 0) + (a.skipped || 0); });
+    $('ov-tests-sub').textContent = mocks.length + (mocks.length === 1 ? ' test' : ' tests') + ' · ' + q + ' questions · ' + rangeTxt;
+    $('ov-quizzes-sub').textContent = 'Paper 1 + Paper 2 rounds · ' + rangeTxt;
     var slope = null;
     var vals = pctList(dated(mocks)).slice(-10);
     if (vals.length >= 2) slope = linSlope(vals);
     $('ov-avg-sub').textContent = avg == null ? 'No mock tests yet — your average starts at 0%'
-      : (best != null ? 'Best: ' + best + '% · ' : '') +
-        (slope == null ? 'Average across your mock tests'
-          : slope > 0.5 ? 'Rising +' + slope + ' pts / test'
-          : slope < -0.5 ? 'Dipping ' + slope + ' pts / test'
-          : 'Steady across your last tests');
+      : (slope == null ? 'Average across your mock tests'
+        : slope > 0.5 ? 'Rising +' + slope + ' pts / test'
+        : slope < -0.5 ? 'Dipping ' + slope + ' pts / test'
+        : 'Steady across your last tests');
+    $('ov-best-sub').textContent = best == null ? 'No mock tests yet — your best starts at 0%'
+      : 'Best across your mock tests · ' + rangeTxt;
+    setChange('ov-avg-change', halfChange(vals));
+    setChange('ov-best-change', halfChange(runningBest(dated(mocks))));
+    setChange('ov-tests-change', null);
+    setChange('ov-quizzes-change', null);
+    spark('ov-tests-spark', cumCounts(dated(mocks)));
+    spark('ov-quizzes-spark', cumCounts(dated(quizzes)));
+    spark('ov-avg-spark', vals);
+    spark('ov-best-spark', runningBest(dated(mocks)));
     /* "This week": real activity from the last 7 days, as a quiet
        line under the overview tiles. */
+    var streak = streakDays();
     var weekEl = $('dash-week-line');
     if (weekEl) {
       var weekAgo = Date.now() - 7 * 86400000;
@@ -2006,6 +2400,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     var div = document.createElement('div');
     div.className = 'dash-hist-row clickable';
     var left = document.createElement('div');
+    left.className = 'dash-hist-main';
     var title = document.createElement('div');
     title.className = 'dash-hist-title';
     if (a.kind === 'mock') {
@@ -2015,25 +2410,32 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     }
     var meta = document.createElement('div');
     meta.className = 'dash-hist-meta muted';
-    var bits = [];
-    bits.push(a.correct + ' correct · ' + a.wrong + ' wrong · ' + a.skipped + ' skipped');
-    if (a.duration_seconds != null) bits.push(fmtDur(a.duration_seconds));
-    bits.push(fmtDate(a.completed_at));
-    meta.textContent = bits.join(' · ');
+    meta.textContent = a.correct + ' correct · ' + a.wrong + ' wrong · ' + a.skipped + ' skipped';
     left.appendChild(title);
     left.appendChild(meta);
+    var date = document.createElement('div');
+    date.className = 'dash-hist-cell dash-hist-hide-m muted';
+    date.textContent = fmtDate(a.completed_at);
     var score = document.createElement('div');
-    score.className = 'dash-hist-score';
+    score.className = 'dash-hist-cell dash-hist-score';
     score.textContent = a.score + ' / ' + a.total;
     var p = pct(a);
-    if (p != null) {
-      var pctEl = document.createElement('div');
-      pctEl.className = 'dash-hist-pct muted';
-      pctEl.textContent = p + '%';
-      score.appendChild(pctEl);
-    }
+    var acc = document.createElement('div');
+    acc.className = 'dash-hist-cell dash-hist-hide-m';
+    acc.textContent = p == null ? '—' : p + '%';
+    var time = document.createElement('div');
+    time.className = 'dash-hist-cell dash-hist-hide-m muted';
+    time.textContent = a.duration_seconds != null ? fmtDur(a.duration_seconds) : '—';
+    var chev = document.createElement('div');
+    chev.className = 'dash-hist-chev';
+    chev.textContent = '›';
+    chev.setAttribute('aria-hidden', 'true');
     div.appendChild(left);
+    div.appendChild(date);
     div.appendChild(score);
+    div.appendChild(acc);
+    div.appendChild(time);
+    div.appendChild(chev);
     /* Tap to expand: accuracy bar, time per question, and a retake link. */
     var details = document.createElement('div');
     details.className = 'dash-hist-details';
@@ -2309,6 +2711,98 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       showView(view);
     });
   });
+  /* ---------- Sidebar collapse, drawer, theme, bell, avatar ------
+     The collapse saves on this device (guarded storage, same as the
+     layout). The drawer opens on phones from the topbar hamburger.
+     The bell and the avatar open small glass popovers; Escape or a
+     tap outside closes them. The sidebar theme buttons drive the
+     site nav toggle, so the theme stays one setting everywhere. */
+  var SIDE_KEY = 'cy-dash-side-v1';
+  var sideCollapsed = false;
+  try { sideCollapsed = localStorage.getItem(SIDE_KEY) === 'collapsed'; } catch (e) {}
+  var sideEl = $('dash-side');
+  function applySideCollapsed() {
+    if (!sideEl) return;
+    sideEl.classList.toggle('collapsed', sideCollapsed);
+    var btn = $('dash-collapse');
+    if (btn) btn.setAttribute('aria-expanded', sideCollapsed ? 'false' : 'true');
+  }
+  applySideCollapsed();
+  var collapseBtn = $('dash-collapse');
+  if (collapseBtn) collapseBtn.addEventListener('click', function () {
+    sideCollapsed = !sideCollapsed;
+    try { localStorage.setItem(SIDE_KEY, sideCollapsed ? 'collapsed' : 'expanded'); } catch (e) {}
+    applySideCollapsed();
+  });
+  function closeDrawer() {
+    if (!sideEl) return;
+    sideEl.classList.remove('open');
+    var bd = $('dash-side-backdrop');
+    if (bd) bd.hidden = true;
+  }
+  var menuBtn = $('dash-menu-btn');
+  if (menuBtn) menuBtn.addEventListener('click', function () {
+    if (!sideEl) return;
+    sideEl.classList.add('open');
+    var bd = $('dash-side-backdrop');
+    if (bd) bd.hidden = false;
+  });
+  var sideBackdrop = $('dash-side-backdrop');
+  if (sideBackdrop) sideBackdrop.addEventListener('click', closeDrawer);
+  function closePops() {
+    var n = $('dash-notif'); if (n) n.hidden = true;
+    var m = $('dash-user-menu'); if (m) m.hidden = true;
+    var b = $('dash-bell'); if (b) b.setAttribute('aria-expanded', 'false');
+    var a = $('dash-avatar-btn'); if (a) a.setAttribute('aria-expanded', 'false');
+  }
+  var bellBtn = $('dash-bell');
+  if (bellBtn) bellBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var n = $('dash-notif');
+    var m = $('dash-user-menu'); if (m) m.hidden = true;
+    if (!n) return;
+    n.hidden = !n.hidden;
+    bellBtn.setAttribute('aria-expanded', n.hidden ? 'false' : 'true');
+  });
+  var avatarBtn = $('dash-avatar-btn');
+  if (avatarBtn) avatarBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var m = $('dash-user-menu');
+    var n = $('dash-notif'); if (n) n.hidden = true;
+    if (!m) return;
+    m.hidden = !m.hidden;
+    avatarBtn.setAttribute('aria-expanded', m.hidden ? 'false' : 'true');
+  });
+  document.addEventListener('click', function (e) {
+    var n = $('dash-notif'), m = $('dash-user-menu');
+    if (n && !n.hidden && !(e.target.closest && e.target.closest('.dash-bell-wrap'))) closePops();
+    if (m && !m.hidden && !(e.target.closest && e.target.closest('.dash-user'))) closePops();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { closeDrawer(); closePops(); }
+  });
+  function paintSideTheme() {
+    var light = document.documentElement.getAttribute('data-theme') === 'light';
+    var d = $('dash-theme-dark'), l = $('dash-theme-light');
+    if (d) d.setAttribute('aria-pressed', light ? 'false' : 'true');
+    if (l) l.setAttribute('aria-pressed', light ? 'true' : 'false');
+  }
+  function flipTheme() {
+    var navToggle = document.getElementById('themeToggle');
+    if (navToggle) navToggle.click();
+    else {
+      var root = document.documentElement;
+      root.setAttribute('data-theme', root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    }
+    paintSideTheme();
+  }
+  var themeDark = $('dash-theme-dark'), themeLight = $('dash-theme-light');
+  if (themeDark) themeDark.addEventListener('click', function () { if (document.documentElement.getAttribute('data-theme') === 'light') flipTheme(); });
+  if (themeLight) themeLight.addEventListener('click', function () { if (document.documentElement.getAttribute('data-theme') !== 'light') flipTheme(); });
+  paintSideTheme();
+  try {
+    new MutationObserver(paintSideTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  } catch (e) {}
   var viewProfile = $('dash-view-profile');
   if (viewProfile) viewProfile.addEventListener('click', function () {
     showView('settings');
