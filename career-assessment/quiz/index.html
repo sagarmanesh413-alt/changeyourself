@@ -61,11 +61,13 @@
     </div>
     <div class="grid-2">
       <div class="card-dark assess-mode" id="mode-general" role="button" tabindex="0">
+        <span class="subj-emoji" aria-hidden="true">🎯</span>
         <h3>Explore careers</h3>
         <p>15 quick questions. We match your skills, interests and way of working to career paths, explain what each one is really like day to day, and tell you the first step.</p>
         <span class="btn btn-white">Start the assessment →</span>
       </div>
       <div class="card-dark assess-mode" id="mode-net" role="button" tabindex="0">
+        <span class="subj-emoji" aria-hidden="true">🎓</span>
         <h3>UGC NET path finder</h3>
         <p>8 questions for UGC NET aspirants. We suggest the subject that fits your background and interests, whether JRF or Assistant Professor suits you, and where to start preparing.</p>
         <span class="btn btn-dark">Find my NET path →</span>
@@ -229,64 +231,64 @@
      "first" is the honest first step — a degree, an exam, or something
      to try this week. No salary promises, no "guaranteed" claims. */
   var CAREERS = [
-    { name: 'Teacher / Lecturer', w: [3, 2, 0, 0, 1, 0],
+    { name: 'Teacher / Lecturer', e: '👩‍🏫', w: [3, 2, 0, 0, 1, 0],
       day: 'Plan lessons, teach classes, and guide students through the subject — patient work, every day different.',
       first: 'A degree in your subject plus B.Ed. Start tutoring one student to see if you love teaching.' },
-    { name: 'Psychologist / Counsellor', w: [3, 2, 0, 0, 0, 0],
+    { name: 'Psychologist / Counsellor', e: '🧠', w: [3, 2, 0, 0, 0, 0],
       day: 'Listen carefully, understand what is really going on, and help people find a way forward.',
       first: 'B.A. Psychology, then M.A. Psychology. Volunteer at a counselling helpline while you study.' },
-    { name: 'Social Worker', w: [3, 1, 0, 0, 1, 0],
+    { name: 'Social Worker', e: '🤝', w: [3, 1, 0, 0, 1, 0],
       day: 'Work with people and communities who need support — practical help, not just sympathy.',
       first: 'Volunteer with an NGO for a month. Consider B.S.W. or M.S.W. if it feels right.' },
-    { name: 'Nurse', w: [3, 0, 1, 0, 0, 0],
+    { name: 'Nurse', e: '🩺', w: [3, 0, 1, 0, 0, 0],
       day: 'Care for patients, stay calm under pressure, and work as part of a team around the clock.',
       first: 'B.Sc. Nursing or GNM. Spend a day shadowing at a local clinic if you can.' },
-    { name: 'Researcher / Professor', w: [1, 3, 0, 0, 0, 0],
+    { name: 'Researcher / Professor', e: '🔬', w: [1, 3, 0, 0, 0, 0],
       day: 'Study one subject deeply, run studies, publish your findings, and teach the next generation.',
       first: 'A Master\u2019s in your subject, then UGC NET and a PhD. Our mock tests are a good place to start.' },
-    { name: 'Data Analyst', w: [0, 2, 0, 3, 0, 0],
+    { name: 'Data Analyst', e: '📊', w: [0, 2, 0, 3, 0, 0],
       day: 'Turn raw numbers into answers that people can act on — dashboards, reports, and clear stories.',
       first: 'Learn Excel and SQL, then analyse one real dataset and write up what you found.' },
-    { name: 'Software Developer', w: [0, 2, 2, 1, 0, 0],
+    { name: 'Software Developer', e: '💻', w: [0, 2, 2, 1, 0, 0],
       day: 'Build apps and systems that solve real problems — mostly thinking, some typing, lots of debugging.',
       first: 'Pick Python or JavaScript and build three small projects you can show someone.' },
-    { name: 'Accountant', w: [0, 0, 0, 3, 1, 0],
+    { name: 'Accountant', e: '🧮', w: [0, 0, 0, 3, 1, 0],
       day: 'Keep a business\u2019s money straight, legal, and understood — steady, detail-heavy work.',
       first: 'B.Com, then CA or CMA foundation. Practise on one real set of accounts.' },
-    { name: 'Civil Services Officer', w: [1, 2, 0, 0, 2, 0],
+    { name: 'Civil Services Officer', e: '🏛️', w: [1, 2, 0, 0, 2, 0],
       day: 'Run public programmes and serve people at scale — big responsibility, slow-moving systems.',
       first: 'Start with NCERTs and current affairs. UPSC preparation is a marathon, not a sprint.' },
-    { name: 'Bank Officer', w: [1, 0, 0, 2, 1, 0],
+    { name: 'Bank Officer', e: '🏦', w: [1, 0, 0, 2, 1, 0],
       day: 'Help customers with accounts, loans and savings — people-facing work with clear rules.',
       first: 'Prepare for IBPS or SBI exams. Practise quantitative aptitude daily.' },
-    { name: 'Engineer', w: [0, 1, 3, 2, 0, 0],
+    { name: 'Engineer', e: '⚙️', w: [0, 1, 3, 2, 0, 0],
       day: 'Design and build things that work in the real world — from bridges to circuits to software.',
       first: 'B.Tech in your branch. Build a small portfolio of things you have actually made.' },
-    { name: 'Designer', w: [0, 0, 1, 0, 0, 3],
+    { name: 'Designer', e: '🎨', w: [0, 0, 1, 0, 0, 3],
       day: 'Make products, spaces and screens look and feel right — taste, craft, and endless revision.',
       first: 'Build a portfolio of five strong pieces. Learn Figma — it is free to start.' },
-    { name: 'Writer / Content Creator', w: [0, 2, 0, 0, 0, 2],
+    { name: 'Writer / Content Creator', e: '✍️', w: [0, 2, 0, 0, 0, 2],
       day: 'Explain ideas clearly in words, audio or video — and keep showing up even when nobody is watching yet.',
       first: 'Publish ten pieces on a topic you care about. The first ten are practice; that is the point.' },
-    { name: 'Digital Marketer', w: [0, 0, 0, 1, 2, 2],
+    { name: 'Digital Marketer', e: '📣', w: [0, 0, 0, 1, 2, 2],
       day: 'Help the right people find the right product — ads, content, and reading what the numbers say.',
       first: 'Learn SEO and ads basics, then run one small campaign for a real business or cause.' },
-    { name: 'Entrepreneur', w: [0, 0, 0, 2, 3, 1],
+    { name: 'Entrepreneur', e: '🚀', w: [0, 0, 0, 2, 3, 1],
       day: 'Build a business from nothing — product, customers, team, and every problem in between.',
       first: 'Solve one small problem for real paying customers before you build anything big.' },
-    { name: 'Lawyer', w: [2, 2, 0, 0, 1, 0],
+    { name: 'Lawyer', e: '⚖️', w: [2, 2, 0, 0, 1, 0],
       day: 'Argue, draft and advise — in court and out of it. Reading, writing, and standing your ground.',
       first: 'LL.B., then intern at a firm or with a senior advocate to see the work up close.' },
-    { name: 'Journalist', w: [1, 2, 0, 0, 0, 2],
+    { name: 'Journalist', e: '📰', w: [1, 2, 0, 0, 0, 2],
       day: 'Find the story, check it properly, and tell it true — often on a deadline.',
       first: 'Write every day. Pitch stories to local outlets and build a small body of published work.' },
-    { name: 'HR Manager', w: [2, 0, 0, 0, 2, 0],
+    { name: 'HR Manager', e: '👥', w: [2, 0, 0, 0, 2, 0],
       day: 'Hire, support and grow the people in a company — the human side of running a business.',
       first: 'An MBA in HR, or start in a people-operations role and learn the work from inside.' },
-    { name: 'Scientist', w: [0, 3, 1, 0, 0, 0],
+    { name: 'Scientist', e: '🔭', w: [0, 3, 1, 0, 0, 0],
       day: 'Run experiments, follow the evidence, and push what we know a little further.',
       first: 'M.Sc. in your science, then CSIR NET or GATE. Read one research paper a week.' },
-    { name: 'Police / Defence Officer', w: [1, 0, 1, 0, 2, 0],
+    { name: 'Police / Defence Officer', e: '🛡️', w: [1, 0, 1, 0, 2, 0],
       day: 'Serve, protect and lead under pressure — discipline, fitness, and quick decisions.',
       first: 'Prepare for SSC, CDS or your state police exam. Start the physical training now, not later.' }
   ];
@@ -450,7 +452,7 @@
     var scored = CAREERS.map(function (c) {
       var num = 0, den = 0;
       c.w.forEach(function (w, i) { num += norm[dimKeys[i]] * w; den += w * 100; });
-      return { name: c.name, match: den ? Math.round((num / den) * 100) : 0, day: c.day, first: c.first, w: c.w };
+      return { name: c.name, e: c.e, match: den ? Math.round((num / den) * 100) : 0, day: c.day, first: c.first, w: c.w };
     }).sort(function (a, b) { return b.match - a.match; });
     var top = scored.slice(0, 5);
     saveResult({ mode: 'general', top: top.map(function (t) { return { name: t.name, match: t.match }; }), norm: norm, at: new Date().toISOString() });
@@ -509,7 +511,7 @@
       var card = document.createElement('div');
       card.className = 'card-dark assess-match';
       var title = document.createElement('h3');
-      title.textContent = (i + 1) + '. ' + c.name;
+      title.textContent = (c.e ? c.e + ' ' : '') + (i + 1) + '. ' + c.name;
       card.appendChild(title);
       var dimKeys = ['P', 'I', 'B', 'N', 'L', 'C'];
       var whyDims = c.w.map(function (w, j) { return { d: dimKeys[j], w: w, n: norm[dimKeys[j]] }; })
