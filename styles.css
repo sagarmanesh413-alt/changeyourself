@@ -496,6 +496,8 @@ img { max-width: 100%; }
 .subject-card h3 { margin-top: 10px; }
 .subject-card p { flex-grow: 1; margin-bottom: 18px; }
 .subject-card .btn { justify-content: center; }
+/* Subject emoji: a large friendly mark at the top of subject cards. */
+.subj-emoji { display: block; font-size: 34px; line-height: 1; margin-bottom: 12px; }
 .live-badge, .soon-badge {
   display: inline-block;
   align-self: flex-start;
