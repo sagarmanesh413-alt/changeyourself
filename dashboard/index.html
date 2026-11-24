@@ -6,11 +6,43 @@
 <title>Your Dashboard — ChangeYourself.in</title>
 <meta name="description" content="Your ChangeYourself dashboard — profile, plan, stats and your full mock-test and quiz history.">
 <script>try{var t=localStorage.getItem("cy-theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;}}catch(e){}</script>
+<link rel="stylesheet" href="/styles.css">
 <style>
 /* First sign-in: hide everything except the profile + form until the profile is complete. */
 body.dash-onboarding .dash-hide-until-profile { display: none !important; }
+
+/* Analysis + interactivity (kept here so it overrides styles.css). */
+.dash-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 6px; }
+.dash-chip { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.dash-chip.active { background: #7c3aed; border-color: #7c3aed; color: #ffffff; }
+#dash-analysis h4 { margin: 20px 0 10px; font-size: 16px; }
+.dash-analysis-grid { display: grid; grid-template-columns: 150px 1fr; gap: 24px; align-items: start; }
+.dash-legend-row { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 6px; }
+.dash-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.dash-bar-row { margin-bottom: 12px; }
+.dash-bar-label { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; font-weight: 600; margin-bottom: 5px; }
+.dash-bar-track { height: 10px; border-radius: 999px; background: var(--border); overflow: hidden; }
+.dash-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #7c3aed, #3b82f6); }
+.dash-bar-fill.weak, .dash-trend-bar.weak { background: linear-gradient(90deg, #ef4444, #f97316); }
+.dash-bar-fill.mid, .dash-trend-bar.mid { background: linear-gradient(90deg, #f59e0b, #eab308); }
+.dash-bar-fill.strong, .dash-trend-bar.strong { background: linear-gradient(90deg, #22c55e, #16a34a); }
+.dash-subj-row.clickable { cursor: pointer; }
+.dash-subj-row.selected { background: rgba(124, 58, 237, .12); border-radius: 10px; padding-left: 10px; padding-right: 10px; }
+.dash-hist-item { border-bottom: 1px solid var(--border); }
+.dash-hist-item:last-child { border-bottom: none; }
+#dash-content .dash-hist-row { border-bottom: none; }
+.dash-hist-row.clickable { cursor: pointer; }
+.dash-hist-details { padding: 4px 0 14px; }
+.dash-trend { display: flex; align-items: flex-end; gap: 8px; height: 120px; }
+.dash-trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+.dash-trend-bar { width: 100%; max-width: 44px; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, #7c3aed, #3b82f6); }
+.dash-trend-label { font-size: 12px; color: var(--muted); }
+.dash-focus { padding-left: 20px; }
+.dash-focus li { margin-bottom: 10px; font-size: 15px; line-height: 1.5; }
+@media (max-width: 640px) {
+  .dash-analysis-grid { grid-template-columns: 1fr; }
+}
 </style>
-<link rel="stylesheet" href="/styles.css">
   <link rel="icon" href="/logo.png">
 </head>
 <body>
@@ -143,15 +175,44 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       <div class="stat"><div class="stat-num" id="stat-best">—</div><div class="stat-label">Best mock score</div></div>
     </div>
 
+    <!-- Analysis -->
+    <div class="card-dark dash-hide-until-profile" id="dash-analysis">
+      <h3>Your analysis</h3>
+      <p class="muted" id="dash-analysis-scope" style="margin-bottom:12px;">Showing: all subjects</p>
+      <div class="dash-chips" id="dash-chips"></div>
+      <div id="dash-analysis-empty" hidden>
+        <p class="muted">No tests taken yet. Take your first mock test and your analysis will appear here — your strengths, your weak spots, and exactly where to put more effort.</p>
+      </div>
+      <div id="dash-analysis-body" hidden>
+        <p id="dash-verdict" style="font-weight:700;line-height:1.5;"></p>
+        <div class="dash-analysis-grid">
+          <div>
+            <svg id="dash-donut" width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Accuracy breakdown"></svg>
+            <div id="dash-legend"></div>
+          </div>
+          <div>
+            <h4 id="dash-bars-title" style="margin-top:0;">Average score by subject</h4>
+            <div id="dash-bars"></div>
+          </div>
+        </div>
+        <h4>Your recent trend</h4>
+        <div class="dash-trend" id="dash-trend"></div>
+        <p class="muted" id="dash-trend-note" style="font-size:13px;"></p>
+        <h4>Where to put more effort</h4>
+        <ul class="dash-focus" id="dash-focus"></ul>
+      </div>
+    </div>
+
     <!-- Per-subject progress -->
     <div class="card-dark dash-hide-until-profile">
       <h3>Progress by subject</h3>
       <div id="dash-subjects"></div>
+      <p class="muted" id="dash-subjects-note" style="font-size:13px;margin-top:10px;"></p>
     </div>
 
     <!-- Mock test history -->
     <div class="card-dark dash-hide-until-profile">
-      <h3>Mock test history</h3>
+      <h3 id="dash-mock-title">Mock test history</h3>
       <div id="dash-mock-history"></div>
     </div>
 
@@ -220,6 +281,263 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   function pct(a) {
     if (!a || !a.total) return null;
     return Math.round((a.score / a.total) * 1000) / 10;
+  }
+
+  /* ---------- Analysis + interactivity ----------
+     All attempts live in allAttempts. subjectFilter (null = all) is set
+     from the profile's target subject on load, and changed by tapping a
+     subject chip or a progress row. Everything below re-renders from it,
+     so the other subjects disappear as soon as one is chosen. */
+  var allAttempts = [];
+  var subjectFilter = null;
+  function mockAttempts() {
+    return allAttempts.filter(function (a) { return a.kind === 'mock' && (!subjectFilter || a.subject === subjectFilter); });
+  }
+  function quizAttempts() {
+    return allAttempts.filter(function (a) { return a.kind === 'quiz'; });
+  }
+  function avgPct(list) {
+    var vals = list.map(pct).filter(function (p) { return p != null; });
+    if (!vals.length) return null;
+    return Math.round((vals.reduce(function (s, x) { return s + x; }, 0) / vals.length) * 10) / 10;
+  }
+  function barClass(p) {
+    if (p == null) return '';
+    if (p < 50) return ' weak';
+    if (p < 70) return ' mid';
+    return ' strong';
+  }
+  function barRow(label, valueText, p) {
+    var row = document.createElement('div');
+    row.className = 'dash-bar-row';
+    var lab = document.createElement('div');
+    lab.className = 'dash-bar-label';
+    var l = document.createElement('span');
+    l.textContent = label;
+    var v = document.createElement('span');
+    v.textContent = valueText;
+    lab.appendChild(l);
+    lab.appendChild(v);
+    var track = document.createElement('div');
+    track.className = 'dash-bar-track';
+    var fill = document.createElement('div');
+    fill.className = 'dash-bar-fill' + barClass(p);
+    fill.style.width = Math.max(0, Math.min(100, p == null ? 0 : p)) + '%';
+    track.appendChild(fill);
+    row.appendChild(lab);
+    row.appendChild(track);
+    return row;
+  }
+  function renderChips() {
+    var box = $('dash-chips');
+    if (!box) return;
+    box.innerHTML = '';
+    var seen = {};
+    allAttempts.forEach(function (a) { if (a.kind === 'mock') seen[a.subject] = true; });
+    var slugs = Object.keys(seen);
+    if (profileRow && profileRow.target_subject && !seen[profileRow.target_subject]) slugs.unshift(profileRow.target_subject);
+    function chip(label, slug) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'dash-chip' + ((slug === subjectFilter) ? ' active' : '');
+      b.textContent = label;
+      b.addEventListener('click', function () { setFilter(slug); });
+      box.appendChild(b);
+    }
+    chip('All subjects', null);
+    slugs.forEach(function (s) { chip(SUBJECT_NAMES[s] || s, s); });
+    var scope = $('dash-analysis-scope');
+    if (scope) scope.textContent = subjectFilter
+      ? 'Showing: ' + (SUBJECT_NAMES[subjectFilter] || subjectFilter) + ' — your target subject'
+      : 'Showing: all subjects';
+  }
+  function setFilter(slug) {
+    subjectFilter = slug || null;
+    renderAll();
+    try {
+      var el = $('dash-analysis');
+      if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {}
+  }
+  function renderAll() {
+    renderStats();
+    renderSubjects();
+    renderHistory();
+    renderChips();
+    renderAnalysis();
+  }
+  function renderAnalysis() {
+    var empty = $('dash-analysis-empty');
+    var body = $('dash-analysis-body');
+    if (!empty || !body) return;
+    var mocks = mockAttempts();
+    var quizzes = quizAttempts();
+    if (!mocks.length && !quizzes.length) {
+      empty.hidden = false;
+      body.hidden = true;
+      return;
+    }
+    empty.hidden = true;
+    body.hidden = false;
+    var subjName = subjectFilter ? (SUBJECT_NAMES[subjectFilter] || subjectFilter) : null;
+
+    /* --- Verdict: strongest vs weakest --- */
+    var verdict = $('dash-verdict');
+    if (mocks.length) {
+      if (subjectFilter) {
+        var avg = avgPct(mocks);
+        verdict.textContent = 'In ' + subjName + ' your average is ' + avg + '% across ' + mocks.length + (mocks.length === 1 ? ' test' : ' tests') + '. ' +
+          (avg >= 70 ? 'Strong — keep pushing your best score higher.' : avg >= 50 ? 'Getting there — focus on your weakest sets below.' : 'This needs the most effort — work through your weakest sets below.');
+      } else {
+        var bySubj = {};
+        mocks.forEach(function (a) { (bySubj[a.subject] = bySubj[a.subject] || []).push(a); });
+        var subs = Object.keys(bySubj).map(function (s) { return { name: SUBJECT_NAMES[s] || s, avg: avgPct(bySubj[s]) }; })
+          .filter(function (x) { return x.avg != null; })
+          .sort(function (a, b) { return b.avg - a.avg; });
+        if (subs.length >= 2) {
+          verdict.textContent = 'Strongest: ' + subs[0].name + ' (' + subs[0].avg + '%). Weakest: ' + subs[subs.length - 1].name + ' (' + subs[subs.length - 1].avg + '%) — put most of your effort there.';
+        } else if (subs.length === 1) {
+          verdict.textContent = 'Your average in ' + subs[0].name + ' is ' + subs[0].avg + '%. Take tests in another subject to compare.';
+        }
+      }
+    } else {
+      verdict.textContent = 'No mock tests yet — your quiz rounds average ' + avgPct(quizzes) + '%. Take a mock test to unlock the full analysis.';
+    }
+
+    /* --- Donut: correct / wrong / skipped --- */
+    var pool = mocks.length ? mocks : quizzes;
+    var tot = { c: 0, w: 0, s: 0 };
+    pool.forEach(function (a) { tot.c += a.correct || 0; tot.w += a.wrong || 0; tot.s += a.skipped || 0; });
+    var sum = tot.c + tot.w + tot.s;
+    var C = 2 * Math.PI * 52;
+    function seg(frac, offset, color) {
+      var len = Math.max(0, frac * C);
+      return '<circle cx="70" cy="70" r="52" fill="none" stroke="' + color + '" stroke-width="16" stroke-dasharray="' + len.toFixed(1) + ' ' + (C - len).toFixed(1) + '" stroke-dashoffset="' + (-offset).toFixed(1) + '" transform="rotate(-90 70 70)"/>';
+    }
+    var acc = sum ? Math.round((tot.c / sum) * 100) : 0;
+    var fC = sum ? tot.c / sum : 0, fW = sum ? tot.w / sum : 0, fS = sum ? tot.s / sum : 0;
+    $('dash-donut').innerHTML =
+      '<circle cx="70" cy="70" r="52" fill="none" stroke="rgba(128,128,128,.25)" stroke-width="16"/>' +
+      seg(fC, 0, '#22c55e') + seg(fW, fC * C, '#ef4444') + seg(fS, (fC + fW) * C, '#71717a') +
+      '<text x="70" y="67" text-anchor="middle" fill="currentColor" font-size="24" font-weight="800">' + acc + '%</text>' +
+      '<text x="70" y="86" text-anchor="middle" fill="currentColor" font-size="11" opacity="0.7">accuracy</text>';
+    var legend = $('dash-legend');
+    legend.innerHTML = '';
+    [['Correct', tot.c, '#22c55e'], ['Wrong', tot.w, '#ef4444'], ['Skipped', tot.s, '#71717a']].forEach(function (row) {
+      var d = document.createElement('div');
+      d.className = 'dash-legend-row';
+      var dot = document.createElement('span');
+      dot.className = 'dash-dot';
+      dot.style.background = row[2];
+      var t = document.createElement('span');
+      t.textContent = row[0] + ': ' + row[1] + (sum ? ' (' + Math.round(row[1] / sum * 100) + '%)' : '');
+      d.appendChild(dot);
+      d.appendChild(t);
+      legend.appendChild(d);
+    });
+
+    /* --- Bars: by subject, or by set when one subject is chosen --- */
+    var bars = $('dash-bars');
+    bars.innerHTML = '';
+    if (subjectFilter) {
+      $('dash-bars-title').textContent = 'Average score by set — ' + subjName;
+      var bySet = {};
+      mocks.forEach(function (a) { if (a.set_number == null) return; (bySet[a.set_number] = bySet[a.set_number] || []).push(a); });
+      Object.keys(bySet).sort(function (x, y) { return x - y; }).forEach(function (n) {
+        var a = avgPct(bySet[n]);
+        bars.appendChild(barRow('Set ' + n + ' (' + bySet[n].length + (bySet[n].length === 1 ? ' test' : ' tests') + ')', a == null ? '—' : a + '%', a));
+      });
+      if (!Object.keys(bySet).length) bars.appendChild(emptyNote('No set data yet.'));
+    } else {
+      $('dash-bars-title').textContent = 'Average score by subject';
+      var byS = {};
+      mocks.forEach(function (a) { (byS[a.subject] = byS[a.subject] || []).push(a); });
+      SUBJECT_ORDER.forEach(function (slug) {
+        if (!byS[slug]) return;
+        var a = avgPct(byS[slug]);
+        bars.appendChild(barRow(SUBJECT_NAMES[slug] || slug, a == null ? '—' : a + '%', a));
+      });
+    }
+
+    /* --- Trend: last 8 mock tests, oldest to newest --- */
+    var trend = $('dash-trend');
+    trend.innerHTML = '';
+    var ordered = mocks.slice().sort(function (x, y) { return new Date(x.completed_at) - new Date(y.completed_at); });
+    var last = ordered.slice(-8);
+    var note = $('dash-trend-note');
+    if (last.length < 2) {
+      note.textContent = 'Take at least 2 mock tests to see your trend.';
+    } else {
+      last.forEach(function (a) {
+        var p = pct(a);
+        var col = document.createElement('div');
+        col.className = 'dash-trend-col';
+        var bar = document.createElement('div');
+        bar.className = 'dash-trend-bar' + barClass(p);
+        bar.style.height = Math.max(4, p || 0) + '%';
+        bar.title = (p == null ? '—' : p + '%');
+        var lab = document.createElement('div');
+        lab.className = 'dash-trend-label';
+        lab.textContent = (a.set_number != null ? 'S' + a.set_number : '');
+        col.appendChild(bar);
+        col.appendChild(lab);
+        trend.appendChild(col);
+      });
+      var first = pct(last[0]), lastP = pct(last[last.length - 1]);
+      note.textContent = (first != null && lastP != null)
+        ? ('First of these: ' + first + '% → latest: ' + lastP + '%' + (lastP > first ? ' — improving, keep going.' : lastP < first ? ' — dipping. Revise before your next test.' : ' — steady.'))
+        : '';
+    }
+
+    /* --- Where to put more effort --- */
+    var focus = $('dash-focus');
+    focus.innerHTML = '';
+    var items = [];
+    function skippedRate(list) {
+      var t = 0, s = 0;
+      list.forEach(function (a) { t += a.total || 0; s += a.skipped || 0; });
+      return t ? Math.round((s / t) * 100) : 0;
+    }
+    function avgDur(list) {
+      var ds = list.map(function (a) { return a.duration_seconds; }).filter(function (d) { return d != null; });
+      if (!ds.length) return null;
+      return Math.round(ds.reduce(function (s, d) { return s + d; }, 0) / ds.length);
+    }
+    if (subjectFilter) {
+      var bySet2 = {};
+      mocks.forEach(function (a) { if (a.set_number == null) return; (bySet2[a.set_number] = bySet2[a.set_number] || []).push(a); });
+      var setAvgs = Object.keys(bySet2).map(function (n) { return { n: n, avg: avgPct(bySet2[n]) }; })
+        .filter(function (x) { return x.avg != null; })
+        .sort(function (a, b) { return a.avg - b.avg; });
+      if (setAvgs.length && setAvgs[0].avg < 70) items.push('Set ' + setAvgs[0].n + ' was your weakest (' + setAvgs[0].avg + '%) — revise its questions and retake it.');
+      var sk = skippedRate(mocks);
+      if (sk > 10) items.push('You skipped ' + sk + '% of questions in ' + subjName + ' — attempt every question, there is no negative marking.');
+      var dur = avgDur(mocks), aAvg = avgPct(mocks);
+      if (dur != null && dur < 3600 && aAvg != null && aAvg < 60) items.push('You finish in about ' + fmtDur(dur) + ' — slow down and use the time to review the questions you are unsure about.');
+    } else if (mocks.length) {
+      var byS2 = {};
+      mocks.forEach(function (a) { (byS2[a.subject] = byS2[a.subject] || []).push(a); });
+      var subAvgs = Object.keys(byS2).map(function (s) { return { name: SUBJECT_NAMES[s] || s, avg: avgPct(byS2[s]) }; })
+        .filter(function (x) { return x.avg != null; })
+        .sort(function (a, b) { return a.avg - b.avg; });
+      if (subAvgs.length >= 2 && subAvgs[0].avg < 70) items.push('Put most effort into ' + subAvgs[0].name + ' — your lowest average at ' + subAvgs[0].avg + '%.');
+      var skAll = skippedRate(mocks);
+      if (skAll > 10) items.push('You skipped ' + skAll + '% of questions overall — attempt every question, there is no negative marking.');
+    }
+    var q1 = quizAttempts().filter(function (a) { return a.subject === 'paper1'; });
+    var q2 = quizAttempts().filter(function (a) { return a.subject === 'paper2'; });
+    var a1 = avgPct(q1), a2 = avgPct(q2);
+    if (a1 != null && a2 != null && Math.abs(a1 - a2) >= 10) {
+      items.push(a1 < a2
+        ? 'In quizzes, Paper 1 (' + a1 + '%) trails Paper 2 (' + a2 + '%) — give Paper 1 more practice.'
+        : 'In quizzes, Paper 2 (' + a2 + '%) trails Paper 1 (' + a1 + '%) — give Paper 2 more practice.');
+    }
+    if (!items.length) items.push('No weak spot stands out — keep taking tests to sharpen your edge.');
+    items.slice(0, 4).forEach(function (t) {
+      var li = document.createElement('li');
+      li.textContent = t;
+      focus.appendChild(li);
+    });
   }
   function showToast(msg) {
     var t = $('toast');
@@ -325,6 +643,10 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     $('f-subject').value = (profileRow && profileRow.target_subject) || '';
 
     applyProfileGate();
+
+    /* A chosen target subject focuses the whole dashboard on it. */
+    if (profileRow && profileRow.target_subject) subjectFilter = profileRow.target_subject;
+    renderAll();
   }
   function renderPlan(ent) {
     var text = $('dash-plan-text');
@@ -352,31 +674,28 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       actions.appendChild(t);
     }
   }
-  function renderStats(attempts) {
-    var mocks = attempts.filter(function (a) { return a.kind === 'mock'; });
-    var quizzes = attempts.filter(function (a) { return a.kind === 'quiz'; });
+  function renderStats() {
+    var mocks = mockAttempts();
+    var quizzes = quizAttempts();
     $('stat-mock').textContent = mocks.length;
     $('stat-quiz').textContent = quizzes.length;
-    if (mocks.length) {
+    var vals = mocks.map(pct).filter(function (p) { return p != null; });
+    if (vals.length) {
       var sum = 0, best = 0;
-      mocks.forEach(function (a) {
-        var p = pct(a);
-        if (p == null) return;
-        sum += p;
-        if (p > best) best = p;
-      });
-      $('stat-avg').textContent = (Math.round((sum / mocks.length) * 10) / 10) + '%';
+      vals.forEach(function (p) { sum += p; if (p > best) best = p; });
+      $('stat-avg').textContent = (Math.round((sum / vals.length) * 10) / 10) + '%';
       $('stat-best').textContent = best + '%';
     } else {
       $('stat-avg').textContent = '—';
       $('stat-best').textContent = '—';
     }
   }
-  function renderSubjects(attempts) {
+  function renderSubjects() {
     var box = $('dash-subjects');
     box.innerHTML = '';
-    var mocks = attempts.filter(function (a) { return a.kind === 'mock'; });
+    var mocks = allAttempts.filter(function (a) { return a.kind === 'mock'; });
     SUBJECT_ORDER.forEach(function (slug) {
+      if (subjectFilter && slug !== subjectFilter) return;
       var rows = mocks.filter(function (a) { return a.subject === slug; });
       var sets = {};
       var best = 0;
@@ -386,7 +705,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
         if (p != null && p > best) best = p;
       });
       var div = document.createElement('div');
-      div.className = 'dash-subj-row';
+      div.className = 'dash-subj-row clickable' + (subjectFilter === slug ? ' selected' : '');
       var name = document.createElement('span');
       name.className = 'dash-subj-name';
       name.textContent = SUBJECT_NAMES[slug] || slug;
@@ -400,12 +719,19 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       }
       div.appendChild(name);
       div.appendChild(prog);
+      div.addEventListener('click', function () { setFilter(subjectFilter === slug ? null : slug); });
       box.appendChild(div);
     });
+    var note = $('dash-subjects-note');
+    if (note) note.textContent = subjectFilter
+      ? 'Showing only ' + (SUBJECT_NAMES[subjectFilter] || subjectFilter) + ' — tap it again, or choose All subjects above, to see everything.'
+      : 'Tap a subject to focus your dashboard on it.';
   }
   function historyRow(a) {
+    var wrap = document.createElement('div');
+    wrap.className = 'dash-hist-item';
     var div = document.createElement('div');
-    div.className = 'dash-hist-row';
+    div.className = 'dash-hist-row clickable';
     var left = document.createElement('div');
     var title = document.createElement('div');
     title.className = 'dash-hist-title';
@@ -435,7 +761,34 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     }
     div.appendChild(left);
     div.appendChild(score);
-    return div;
+    /* Tap to expand: accuracy bar, time per question, and a retake link. */
+    var details = document.createElement('div');
+    details.className = 'dash-hist-details';
+    details.hidden = true;
+    if (p != null) details.appendChild(barRow('Accuracy', p + '%', p));
+    var extra = document.createElement('div');
+    extra.className = 'muted';
+    extra.style.fontSize = '13px';
+    var extraBits = [];
+    if (a.duration_seconds != null && a.total) {
+      var perQ = Math.round(a.duration_seconds / a.total);
+      extraBits.push('About ' + (perQ >= 60 ? Math.floor(perQ / 60) + 'm ' + (perQ % 60) + 's' : perQ + 's') + ' per question');
+    }
+    extra.textContent = extraBits.join(' · ');
+    details.appendChild(extra);
+    var retake = document.createElement('a');
+    retake.className = 'card-link';
+    retake.style.fontSize = '14px';
+    retake.href = a.kind === 'mock' ? ('/changexed/mock-tests/?subject=' + encodeURIComponent(a.subject)) : '/changexed/quiz/';
+    retake.textContent = a.kind === 'mock' ? 'Retake this subject →' : 'Take another quiz round →';
+    details.appendChild(retake);
+    div.addEventListener('click', function () {
+      details.hidden = !details.hidden;
+      wrap.classList.toggle('open', !details.hidden);
+    });
+    wrap.appendChild(div);
+    wrap.appendChild(details);
+    return wrap;
   }
   function emptyNote(text, linkHref, linkText) {
     var p = document.createElement('p');
@@ -450,9 +803,11 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     }
     return p;
   }
-  function renderHistory(attempts) {
-    var mocks = attempts.filter(function (a) { return a.kind === 'mock'; });
-    var quizzes = attempts.filter(function (a) { return a.kind === 'quiz'; });
+  function renderHistory() {
+    var title = $('dash-mock-title');
+    if (title) title.textContent = 'Mock test history' + (subjectFilter ? ' — ' + (SUBJECT_NAMES[subjectFilter] || subjectFilter) : '');
+    var mocks = mockAttempts();
+    var quizzes = quizAttempts();
     var mh = $('dash-mock-history');
     mh.innerHTML = '';
     if (!mocks.length) {
@@ -573,9 +928,8 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
           });
           window.CYSupa.getEntitlement(sessionUser.id).then(renderPlan);
           window.CYSupa.fetchAttempts(sessionUser.id).then(function (attempts) {
-            renderStats(attempts);
-            renderSubjects(attempts);
-            renderHistory(attempts);
+            allAttempts = attempts || [];
+            renderAll();
           });
         });
       }
