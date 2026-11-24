@@ -100,6 +100,71 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 @media (max-width: 640px) {
   .dash-analysis-grid { grid-template-columns: 1fr; }
 }
+
+/* ---- Reference-layout frames (sidebar + paired rows), same theme ----
+   The layout follows the reference dashboard's wireframe — sidebar,
+   overview tiles, paired card rows, insights banner — but every
+   colour, card and background stays the site's own (black + dotted
+   grid, glass cards, purple/blue accents). No 3D illustration, no
+   neon glow, no invented numbers. */
+.dash-shell { display: flex; align-items: flex-start; }
+.dash-side { display: none; }
+.dash-main { flex: 1; min-width: 0; }
+@media (min-width: 1024px) {
+  .dash-side { display: flex; flex-direction: column; gap: 4px; flex: 0 0 216px; width: 216px; position: sticky; top: 96px; height: calc(100vh - 112px); margin: 24px 0 0 24px; padding: 16px 12px; border: 1px solid var(--border); border-radius: 18px; background: var(--card); overflow-y: auto; }
+}
+.dash-side-link { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; color: var(--muted); font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; background: none; font: inherit; text-align: left; width: 100%; }
+.dash-side-link:hover { color: var(--text); background: rgba(124, 58, 237, .08); }
+.dash-side-link.active { color: #ffffff; background: #7c3aed; }
+.dash-side-link svg { width: 20px; height: 20px; flex-shrink: 0; }
+.dash-side-plan { margin-top: auto; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: rgba(124, 58, 237, .08); }
+.dash-side-plan p { font-size: 13px; color: var(--muted); margin: 0 0 10px; line-height: 1.5; }
+.dash-side-plan .card-link { font-size: 14px; }
+.dash-side-theme { margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; }
+.dash-side-theme:hover { color: var(--text); }
+.dash-side-theme svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* Topbar: live search over the history + a real time range. */
+.dash-topbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.dash-search { flex: 1; min-width: 200px; padding: 11px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font: inherit; font-size: 15px; }
+.dash-search::placeholder { color: var(--muted); }
+#dash-range { padding: 11px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font: inherit; font-size: 15px; }
+#dash-range option { background: #ffffff; color: #000000; }
+
+/* Your overview: four tiles of real numbers. */
+.dash-overview { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.dash-ov-tile { padding: 18px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); }
+.dash-ov-icon { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+.dash-ov-icon svg { width: 20px; height: 20px; }
+.dash-ov-label { font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+.dash-ov-value { font-size: 26px; font-weight: 800; line-height: 1.1; }
+.dash-ov-sub { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+@media (max-width: 640px) {
+  .dash-overview { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Insights banner: the top "where to put more effort" item + a real
+   next step. A subtle purple tint, still a glass card. */
+.dash-insights { border-color: rgba(124, 58, 237, .45); background: linear-gradient(90deg, rgba(124, 58, 237, .16), rgba(59, 130, 246, .08)); }
+.dash-insights h3 { margin-bottom: 6px; }
+.dash-insights p { margin-bottom: 14px; }
+
+/* Spacing + paired rows: below the sidebar breakpoint the content is
+   the same single column as before. */
+#dash-content > #dash-overview, #dash-content > #dash-topbar { margin-bottom: 20px; }
+@media (min-width: 1024px) {
+  #dash-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  #dash-content > .card-dark, #dash-content > #dash-overview, #dash-content > #dash-topbar { margin-bottom: 0; }
+  #dash-content > #dash-onboard-note,
+  #dash-content > .dash-profile,
+  #dash-content > #dash-details-card,
+  #dash-content > .dash-customise-row,
+  #dash-content > #dash-customise,
+  #dash-content > #dash-topbar,
+  #dash-content > #dash-overview,
+  #dash-content > #dash-analysis,
+  #dash-content > #dash-insights { grid-column: 1 / -1; }
+}
 </style>
   <link rel="icon" href="/logo.png">
 </head>
@@ -113,9 +178,27 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
 </nav>
 
+<div class="dash-shell">
+  <!-- Sidebar: the reference layout's left nav. Dashboard / My Tests /
+       Analytics / Settings jump to sections on this page; Learn goes to
+       the mock tests. The bottom card is the real plan, not an upsell. -->
+  <aside class="dash-side dash-hide-until-profile" id="dash-side" aria-label="Dashboard sections">
+    <button type="button" class="dash-side-link active" data-side-target="top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Dashboard</button>
+    <button type="button" class="dash-side-link" data-side-target="dash-mock-history-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><polyline points="9 14 11 16 15 12"/></svg>My Tests</button>
+    <button type="button" class="dash-side-link" data-side-target="dash-analysis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</button>
+    <a class="dash-side-link" href="/changexed/mock-tests/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Learn</a>
+    <button type="button" class="dash-side-link" data-side-target="dash-details-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Settings</button>
+    <div class="dash-side-plan">
+      <p id="dash-side-plan-text">Checking your plan…</p>
+      <a class="card-link" id="dash-side-plan-link" href="/pricing/">See pricing →</a>
+    </div>
+    <button type="button" class="dash-side-theme" id="dash-side-theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Switch theme</button>
+  </aside>
+  <div class="dash-main">
+
 <div class="page-head"><div class="container">
   <h1 id="dash-hero-title">Your dashboard</h1>
-  <p>Everything about your learning — your profile, your plan, and every mock test and quiz round you have taken.</p>
+  <p>Let's keep pushing your limits and grow together.</p>
 </div></div>
 
 <section class="section" style="padding-top:0"><div class="container">
@@ -150,6 +233,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
         <p id="dash-email" class="muted">—</p>
         <p class="muted" id="dash-member">Member since —</p>
       </div>
+      <button class="btn btn-dark" id="dash-view-profile" type="button">View profile →</button>
       <button class="btn btn-dark" id="dash-signout" type="button">Sign out</button>
     </div>
 
@@ -231,19 +315,51 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       <div class="dash-customise-list" id="dash-customise-list"></div>
     </div>
 
+    <!-- Topbar: live search over the history + a real time range. -->
+    <div class="dash-topbar dash-hide-until-profile" id="dash-topbar">
+      <input type="search" class="dash-search" id="dash-search" placeholder="Search your tests… (subject, set, date)" aria-label="Search your test history">
+      <select id="dash-range" aria-label="Time range">
+        <option value="0">All time</option>
+        <option value="30">Last 30 days</option>
+        <option value="90">Last 90 days</option>
+      </select>
+    </div>
+
+    <!-- Your overview: four tiles of real numbers (the reference
+         layout's top row). No rank — there is no ranking system; the
+         fourth tile is the real average score. -->
+    <div class="dash-overview dash-hide-until-profile" id="dash-overview">
+      <div class="dash-ov-tile">
+        <div class="dash-ov-icon" style="background:rgba(124,58,237,.15);color:#a78bfa;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><polyline points="9 14 11 16 15 12"/></svg></div>
+        <div class="dash-ov-label">Total Tests</div>
+        <div class="dash-ov-value" id="ov-tests">0</div>
+        <div class="dash-ov-sub" id="ov-tests-sub">—</div>
+      </div>
+      <div class="dash-ov-tile">
+        <div class="dash-ov-icon" style="background:rgba(59,130,246,.15);color:#60a5fa;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+        <div class="dash-ov-label">Questions Attempted</div>
+        <div class="dash-ov-value" id="ov-questions">0</div>
+        <div class="dash-ov-sub" id="ov-questions-sub">—</div>
+      </div>
+      <div class="dash-ov-tile">
+        <div class="dash-ov-icon" style="background:rgba(249,115,22,.15);color:#fb923c;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
+        <div class="dash-ov-label">Learning Streak</div>
+        <div class="dash-ov-value" id="ov-streak">0 Days</div>
+        <div class="dash-ov-sub" id="ov-streak-sub">—</div>
+      </div>
+      <div class="dash-ov-tile">
+        <div class="dash-ov-icon" style="background:rgba(34,197,94,.15);color:#4ade80;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div class="dash-ov-label">Average Score</div>
+        <div class="dash-ov-value" id="ov-avg">—</div>
+        <div class="dash-ov-sub" id="ov-avg-sub">—</div>
+      </div>
+    </div>
+
     <!-- Plan -->
     <div class="card-dark dash-hide-until-profile" id="dash-plan">
       <h3>Your plan</h3>
       <p id="dash-plan-text" class="muted">Checking your plan…</p>
       <div class="quiz-actions" id="dash-plan-actions"></div>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats dash-hide-until-profile" id="dash-stats">
-      <div class="stat"><div class="stat-num" id="stat-mock">0</div><div class="stat-label">Mock tests taken</div></div>
-      <div class="stat"><div class="stat-num" id="stat-quiz">0</div><div class="stat-label">Quiz rounds</div></div>
-      <div class="stat"><div class="stat-num" id="stat-avg">—</div><div class="stat-label">Average mock score</div></div>
-      <div class="stat"><div class="stat-num" id="stat-best">—</div><div class="stat-label">Best mock score</div></div>
     </div>
 
     <!-- Analysis -->
@@ -315,8 +431,19 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       <div id="dash-quiz-history"></div>
     </div>
 
+    <!-- Insights & next steps: the reference layout's bottom banner —
+         the top "where to put more effort" item, plus a real next step. -->
+    <div class="card-dark dash-insights dash-hide-until-profile" id="dash-insights">
+      <h3>Insights &amp; next steps</h3>
+      <p id="dash-insights-text">Take your first mock test to unlock personalised insights.</p>
+      <a class="btn btn-white" href="/changexed/mock-tests/">Take a Mock Test →</a>
+    </div>
+
   </div>
 </div></section>
+
+</div><!-- /.dash-main -->
+</div><!-- /.dash-shell -->
 
 <footer class="footer"><div class="container"><div class="footer-links"><a href="/">Home</a><a href="/about/">About</a><a href="/pricing/">Pricing</a><a href="/changexed/mock-tests/">Mock Tests</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://www.youtube.com/@ChangeXed" target="_blank" rel="noopener">Contact</a></div><img src="/logo.png" alt="ChangeYourself" class="footer-logo"><p class="footer-tag">ChangeYourself — Learn. Grow. Transform.</p><p class="footer-copy">© 2026 ChangeYourself.in</p></div></footer>
 
@@ -383,6 +510,17 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
      progress row shrinks it, and a chip focuses it to one subject. */
   var allAttempts = [];
   var visibleSubjects = null;
+  /* Time range: 0 = all time, 30 / 90 = last N days. The overview,
+     analysis, progress and history all follow it; the streak is
+     always all-time (a streak is meaningless inside a window). */
+  var dateRangeDays = 0;
+  var searchQuery = '';
+  function inRange(a) {
+    if (!dateRangeDays) return true;
+    if (!a || !a.completed_at) return false;
+    var t = new Date(a.completed_at).getTime();
+    return !isNaN(t) && t >= Date.now() - dateRangeDays * 86400000;
+  }
   function isVisible(slug) {
     return !visibleSubjects || visibleSubjects.indexOf(slug) !== -1;
   }
@@ -390,10 +528,10 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     return (visibleSubjects && visibleSubjects.length === 1) ? visibleSubjects[0] : null;
   }
   function mockAttempts() {
-    return allAttempts.filter(function (a) { return a.kind === 'mock' && isVisible(a.subject); });
+    return allAttempts.filter(function (a) { return a.kind === 'mock' && isVisible(a.subject) && inRange(a); });
   }
   function quizAttempts() {
-    return allAttempts.filter(function (a) { return a.kind === 'quiz'; });
+    return allAttempts.filter(function (a) { return a.kind === 'quiz' && inRange(a); });
   }
   function avgPct(list) {
     var vals = list.map(pct).filter(function (p) { return p != null; });
@@ -448,15 +586,16 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     chip('All subjects', null);
     slugs.forEach(function (s) { chip(SUBJECT_NAMES[s] || s, s); });
     var scope = $('dash-analysis-scope');
+    var rangeLabel = dateRangeDays ? 'Last ' + dateRangeDays + ' days' : 'All time';
     if (scope) {
       if (!visibleSubjects) {
-        scope.textContent = 'Showing: all subjects';
+        scope.textContent = 'Showing: all subjects · ' + rangeLabel;
       } else if (visibleSubjects.length === 1) {
         var only = SUBJECT_NAMES[visibleSubjects[0]] || visibleSubjects[0];
-        scope.textContent = 'Showing: ' + only + ((profileRow && profileRow.target_subject === visibleSubjects[0]) ? ' — your target subject' : '');
+        scope.textContent = 'Showing: ' + only + ((profileRow && profileRow.target_subject === visibleSubjects[0]) ? ' — your target subject' : '') + ' · ' + rangeLabel;
       } else {
         var names = visibleSubjects.map(function (s) { return SUBJECT_NAMES[s] || s; });
-        scope.textContent = 'Showing: ' + names.join(', ');
+        scope.textContent = 'Showing: ' + names.join(', ') + ' · ' + rangeLabel;
       }
     }
   }
@@ -507,12 +646,13 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
      memory when the webview blocks it). Order, hidden sections and card
      heights are remembered; Reset restores the defaults. */
   var DASH_SECTIONS = [
+    { id: 'dash-overview', label: 'Your overview' },
     { id: 'dash-plan', label: 'Your plan' },
-    { id: 'dash-stats', label: 'Stats' },
     { id: 'dash-analysis', label: 'Your analysis' },
     { id: 'dash-progress', label: 'Progress by subject' },
     { id: 'dash-mock-history-card', label: 'Mock test history' },
-    { id: 'dash-quiz-history-card', label: 'Quiz history' }
+    { id: 'dash-quiz-history-card', label: 'Quiz history' },
+    { id: 'dash-insights', label: 'Insights & next steps' }
   ];
   var RESIZABLE = ['dash-details-card', 'dash-plan', 'dash-analysis', 'dash-progress', 'dash-mock-history-card', 'dash-quiz-history-card'];
   var LAYOUT_KEY = 'cy-dash-layout-v1';
@@ -534,6 +674,15 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       if (parsed && Array.isArray(parsed.order)) {
         parsed.hidden = Array.isArray(parsed.hidden) ? parsed.hidden : [];
         parsed.sizes = parsed.sizes || {};
+        /* Migrate saved layouts: 'dash-stats' became 'dash-overview'
+           (same slot), and 'dash-insights' is new (appended at the
+           end, where the banner belongs). */
+        ['order', 'hidden'].forEach(function (k) {
+          var i = parsed[k].indexOf('dash-stats');
+          if (i !== -1) parsed[k][i] = 'dash-overview';
+        });
+        if (parsed.order.indexOf('dash-overview') === -1) parsed.order.unshift('dash-overview');
+        if (parsed.order.indexOf('dash-insights') === -1) parsed.order.push('dash-insights');
         return parsed;
       }
     } catch (e) {}
@@ -656,7 +805,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   }
 
   function renderAll() {
-    renderStats();
+    renderOverview();
     renderSubjects();
     renderHistory();
     renderChips();
@@ -749,6 +898,8 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     if (!mocks.length && !quizzes.length) {
       empty.hidden = false;
       body.hidden = true;
+      var ins0 = $('dash-insights-text');
+      if (ins0) ins0.textContent = 'Take your first mock test to unlock personalised insights.';
       return;
     }
     empty.hidden = true;
@@ -1088,6 +1239,10 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     if (speedInsight) items.push(speedInsight);
     if (sd != null && sd >= 15) items.push('Your scores swing a lot (\u00B1' + sd + ' pts across your last 10 tests) — steady revision beats cramming before the next test.');
     if (!items.length) items.push('No weak spot stands out — keep taking tests to sharpen your edge.');
+    /* The insights banner shows the top item — the single most
+       useful next step. */
+    var ins = $('dash-insights-text');
+    if (ins) ins.textContent = items[0];
     items.slice(0, 5).forEach(function (t) {
       var li = document.createElement('li');
       li.textContent = t;
@@ -1232,6 +1387,16 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     var text = $('dash-plan-text');
     var actions = $('dash-plan-actions');
     actions.innerHTML = '';
+    /* The sidebar's plan card shows the same status, one line. */
+    var sideText = $('dash-side-plan-text');
+    var sideLink = $('dash-side-plan-link');
+    if (sideText) sideText.textContent = ent
+      ? 'Test Series — full access in your subject.'
+      : 'Tests 1–3 free · Unlock all 20 for ₹249 / subject.';
+    if (sideLink) {
+      sideLink.href = ent ? '/changexed/mock-tests/' : '/pricing/';
+      sideLink.textContent = ent ? 'Take a mock test →' : 'See pricing →';
+    }
     if (ent) {
       text.textContent = 'Test Series — Full access. All 20 mock tests in your subject are unlocked.' +
         (ent.purchased_at ? ' Purchased on ' + fmtDate(ent.purchased_at) + '.' : '');
@@ -1254,26 +1419,45 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       actions.appendChild(t);
     }
   }
-  function renderStats() {
+  /* ---------- Your overview: four tiles of real numbers ----------
+     Total Tests (mocks in range), Questions Attempted (all questions
+     in range), Learning Streak (consecutive days, always all-time),
+     Average Score (mocks in range, with the real trend underneath).
+     The old stats (quiz rounds, best score) live on as sub-lines —
+     nothing is lost. */
+  function renderOverview() {
     var mocks = mockAttempts();
     var quizzes = quizAttempts();
-    $('stat-mock').textContent = mocks.length;
-    $('stat-quiz').textContent = quizzes.length;
-    var vals = mocks.map(pct).filter(function (p) { return p != null; });
-    if (vals.length) {
-      var sum = 0, best = 0;
-      vals.forEach(function (p) { sum += p; if (p > best) best = p; });
-      $('stat-avg').textContent = (Math.round((sum / vals.length) * 10) / 10) + '%';
-      $('stat-best').textContent = best + '%';
-    } else {
-      $('stat-avg').textContent = '—';
-      $('stat-best').textContent = '—';
-    }
+    var ov = $('dash-overview');
+    if (!ov) return;
+    $('ov-tests').textContent = mocks.length;
+    var q = 0;
+    mocks.concat(quizzes).forEach(function (a) { q += (a.correct || 0) + (a.wrong || 0) + (a.skipped || 0); });
+    $('ov-questions').textContent = q;
+    var streak = streakDays();
+    $('ov-streak').textContent = streak + (streak === 1 ? ' Day' : ' Days');
+    var avg = avgPct(mocks);
+    var best = null;
+    mocks.map(pct).forEach(function (p) { if (p != null && (best == null || p > best)) best = p; });
+    $('ov-avg').textContent = avg == null ? '—' : avg + '%';
+    var rangeTxt = dateRangeDays ? 'in the last ' + dateRangeDays + ' days' : 'all time';
+    $('ov-tests-sub').textContent = quizzes.length + (quizzes.length === 1 ? ' quiz round' : ' quiz rounds') + ' · ' + rangeTxt;
+    $('ov-questions-sub').textContent = 'Across mocks and quizzes · ' + rangeTxt;
+    $('ov-streak-sub').textContent = 'Consecutive days with a test · all time';
+    var slope = null;
+    var vals = pctList(dated(mocks)).slice(-10);
+    if (vals.length >= 2) slope = linSlope(vals);
+    $('ov-avg-sub').textContent = avg == null ? 'Take a mock test to see your average'
+      : (best != null ? 'Best: ' + best + '% · ' : '') +
+        (slope == null ? 'Average across your mock tests'
+          : slope > 0.5 ? 'Rising +' + slope + ' pts / test'
+          : slope < -0.5 ? 'Dipping ' + slope + ' pts / test'
+          : 'Steady across your last tests');
   }
   function renderSubjects() {
     var box = $('dash-subjects');
     box.innerHTML = '';
-    var mocks = allAttempts.filter(function (a) { return a.kind === 'mock'; });
+    var mocks = mockAttempts();
     SUBJECT_ORDER.forEach(function (slug) {
       if (!isVisible(slug)) return;
       var rows = mocks.filter(function (a) { return a.subject === slug; });
@@ -1316,9 +1500,10 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       box.appendChild(div);
     });
     var note = $('dash-subjects-note');
-    if (note) note.textContent = visibleSubjects
+    if (note) note.textContent = (visibleSubjects
       ? 'Tap × to remove a subject, or add another below.'
-      : 'Tap a subject to focus your dashboard on it.';
+      : 'Tap a subject to focus your dashboard on it.') +
+      (dateRangeDays ? ' Showing the last ' + dateRangeDays + ' days.' : '');
   }
   function historyRow(a) {
     var wrap = document.createElement('div');
@@ -1396,25 +1581,43 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     }
     return p;
   }
+  /* Search matches the history row's own text: subject, set, date,
+     score. A filtered list that matches nothing says so honestly. */
+  function histMatches(a) {
+    if (!searchQuery) return true;
+    var bits = [];
+    if (a.kind === 'mock') {
+      bits.push(SUBJECT_NAMES[a.subject] || a.subject);
+      if (a.set_number != null) bits.push('mock test ' + a.set_number, 'set ' + a.set_number);
+    } else {
+      bits.push('quick quiz', SUBJECT_NAMES[a.subject] || a.subject);
+    }
+    bits.push(fmtDate(a.completed_at), String(a.score), String(a.total));
+    return bits.join(' ').toLowerCase().indexOf(searchQuery) !== -1;
+  }
   function renderHistory() {
     var title = $('dash-mock-title');
     if (title) {
       var single = singleSubject();
       title.textContent = 'Mock test history' + (single ? ' — ' + (SUBJECT_NAMES[single] || single) : (visibleSubjects ? ' — ' + visibleSubjects.length + ' subjects' : ''));
     }
-    var mocks = mockAttempts();
-    var quizzes = quizAttempts();
+    var mocks = mockAttempts().filter(histMatches);
+    var quizzes = quizAttempts().filter(histMatches);
     var mh = $('dash-mock-history');
     mh.innerHTML = '';
     if (!mocks.length) {
-      mh.appendChild(emptyNote('No mock tests taken yet. Your completed tests will appear here.', '/changexed/mock-tests/', 'Take your first mock test →'));
+      mh.appendChild(searchQuery
+        ? emptyNote('No mock tests match "' + searchQuery + '".')
+        : emptyNote('No mock tests taken yet. Your completed tests will appear here.', '/changexed/mock-tests/', 'Take your first mock test →'));
     } else {
       mocks.forEach(function (a) { mh.appendChild(historyRow(a)); });
     }
     var qh = $('dash-quiz-history');
     qh.innerHTML = '';
     if (!quizzes.length) {
-      qh.appendChild(emptyNote('No quiz rounds yet. Your completed rounds will appear here.', '/changexed/quiz/', 'Try the quick quiz →'));
+      qh.appendChild(searchQuery
+        ? emptyNote('No quiz rounds match "' + searchQuery + '".')
+        : emptyNote('No quiz rounds yet. Your completed rounds will appear here.', '/changexed/quiz/', 'Try the quick quiz →'));
     } else {
       quizzes.forEach(function (a) { qh.appendChild(historyRow(a)); });
     }
@@ -1590,6 +1793,53 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     sel.hidden = true;
     var btn = $('dash-add-subject-btn');
     if (btn) btn.hidden = false;
+  });
+
+  /* ---------- Sidebar, search, range ----------
+     Sidebar links jump to a section — unhiding it first if the user
+     hid it in Customise. The sidebar theme button reuses the nav
+     toggle's exact behaviour (same button, same paint). */
+  var sideLinks = Array.prototype.slice.call(document.querySelectorAll('.dash-side-link[data-side-target]'));
+  sideLinks.forEach(function (link) {
+    link.addEventListener('click', function () {
+      sideLinks.forEach(function (l) { l.classList.remove('active'); });
+      link.classList.add('active');
+      var target = link.getAttribute('data-side-target');
+      if (target === 'top') {
+        try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+        return;
+      }
+      var el = $(target);
+      if (!el) return;
+      var hi = dashLayout.hidden.indexOf(target);
+      if (hi !== -1) {
+        dashLayout.hidden.splice(hi, 1);
+        saveLayout();
+        applyLayout();
+      }
+      try { if (el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    });
+  });
+  var sideTheme = $('dash-side-theme');
+  if (sideTheme) sideTheme.addEventListener('click', function () {
+    var navToggle = $('themeToggle');
+    if (navToggle) navToggle.click();
+  });
+  var viewProfile = $('dash-view-profile');
+  if (viewProfile) viewProfile.addEventListener('click', function () {
+    var el = $('dash-details-card');
+    if (!el) return;
+    try { if (el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+  });
+  var searchInput = $('dash-search');
+  if (searchInput) searchInput.addEventListener('input', function () {
+    searchQuery = String(searchInput.value || '').trim().toLowerCase();
+    renderHistory();
+  });
+  var rangeSel = $('dash-range');
+  if (rangeSel) rangeSel.addEventListener('change', function () {
+    dateRangeDays = parseInt(rangeSel.value, 10) || 0;
+    renderAll();
   });
 
   loadDashboard();
