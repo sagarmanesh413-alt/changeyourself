@@ -19,6 +19,11 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-profile-main p { margin-bottom: 4px; }
 .dash-profile-main p:last-child { margin-bottom: 0; }
 
+/* Your details + Edit profile are one card: the details show by
+   default, and Edit profile opens the form in place in the same card. */
+.dash-details-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.dash-details-head h3 { margin: 0; }
+
 /* Analysis + interactivity (kept here so it overrides styles.css). */
 .dash-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 6px; }
 .dash-chip { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
@@ -108,16 +113,18 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       <button class="btn btn-dark" id="dash-signout" type="button">Sign out</button>
     </div>
 
-    <div class="card-dark">
-      <h3>Your details</h3>
-      <div class="dash-fields" id="dash-fields"></div>
-      <p class="muted" style="margin-top:14px;font-size:14px;">Only you can see these details. Fill in what is missing below.</p>
-    </div>
-
-    <!-- Edit profile -->
-    <div class="card-dark">
-      <h3>Edit profile</h3>
-      <form id="dash-form" novalidate>
+    <!-- Your details + Edit profile: one card. The details show by
+         default; Edit profile opens the form in place. -->
+    <div class="card-dark" id="dash-details-card">
+      <div class="dash-details-head">
+        <h3>Your details</h3>
+        <button class="btn btn-dark" id="dash-edit-btn" type="button">Edit profile</button>
+      </div>
+      <div id="dash-details-view">
+        <div class="dash-fields" id="dash-fields"></div>
+        <p class="muted" style="margin-top:14px;font-size:14px;">Only you can see these details.</p>
+      </div>
+      <form id="dash-form" novalidate hidden>
         <div class="dash-form-grid">
           <div class="dash-field">
             <label for="f-name">Full name</label>
@@ -167,6 +174,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
         </div>
         <div class="quiz-actions">
           <button class="btn btn-white" id="dash-save" type="submit">Save profile</button>
+          <button class="btn btn-dark" id="dash-cancel" type="button">Cancel</button>
         </div>
         <p class="auth-msg" id="dash-form-msg" role="status"></p>
       </form>
@@ -669,11 +677,29 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       return v !== null && v !== undefined && String(v).trim() !== '';
     });
   }
+  /* Your details card: view mode shows the details, edit mode shows
+     the form in the same card. No cancelling out of the first-sign-in
+     gate — the profile must be completed before the dashboard opens. */
+  function setProfileMode(editing) {
+    var view = $('dash-details-view');
+    var form = $('dash-form');
+    var btn = $('dash-edit-btn');
+    var cancel = $('dash-cancel');
+    if (view) view.hidden = editing;
+    if (form) form.hidden = !editing;
+    if (btn) btn.hidden = editing;
+    var onboarding = false;
+    try { onboarding = document.body.classList.contains('dash-onboarding'); } catch (e) {}
+    if (cancel) cancel.hidden = onboarding;
+  }
   function applyProfileGate() {
     var done = profileComplete(profileRow);
     try { document.body.classList.toggle('dash-onboarding', !done); } catch (e) {}
     var note = $('dash-onboard-note');
     if (note) note.hidden = done;
+    /* The details card follows the gate: an incomplete profile opens
+       the form in place; a complete profile shows the details. */
+    setProfileMode(!done);
     if (!done) {
       /* Guarded scroll: some phone webviews throw on scroll calls. */
       try {
@@ -981,6 +1007,9 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       msg.textContent = 'Profile saved.';
       msg.className = 'auth-msg ok';
       showToast('Profile saved.');
+      /* The name may have changed — the nav shows the saved profile
+         name, so refresh it right away. */
+      if (window.CYAuth && window.CYAuth.refresh) { try { window.CYAuth.refresh(); } catch (e) {} }
     });
   }
 
@@ -1037,6 +1066,16 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     }
   });
   $('dash-form').addEventListener('submit', onSave);
+  $('dash-edit-btn').addEventListener('click', function () {
+    setProfileMode(true);
+    var f = $('f-name');
+    if (f) { try { f.focus(); } catch (e) {} }
+  });
+  $('dash-cancel').addEventListener('click', function () {
+    /* Discard edits: refill the form from the saved row and go back
+       to the details view. */
+    renderProfile();
+  });
   $('dash-add-subject-btn').addEventListener('click', function () {
     var sel = $('dash-add-subject-select');
     var btn = $('dash-add-subject-btn');
