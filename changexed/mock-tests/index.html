@@ -518,6 +518,8 @@ body { padding-top: 76px; }
   html[data-theme="light"] .exam-actions .mark-btn.on { color: #ffffff; }
   html[data-theme="light"] .timer.low { color: #ffffff; }
   </style>
+    <script src="/supabase.js"></script>
+    <script src="/auth.js"></script>
 </head>
   <body>
 <nav class="nav">
@@ -540,12 +542,9 @@ body { padding-top: 76px; }
     if (timer) clearTimeout(timer);
     timer = setTimeout(function () { toast.classList.remove("show"); }, 4000);
   }
-  var loginBtn = document.getElementById("loginBtn");
-  if (loginBtn) {
-    loginBtn.addEventListener("click", function () {
-      showToast("Login is coming soon \u2014 the mock tests are free for now.");
-    });
-  }
+  /* The Login button is owned by /auth.js now (real sign-in).
+     Expose the toast so auth.js can reuse it for sign-in feedback. */
+  window.CYToast = showToast;
 })();
 </script>
     <div id="boot-fallback" role="alert">
@@ -1038,6 +1037,13 @@ body { padding-top: 76px; }
         var pct = Math.round((total / exam.maxMarks) * 1000) / 10;
         lastResult = { subject: exam.subject, setNum: exam.setNum, qs: exam.qs, answers: exam.answers.slice(), total: total, p1: p1, p2: p2, pct: pct, maxMarks: exam.maxMarks, p1Max: exam.p1Count * 2, p2Max: exam.maxMarks - exam.p1Count * 2, totalQ: TOTAL_Q, taken: taken, correct: correct, wrong: wrong, skipped: skipped, auto: !!auto };
         saveBest(exam.subject, exam.setNum, total, pct);
+        /* Save the attempt to the signed-in user's history. Fire-and-forget:
+           recordAttempt never throws and never blocks the results screen. */
+        try {
+          if (window.CYSupa && window.CYSupa.recordAttempt) {
+            window.CYSupa.recordAttempt({ kind: 'mock', subject: exam.subject, set_number: exam.setNum, score: total, total: exam.maxMarks, correct: correct, wrong: wrong, skipped: skipped, duration_seconds: taken });
+          }
+        } catch (e) {}
         renderResults();
         showScreen('results');
       }
