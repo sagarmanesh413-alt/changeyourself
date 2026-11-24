@@ -28,7 +28,7 @@
     ".auth-sep::before,.auth-sep::after{content:\"\";flex:1;height:1px;background:rgba(255,255,255,.14);}",
     ".auth-modal label{display:block;font-size:14px;font-weight:600;margin-bottom:6px;}",
     ".auth-modal input{width:100%;padding:12px 14px;margin-bottom:14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#ffffff;font:inherit;font-size:15px;}",
-    ".auth-modal input::placeholder{color:#71717a;}",
+    ".auth-modal input::placeholder{color:#a1a1aa;}",
     ".auth-modal input:focus{outline:2px solid #7c3aed;outline-offset:1px;}",
     ".auth-modal .btn{width:100%;justify-content:center;}",
     ".auth-modal .btn:disabled{opacity:.6;cursor:wait;}",
@@ -170,6 +170,27 @@
       /* On success the browser leaves for Google — nothing more to do. */
     });
   }
+  /* F-16: 60-second resend cooldown after a code is sent (modal session
+     only — no persistence). The button stays disabled with a countdown
+     label so the OTP endpoint cannot be spammed from the UI. */
+  var sendCooldownTimer = null;
+  function startSendCooldown(btn) {
+    var left = 60;
+    btn.disabled = true;
+    btn.textContent = "Resend code in " + left + "s";
+    if (sendCooldownTimer) clearInterval(sendCooldownTimer);
+    sendCooldownTimer = setInterval(function () {
+      left -= 1;
+      if (left <= 0) {
+        clearInterval(sendCooldownTimer);
+        sendCooldownTimer = null;
+        btn.disabled = false;
+        btn.textContent = "Send sign-in code";
+        return;
+      }
+      btn.textContent = "Resend code in " + left + "s";
+    }, 1000);
+  }
   function onSendCode() {
     if (!needSupa()) return;
     var email = ($("authEmail").value || "").trim();
@@ -178,14 +199,14 @@
     btn.disabled = true;
     setMsg("");
     window.CYSupa.sendOtp(email).then(function (r) {
-      btn.disabled = false;
-      if (!r.ok) { setMsg(r.error || "Could not send the code. Try again."); return; }
+      if (!r.ok) { btn.disabled = false; setMsg(r.error || "Could not send the code. Try again."); return; }
       $("authEmailEcho").textContent = email;
       $("authOtpStep1").hidden = true;
       $("authOtpStep2").hidden = false;
       setMsg("Code sent. Check your inbox.", true);
       var code = $("authCode");
       if (code) code.focus();
+      startSendCooldown(btn);
     });
   }
   function onVerify() {
