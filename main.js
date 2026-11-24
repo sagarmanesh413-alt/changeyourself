@@ -213,25 +213,24 @@
     updateParallax();
   }
 
-  /* ---------- Liquid glass dock (Nimbus "Waterline") ----------
+  /* ---------- Liquid glass navs (Nimbus "Waterline") ----------
      A vanilla port of the LiquidNavbar React component. The site is
      a static site — no React, no shadcn, no Tailwind, no build step
      — so the component is ported to plain JS/CSS instead of being
-     installed. The menus are the site's own 7 dock links, read from
-     the page; the pill is icons-only (compact), the way the dock
-     has always been. The active drop sits on the menu for the page
-     you are on (from the URL); on pages with no dock menu (About,
-     Pricing, Privacy, Terms, the ChangeXed hub) there is no active
-     drop, just the glass pill. Tone follows the site theme. Sound
-     is off (the demo's plip is not wired up). */
-  (function initLiquidDock() {
-    var dock = document.querySelector(".dock");
-    if (!dock) return;
-    var links = Array.prototype.slice.call(dock.querySelectorAll("a"));
-    if (!links.length) return;
+     installed. It runs on two pills: the floating dock (icons-only,
+     compact) and the header (text links, labels visible). The menus
+     are the site's own links, read from the page; the active drop
+     sits on the link for the page you are on (from the URL), and on
+     pages with no matching link there is no active drop, just the
+     glass pill. Tone follows the site theme. Sound is off (the
+     demo's plip is not wired up). */
+  var liquidToneTargets = [];
+  function initLiquidNav(dock, itemDefs, compact) {
+    if (!dock || !itemDefs.length) return;
+    var links = itemDefs.map(function (d) { return d.el; });
 
     var PAD = 14;
-    var FX = ["glow", "spin", "pop", "wave", "drop", "spin", "pop"];
+    var FX = itemDefs.map(function (d) { return d.fx || "none"; });
     var VERT = "attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}";
     var FRAG = `precision highp float;
 uniform vec2 uRes;uniform float uDpr;uniform float uTime;uniform vec4 uPill;
@@ -292,7 +291,7 @@ void main(){
        canvas and the CSS-drop fallback, then the icon + label
        structure inside each link. */
     dock.classList.add("nimbus-nav");
-    dock.setAttribute("data-compact", "true");
+    dock.setAttribute("data-compact", compact ? "true" : "false");
     dock.setAttribute("aria-label", "Main");
     var firstLink = links[0];
     var filterSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -316,26 +315,44 @@ void main(){
     dock.insertBefore(drop, firstLink);
 
     var iconEls = [];
-    links.forEach(function (a, i) {
-      var label = a.getAttribute("aria-label") || a.getAttribute("title") || "";
+    itemDefs.forEach(function (def, i) {
+      var a = def.el;
+      var label = def.label || "";
       var svg = a.querySelector("svg");
+      var img = a.querySelector("img");
       a.classList.add("nimbus-item");
       a.setAttribute("aria-label", label);
-      var ico = document.createElement("span");
-      ico.className = "nv-ico";
-      if (svg) {
-        if (i === 0) {
-          var door = svg.querySelector("polyline");
-          if (door) door.setAttribute("class", "nv-door");
+      var ico = null;
+      if (svg || img) {
+        ico = document.createElement("span");
+        ico.className = "nv-ico";
+        if (svg) {
+          if (def.door) {
+            var door = svg.querySelector("polyline");
+            if (door) door.setAttribute("class", "nv-door");
+          }
+          ico.appendChild(svg);
+        } else {
+          ico.appendChild(img);
         }
-        ico.appendChild(svg);
+        a.insertBefore(ico, a.firstChild);
       }
-      a.insertBefore(ico, a.firstChild);
-      var lab = document.createElement("span");
-      lab.className = "nimbus-label";
-      lab.textContent = label;
-      a.appendChild(lab);
       iconEls.push(ico);
+      if (def.hideLabel) {
+        /* Icons-only item: the label lives in the DOM, hidden. */
+        var lab = document.createElement("span");
+        lab.className = "nimbus-label";
+        lab.textContent = label;
+        a.appendChild(lab);
+      } else if (!svg && !img) {
+        /* Text link: wrap its own text in the visible label. */
+        var text = a.textContent;
+        a.textContent = "";
+        var lab2 = document.createElement("span");
+        lab2.className = "nimbus-label";
+        lab2.textContent = String(text || "").trim();
+        a.appendChild(lab2);
+      }
       if (i === current) a.setAttribute("aria-current", "page");
       else a.removeAttribute("aria-current");
     });
@@ -549,7 +566,9 @@ void main(){
       loop();
     }
 
-    /* Tone follows the site theme, live, when the toggle changes. */
+    /* Tone follows the site theme, live, when the toggle changes.
+       Each pill registers its own applyTone; one observer below
+       calls them all. */
     function applyTone() {
       var t = currentTheme();
       dark = t === "dark" ? 1 : 0;
@@ -557,14 +576,7 @@ void main(){
       loop();
     }
     applyTone();
-    if (window.MutationObserver) {
-      var mo = new MutationObserver(function (muts) {
-        for (var mi = 0; mi < muts.length; mi++) {
-          if (muts[mi].attributeName === "data-theme") { applyTone(); break; }
-        }
-      });
-      mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    }
+    liquidToneTargets.push(applyTone);
 
     /* Init: GL (or the CSS drop), visibility + resize observers. */
     dock.setAttribute("data-refract", supportsRefraction() ? "on" : "off");
@@ -660,5 +672,47 @@ void main(){
     links.forEach(function (a, i) {
       a.addEventListener("click", function () { select(i); });
     });
-  })();
+  }
+
+  /* The two pills: the floating dock (icons-only) and the header
+     (text links, labels visible). The header's Login button and
+     theme toggle are actions, not items — they sit in the pill and
+     get its ripple, but they never move the drop. */
+  var dockEl = document.querySelector(".dock");
+  if (dockEl) {
+    initLiquidNav(dockEl, Array.prototype.slice.call(dockEl.querySelectorAll("a")).map(function (a, i) {
+      return {
+        el: a,
+        label: a.getAttribute("aria-label") || a.getAttribute("title") || "",
+        fx: ["glow", "spin", "pop", "wave", "drop", "spin", "pop"][i] || "pop",
+        hideLabel: true,
+        door: i === 0
+      };
+    }), true);
+  }
+  var navEl = document.querySelector(".nav");
+  if (navEl) {
+    var navLinks = Array.prototype.slice.call(navEl.querySelectorAll("a.nav-link, a.logo"));
+    initLiquidNav(navEl, navLinks.map(function (a) {
+      var isLogo = a.classList.contains("logo");
+      return {
+        el: a,
+        label: isLogo ? "Home" : (a.textContent || "").trim(),
+        fx: isLogo ? "glow" : "none",
+        hideLabel: isLogo
+      };
+    }), false);
+  }
+  /* One theme observer for both pills. */
+  if (window.MutationObserver) {
+    var liquidMo = new MutationObserver(function (muts) {
+      for (var mi = 0; mi < muts.length; mi++) {
+        if (muts[mi].attributeName === "data-theme") {
+          liquidToneTargets.forEach(function (fn) { fn(); });
+          break;
+        }
+      }
+    });
+    liquidMo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  }
 })();
