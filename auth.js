@@ -71,8 +71,12 @@
     t.classList.add("show");
     setTimeout(function () { t.classList.remove("show"); }, 4000);
   }
-  function displayName(user) {
+  /* The name the user saved in their profile wins over the Google
+     account name — Google's name can be an email-like handle
+     (e.g. "changexecosystem") while the profile says "MANESH". */
+  function displayName(user, profileName) {
     if (!user) return "";
+    if (profileName) return String(profileName).split(" ")[0];
     var md = user.user_metadata || {};
     var name = md.full_name || md.name || "";
     if (name) return String(name).split(" ")[0];
@@ -233,7 +237,7 @@
     nav.appendChild(menu);
     return menu;
   }
-  function paintNav(user) {
+  function paintNav(user, profileName) {
     var btn = $("loginBtn");
     if (!btn) return;
     if (!user) {
@@ -243,7 +247,7 @@
       if (old) old.parentNode.removeChild(old);
       return;
     }
-    btn.textContent = displayName(user) + " \u25be";
+    btn.textContent = displayName(user, profileName) + " \u25be";
     var menu = buildMenu(btn, user);
     btn.onclick = function (e) {
       e.stopPropagation();
@@ -255,6 +259,16 @@
     window.CYSupa.getUser().then(function (user) {
       currentUser = user;
       paintNav(user);
+      /* Paint first with the Google name, then re-paint with the saved
+         profile name when it arrives — never block the nav on it. */
+      try {
+        if (user && typeof window.CYSupa.getProfile === "function") {
+          window.CYSupa.getProfile(user.id).then(function (p) {
+            var name = (p && p.full_name) || "";
+            if (name) paintNav(user, name);
+          });
+        }
+      } catch (e) {}
       if (reloadPage && user && window.location.pathname.indexOf("/dashboard") === 0) {
         window.location.reload();
       }
