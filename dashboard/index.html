@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Dashboard — ChangeYourself.in</title>
+<meta name="description" content="Your ChangeYourself dashboard — profile, plan, stats and your full mock-test and quiz history.">
+<script>try{var t=localStorage.getItem("cy-theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;}}catch(e){}</script>
+<link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/logo.png">
+</head>
+<body>
+<nav class="nav">
+  <a class="logo" href="/" aria-label="ChangeYourself home"><img src="/logo.png" alt="ChangeYourself"></a>
+  <a class="nav-link" href="/about/">About</a>
+  <a class="nav-link" href="/pricing/">Pricing</a>
+  <a class="nav-link" href="/changexed/">ChangeXed</a>
+  <button class="login-btn" id="loginBtn" type="button">Login</button>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+</nav>
+
+<div class="page-head"><div class="container">
+  <h1>Your dashboard</h1>
+  <p>Everything about your learning — your profile, your plan, and every mock test and quiz round you have taken.</p>
+</div></div>
+
+<section class="section" style="padding-top:0"><div class="container">
+
+  <!-- Loading -->
+  <div class="card-dark" id="dash-loading">
+    <h3>Loading your dashboard…</h3>
+    <p>Fetching your profile and history.</p>
+  </div>
+
+  <!-- Signed out -->
+  <div class="card-dark" id="dash-locked" hidden>
+    <h3>Sign in to see your dashboard</h3>
+    <p>Your profile, plan and test history live in your account. Sign in with Google or with an email code — it takes a few seconds.</p>
+    <p id="dash-locked-msg" class="auth-msg" role="status"></p>
+    <button class="btn btn-white" id="dash-signin" type="button">Sign in</button>
+  </div>
+
+  <!-- Signed in -->
+  <div id="dash-content" hidden>
+
+    <!-- Profile -->
+    <div class="card-dark dash-profile">
+      <div class="dash-avatar" id="dash-avatar" aria-hidden="true">?</div>
+      <div class="dash-profile-main">
+        <h2 id="dash-name">—</h2>
+        <p id="dash-email" class="muted">—</p>
+        <p class="muted" id="dash-member">Member since —</p>
+      </div>
+      <button class="btn btn-dark" id="dash-signout" type="button">Sign out</button>
+    </div>
+
+    <div class="card-dark">
+      <h3>Your details</h3>
+      <div class="dash-fields" id="dash-fields"></div>
+      <p class="muted" style="margin-top:14px;font-size:14px;">Only you can see these details. Fill in what is missing below.</p>
+    </div>
+
+    <!-- Edit profile -->
+    <div class="card-dark">
+      <h3>Edit profile</h3>
+      <form id="dash-form" novalidate>
+        <div class="dash-form-grid">
+          <div class="dash-field">
+            <label for="f-name">Full name</label>
+            <input type="text" id="f-name" autocomplete="name" placeholder="Your name">
+          </div>
+          <div class="dash-field">
+            <label for="f-dob">Date of birth</label>
+            <input type="date" id="f-dob">
+          </div>
+          <div class="dash-field">
+            <label for="f-qual">Qualification</label>
+            <input type="text" id="f-qual" autocomplete="off" placeholder="e.g. M.A. Psychology">
+          </div>
+          <div class="dash-field">
+            <label for="f-work">Work status</label>
+            <select id="f-work">
+              <option value="">Not set</option>
+              <option value="working">Working</option>
+              <option value="not_working">Not working</option>
+              <option value="student">Student</option>
+            </select>
+          </div>
+          <div class="dash-field">
+            <label for="f-phone">Phone</label>
+            <input type="tel" id="f-phone" autocomplete="tel" placeholder="Your phone number">
+          </div>
+          <div class="dash-field">
+            <label for="f-city">City</label>
+            <input type="text" id="f-city" autocomplete="address-level2" placeholder="Your city">
+          </div>
+          <div class="dash-field">
+            <label for="f-subject">Target subject (UGC NET)</label>
+            <select id="f-subject">
+              <option value="">Not set</option>
+              <option value="psychology">Psychology</option>
+              <option value="commerce">Commerce</option>
+              <option value="management">Management</option>
+              <option value="english">English</option>
+              <option value="political-science">Political Science</option>
+              <option value="history">History</option>
+              <option value="economics">Economics</option>
+              <option value="computer-science">Computer Science and Applications</option>
+              <option value="sociology">Sociology</option>
+              <option value="law">Law</option>
+            </select>
+          </div>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn btn-white" id="dash-save" type="submit">Save profile</button>
+        </div>
+        <p class="auth-msg" id="dash-form-msg" role="status"></p>
+      </form>
+    </div>
+
+    <!-- Plan -->
+    <div class="card-dark" id="dash-plan">
+      <h3>Your plan</h3>
+      <p id="dash-plan-text" class="muted">Checking your plan…</p>
+      <div class="quiz-actions" id="dash-plan-actions"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats" id="dash-stats">
+      <div class="stat"><div class="stat-num" id="stat-mock">0</div><div class="stat-label">Mock tests taken</div></div>
+      <div class="stat"><div class="stat-num" id="stat-quiz">0</div><div class="stat-label">Quiz rounds</div></div>
+      <div class="stat"><div class="stat-num" id="stat-avg">—</div><div class="stat-label">Average mock score</div></div>
+      <div class="stat"><div class="stat-num" id="stat-best">—</div><div class="stat-label">Best mock score</div></div>
+    </div>
+
+    <!-- Per-subject progress -->
+    <div class="card-dark">
+      <h3>Progress by subject</h3>
+      <div id="dash-subjects"></div>
+    </div>
+
+    <!-- Mock test history -->
+    <div class="card-dark">
+      <h3>Mock test history</h3>
+      <div id="dash-mock-history"></div>
+    </div>
+
+    <!-- Quiz history -->
+    <div class="card-dark">
+      <h3>Quiz history</h3>
+      <div id="dash-quiz-history"></div>
+    </div>
+
+  </div>
+</div></section>
+
+<footer class="footer"><div class="container"><div class="footer-links"><a href="/">Home</a><a href="/about/">About</a><a href="/pricing/">Pricing</a><a href="/changexed/mock-tests/">Mock Tests</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://www.youtube.com/@ChangeXed" target="_blank" rel="noopener">Contact</a></div><img src="/logo.png" alt="ChangeYourself" class="footer-logo"><p class="footer-tag">ChangeYourself — Learn. Grow. Transform.</p><p class="footer-copy">© 2026 ChangeYourself.in</p></div></footer>
+
+<!-- No dock on the dashboard: it is an app-like page, same as the mock-test and quiz pages. -->
+<div class="toast" id="toast" role="status"></div>
+<script src="/main.js"></script>
+<script src="/supabase.js"></script>
+<script src="/auth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var SUBJECT_NAMES = {
+    'psychology': 'Psychology', 'commerce': 'Commerce', 'management': 'Management',
+    'english': 'English', 'political-science': 'Political Science', 'history': 'History',
+    'economics': 'Economics', 'computer-science': 'Computer Science and Applications',
+    'sociology': 'Sociology', 'law': 'Law', 'most-probable': 'Most Probable Questions',
+    'paper1': 'Paper 1', 'paper2': 'Paper 2', 'mixed': 'Mixed'
+  };
+  var SUBJECT_ORDER = ['psychology', 'commerce', 'management', 'english', 'political-science',
+    'history', 'economics', 'computer-science', 'sociology', 'law', 'most-probable'];
+  var WORK_LABELS = { 'working': 'Working', 'not_working': 'Not working', 'student': 'Student' };
+
+  var sessionUser = null;
+  var profileRow = null;
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch (e) { return ''; }
+  }
+  function fmtDur(sec) {
+    if (sec == null) return '';
+    sec = Math.max(0, Math.round(sec));
+    if (sec >= 3600) return Math.floor(sec / 3600) + 'h ' + Math.floor((sec % 3600) / 60) + 'm';
+    if (sec >= 60) return Math.floor(sec / 60) + 'm ' + (sec % 60) + 's';
+    return sec + 's';
+  }
+  function pct(a) {
+    if (!a || !a.total) return null;
+    return Math.round((a.score / a.total) * 1000) / 10;
+  }
+  function showToast(msg) {
+    var t = $('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function () { t.classList.remove('show'); }, 4000);
+  }
+
+  /* ---------- Wait for the Supabase client to exist ----------
+     supabase.js is loaded above, but its CDN load is async; poll
+     briefly, then give up with an honest message. */
+  function waitForSupa(done) {
+    var tries = 0;
+    (function check() {
+      if (window.CYSupa) { done(true); return; }
+      tries++;
+      if (tries > 40) { done(false); return; }
+      setTimeout(check, 250);
+    })();
+  }
+
+  function showLocked(msg) {
+    $('dash-loading').hidden = true;
+    $('dash-content').hidden = true;
+    $('dash-locked').hidden = false;
+    if (msg) $('dash-locked-msg').textContent = msg;
+    if (window.CYAuth) window.CYAuth.openModal();
+  }
+  function showContent() {
+    $('dash-loading').hidden = true;
+    $('dash-locked').hidden = true;
+    $('dash-content').hidden = false;
+  }
+
+  /* ---------- Render ---------- */
+  function fieldRow(label, value) {
+    var div = document.createElement('div');
+    div.className = 'dash-field-row';
+    var l = document.createElement('span');
+    l.className = 'dash-field-label';
+    l.textContent = label;
+    var v = document.createElement('span');
+    v.className = 'dash-field-value' + (value ? '' : ' not-set');
+    v.textContent = value || 'Not set';
+    div.appendChild(l);
+    div.appendChild(v);
+    return div;
+  }
+  function renderProfile() {
+    var md = (sessionUser && sessionUser.user_metadata) || {};
+    var name = (profileRow && profileRow.full_name) || md.full_name || md.name || '';
+    var email = (sessionUser && sessionUser.email) || (profileRow && profileRow.email) || '';
+    var memberSince = fmtDate((profileRow && profileRow.created_at) || (sessionUser && sessionUser.created_at));
+    $('dash-name').textContent = name || email || 'Your account';
+    $('dash-email').textContent = email;
+    $('dash-member').textContent = memberSince ? 'Member since ' + memberSince : '';
+    $('dash-avatar').textContent = (name || email || '?').trim().charAt(0).toUpperCase() || '?';
+
+    var fields = $('dash-fields');
+    fields.innerHTML = '';
+    fields.appendChild(fieldRow('Date of birth', fmtDate(profileRow && profileRow.date_of_birth)));
+    fields.appendChild(fieldRow('Qualification', profileRow && profileRow.qualification));
+    fields.appendChild(fieldRow('Work status', profileRow && profileRow.employment_status ? (WORK_LABELS[profileRow.employment_status] || profileRow.employment_status) : ''));
+    fields.appendChild(fieldRow('Phone', profileRow && profileRow.phone));
+    fields.appendChild(fieldRow('City', profileRow && profileRow.city));
+    fields.appendChild(fieldRow('Target subject', profileRow && profileRow.target_subject ? (SUBJECT_NAMES[profileRow.target_subject] || profileRow.target_subject) : ''));
+
+    /* Prefill the edit form from the same row. */
+    $('f-name').value = (profileRow && profileRow.full_name) || md.full_name || md.name || '';
+    $('f-dob').value = (profileRow && profileRow.date_of_birth) || '';
+    $('f-qual').value = (profileRow && profileRow.qualification) || '';
+    $('f-work').value = (profileRow && profileRow.employment_status) || '';
+    $('f-phone').value = (profileRow && profileRow.phone) || '';
+    $('f-city').value = (profileRow && profileRow.city) || '';
+    $('f-subject').value = (profileRow && profileRow.target_subject) || '';
+  }
+  function renderPlan(ent) {
+    var text = $('dash-plan-text');
+    var actions = $('dash-plan-actions');
+    actions.innerHTML = '';
+    if (ent) {
+      text.textContent = 'Test Series — Full access. All 20 mock tests in every subject are unlocked.' +
+        (ent.purchased_at ? ' Purchased on ' + fmtDate(ent.purchased_at) + '.' : '');
+      var a = document.createElement('a');
+      a.className = 'btn btn-white';
+      a.href = '/changexed/mock-tests/';
+      a.textContent = 'Take a mock test →';
+      actions.appendChild(a);
+    } else {
+      text.textContent = 'Free plan — Mock Tests 1–3 are free in every subject. Unlock all 20 tests in all subjects with the Test Series (₹199, one-time).';
+      var u = document.createElement('a');
+      u.className = 'btn btn-white';
+      u.href = '/pricing/';
+      u.textContent = 'See the ₹199 plan →';
+      actions.appendChild(u);
+      var t = document.createElement('a');
+      t.className = 'btn btn-dark';
+      t.href = '/changexed/mock-tests/';
+      t.textContent = 'Take a free test →';
+      actions.appendChild(t);
+    }
+  }
+  function renderStats(attempts) {
+    var mocks = attempts.filter(function (a) { return a.kind === 'mock'; });
+    var quizzes = attempts.filter(function (a) { return a.kind === 'quiz'; });
+    $('stat-mock').textContent = mocks.length;
+    $('stat-quiz').textContent = quizzes.length;
+    if (mocks.length) {
+      var sum = 0, best = 0;
+      mocks.forEach(function (a) {
+        var p = pct(a);
+        if (p == null) return;
+        sum += p;
+        if (p > best) best = p;
+      });
+      $('stat-avg').textContent = (Math.round((sum / mocks.length) * 10) / 10) + '%';
+      $('stat-best').textContent = best + '%';
+    } else {
+      $('stat-avg').textContent = '—';
+      $('stat-best').textContent = '—';
+    }
+  }
+  function renderSubjects(attempts) {
+    var box = $('dash-subjects');
+    box.innerHTML = '';
+    var mocks = attempts.filter(function (a) { return a.kind === 'mock'; });
+    SUBJECT_ORDER.forEach(function (slug) {
+      var rows = mocks.filter(function (a) { return a.subject === slug; });
+      var sets = {};
+      var best = 0;
+      rows.forEach(function (a) {
+        if (a.set_number != null) sets[a.set_number] = true;
+        var p = pct(a);
+        if (p != null && p > best) best = p;
+      });
+      var div = document.createElement('div');
+      div.className = 'dash-subj-row';
+      var name = document.createElement('span');
+      name.className = 'dash-subj-name';
+      name.textContent = SUBJECT_NAMES[slug] || slug;
+      var prog = document.createElement('span');
+      prog.className = 'dash-subj-prog muted';
+      if (slug === 'most-probable') {
+        prog.textContent = rows.length ? ('Taken ' + rows.length + (rows.length === 1 ? ' time' : ' times') + (best ? ' · Best ' + best + '%' : '')) : 'Not taken yet';
+      } else {
+        var n = Object.keys(sets).length;
+        prog.textContent = n + ' / 20 sets' + (best ? ' · Best ' + best + '%' : '');
+      }
+      div.appendChild(name);
+      div.appendChild(prog);
+      box.appendChild(div);
+    });
+  }
+  function historyRow(a) {
+    var div = document.createElement('div');
+    div.className = 'dash-hist-row';
+    var left = document.createElement('div');
+    var title = document.createElement('div');
+    title.className = 'dash-hist-title';
+    if (a.kind === 'mock') {
+      title.textContent = (SUBJECT_NAMES[a.subject] || a.subject) + (a.set_number != null ? ' · Mock Test ' + a.set_number : '');
+    } else {
+      title.textContent = 'Quick Quiz · ' + (SUBJECT_NAMES[a.subject] || a.subject);
+    }
+    var meta = document.createElement('div');
+    meta.className = 'dash-hist-meta muted';
+    var bits = [];
+    bits.push(a.correct + ' correct · ' + a.wrong + ' wrong · ' + a.skipped + ' skipped');
+    if (a.duration_seconds != null) bits.push(fmtDur(a.duration_seconds));
+    bits.push(fmtDate(a.completed_at));
+    meta.textContent = bits.join(' · ');
+    left.appendChild(title);
+    left.appendChild(meta);
+    var score = document.createElement('div');
+    score.className = 'dash-hist-score';
+    score.textContent = a.score + ' / ' + a.total;
+    var p = pct(a);
+    if (p != null) {
+      var pctEl = document.createElement('div');
+      pctEl.className = 'dash-hist-pct muted';
+      pctEl.textContent = p + '%';
+      score.appendChild(pctEl);
+    }
+    div.appendChild(left);
+    div.appendChild(score);
+    return div;
+  }
+  function emptyNote(text, linkHref, linkText) {
+    var p = document.createElement('p');
+    p.className = 'muted';
+    p.textContent = text + ' ';
+    if (linkHref) {
+      var a = document.createElement('a');
+      a.className = 'card-link';
+      a.href = linkHref;
+      a.textContent = linkText;
+      p.appendChild(a);
+    }
+    return p;
+  }
+  function renderHistory(attempts) {
+    var mocks = attempts.filter(function (a) { return a.kind === 'mock'; });
+    var quizzes = attempts.filter(function (a) { return a.kind === 'quiz'; });
+    var mh = $('dash-mock-history');
+    mh.innerHTML = '';
+    if (!mocks.length) {
+      mh.appendChild(emptyNote('No mock tests taken yet. Your completed tests will appear here.', '/changexed/mock-tests/', 'Take your first mock test →'));
+    } else {
+      mocks.forEach(function (a) { mh.appendChild(historyRow(a)); });
+    }
+    var qh = $('dash-quiz-history');
+    qh.innerHTML = '';
+    if (!quizzes.length) {
+      qh.appendChild(emptyNote('No quiz rounds yet. Your completed rounds will appear here.', '/changexed/quiz/', 'Try the quick quiz →'));
+    } else {
+      quizzes.forEach(function (a) { qh.appendChild(historyRow(a)); });
+    }
+  }
+
+  /* ---------- Save profile ---------- */
+  function onSave(e) {
+    e.preventDefault();
+    if (!sessionUser || !window.CYSupa) return;
+    var msg = $('dash-form-msg');
+    msg.textContent = '';
+    msg.className = 'auth-msg';
+    var dob = $('f-dob').value || '';
+    if (dob) {
+      var d = new Date(dob + 'T00:00:00');
+      if (isNaN(d.getTime())) { msg.textContent = 'Enter a valid date of birth.'; return; }
+      if (d.getTime() > Date.now()) { msg.textContent = 'Date of birth cannot be in the future.'; return; }
+    }
+    var work = $('f-work').value || '';
+    if (work && ['working', 'not_working', 'student'].indexOf(work) === -1) {
+      msg.textContent = 'Choose a valid work status.'; return;
+    }
+    var subject = $('f-subject').value || '';
+    if (subject && SUBJECT_ORDER.indexOf(subject) === -1 && subject !== 'most-probable') {
+      msg.textContent = 'Choose a valid target subject.'; return;
+    }
+    var fields = {
+      full_name: $('f-name').value.trim() || null,
+      date_of_birth: dob || null,
+      qualification: $('f-qual').value.trim() || null,
+      employment_status: work || null,
+      phone: $('f-phone').value.trim() || null,
+      city: $('f-city').value.trim() || null,
+      target_subject: subject || null
+    };
+    var btn = $('dash-save');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    window.CYSupa.updateProfile(sessionUser.id, sessionUser.email, fields).then(function (r) {
+      btn.disabled = false;
+      btn.textContent = 'Save profile';
+      if (!r.ok) {
+        msg.textContent = r.error || 'Could not save your profile. Try again.';
+        return;
+      }
+      profileRow = r.data || profileRow;
+      renderProfile();
+      msg.textContent = 'Profile saved.';
+      msg.className = 'auth-msg ok';
+      showToast('Profile saved.');
+    });
+  }
+
+  /* ---------- Boot ---------- */
+  function loadDashboard() {
+    waitForSupa(function (haveSupa) {
+      if (!haveSupa) {
+        $('dash-loading').hidden = true;
+        $('dash-locked').hidden = false;
+        $('dash-locked-msg').textContent = 'Sign-in could not load — check your connection and reload the page.';
+        return;
+      }
+      var hadCode = false;
+      try { hadCode = window.location.search.indexOf('code=') !== -1; } catch (e) {}
+      function checkSession(retry) {
+        window.CYSupa.getSession().then(function (session) {
+          if (!session) {
+            /* After a Google redirect the code exchange can lag behind
+               the first session read — one retry before giving up. */
+            if (hadCode && retry) { setTimeout(function () { checkSession(false); }, 1500); return; }
+            var err = '';
+            try {
+              var m = window.location.search.match(/[?&]error_description=([^&]*)/);
+              if (m) err = decodeURIComponent(m[1].replace(/\+/g, ' '));
+            } catch (e) {}
+            showLocked(err || '');
+            return;
+          }
+          sessionUser = session.user;
+          showContent();
+          window.CYSupa.getProfile(sessionUser.id).then(function (p) {
+            profileRow = p;
+            renderProfile();
+          });
+          window.CYSupa.getEntitlement(sessionUser.id).then(renderPlan);
+          window.CYSupa.fetchAttempts(sessionUser.id).then(function (attempts) {
+            renderStats(attempts);
+            renderSubjects(attempts);
+            renderHistory(attempts);
+          });
+        });
+      }
+      checkSession(true);
+    });
+  }
+
+  $('dash-signin').addEventListener('click', function () {
+    if (window.CYAuth) window.CYAuth.openModal();
+  });
+  $('dash-signout').addEventListener('click', function () {
+    if (window.CYSupa) {
+      window.CYSupa.signOut().then(function () { window.location.reload(); });
+    } else {
+      window.location.reload();
+    }
+  });
+  $('dash-form').addEventListener('submit', onSave);
+
+  loadDashboard();
+})();
+</script>
+</body>
+</html>
