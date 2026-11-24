@@ -34,7 +34,6 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   .dash-form-grid { grid-template-columns: 1fr; }
   .dash-details-head { flex-wrap: wrap; }
   .dash-customise-row { flex-wrap: wrap; }
-  .dash-level-num { font-size: 14px; }
 }
 
 /* Resizable cards: a drag grip in the bottom-right corner. */
@@ -54,8 +53,6 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-customise-item .btn:disabled { opacity: .35; cursor: default; }
 
 /* Analysis v2: current level + set mastery. */
-.dash-level-num { font-size: 15px; line-height: 1.7; }
-.dash-level-num b { font-size: 16px; }
 .dash-mastery { display: flex; flex-wrap: wrap; gap: 6px; }
 .dash-mastery-cell { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 11px; font-weight: 700; color: #ffffff; }
 .dash-mastery-cell.na { background: rgba(128,128,128,.25); color: var(--muted); }
@@ -68,7 +65,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 6px; }
 .dash-chip { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 .dash-chip.active { background: #7c3aed; border-color: #7c3aed; color: #ffffff; }
-#dash-trend-card h4, #dash-score-card h4 { margin: 20px 0 10px; font-size: 16px; }
+#dash-score-card h4 { margin: 20px 0 10px; font-size: 16px; }
 .dash-analysis-grid { display: grid; grid-template-columns: 150px 1fr; gap: 24px; align-items: start; }
 .dash-legend-row { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 6px; }
 .dash-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
@@ -91,10 +88,11 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 #dash-content .dash-hist-row { border-bottom: none; }
 .dash-hist-row.clickable { cursor: pointer; }
 .dash-hist-details { padding: 4px 0 14px; }
-.dash-trend { display: flex; align-items: flex-end; gap: 8px; height: 120px; }
+.dash-trend { display: flex; align-items: flex-end; gap: 8px; height: 150px; }
 .dash-trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
 .dash-trend-bar { width: 100%; max-width: 44px; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, #7c3aed, #3b82f6); }
 .dash-trend-label { font-size: 12px; color: var(--muted); }
+.dash-trend-pct { font-size: 12px; font-weight: 700; }
 .dash-focus { padding-left: 20px; }
 .dash-focus li { margin-bottom: 10px; font-size: 15px; line-height: 1.5; }
 @media (max-width: 640px) {
@@ -143,15 +141,20 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   .dash-overview { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Insights banner: the top "where to put more effort" item + a real
-   next step. A subtle purple tint, still a glass card. */
-.dash-insights { border-color: rgba(124, 58, 237, .45); background: linear-gradient(90deg, rgba(124, 58, 237, .16), rgba(59, 130, 246, .08)); }
-.dash-insights h3 { margin-bottom: 6px; }
-.dash-insights p { margin-bottom: 14px; }
+/* Focus banner: the reference's bottom banner — the top "where to
+   put more effort" item + a real next step. A subtle purple tint,
+   still a glass card. */
+.dash-focus-card { border-color: rgba(124, 58, 237, .45); background: linear-gradient(90deg, rgba(124, 58, 237, .16), rgba(59, 130, 246, .08)); display: flex; gap: 20px; align-items: flex-start; justify-content: space-between; }
+.dash-focus-card h3 { margin-bottom: 6px; }
+.dash-focus-main { flex: 1; min-width: 0; }
+.dash-focus-main p { margin-bottom: 10px; }
+.dash-focus-main .dash-focus { margin-bottom: 0; }
+@media (max-width: 640px) { .dash-focus-card { flex-direction: column; } }
 
 /* Spacing + paired rows: below the sidebar breakpoint the content is
    the same single column as before. */
 #dash-content > #dash-overview, #dash-content > #dash-topbar { margin-bottom: 20px; }
+#dash-content > .dash-analysis-heading { margin-bottom: 0; }
 @media (min-width: 1024px) {
   /* Rows stretch to equal height, so a shorter card fills the space
      beside its taller neighbour instead of leaving a gap. */
@@ -164,7 +167,11 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   #dash-content > #dash-topbar,
   #dash-content > #dash-overview,
   #dash-content > #dash-quiz-history-card,
-  #dash-content > #dash-insights { grid-column: 1 / -1; }
+  #dash-content > #dash-analysis-banner,
+  #dash-content > #dash-analysis-heading,
+  #dash-content > #dash-trend-card,
+  #dash-content > #dash-time-card,
+  #dash-content > #dash-focus-card { grid-column: 1 / -1; }
 }
 
 /* Fit the dashboard to the space: the content fills the main column
@@ -181,7 +188,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   border: 1px solid rgba(139, 92, 246, 0.25);
   box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.05), 0 10px 30px rgba(0, 0, 0, 0.28);
 }
-.dash-main .card-dark.dash-insights { border-color: rgba(124, 58, 237, 0.5); }
+.dash-main .card-dark.dash-focus-card { border-color: rgba(124, 58, 237, 0.5); }
 html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-overview .dash-ov-tile, html[data-theme="light"] .dash-side {
   box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.05), 0 10px 26px rgba(124, 58, 237, 0.10);
 }
@@ -189,6 +196,39 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
 /* Time per Question: the big average-time number. */
 .dash-time-big { font-size: 34px; font-weight: 800; line-height: 1.1; margin: 4px 0 2px; }
 .dash-time-sub { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+
+/* Analysis banner: scope + subject chips + the verdict, with a 🧠
+   mark where the reference puts its 3D brain (no 3D anywhere on
+   the site — the emoji keeps the same idea in the site's own idiom). */
+.dash-analysis-banner { display: flex; gap: 20px; align-items: center; }
+.dash-banner-main { flex: 1; min-width: 0; }
+.dash-analysis-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(124, 58, 237, .15); color: #a78bfa; font-size: 13px; font-weight: 700; }
+.dash-banner-scope { font-size: 20px; font-weight: 700; margin: 12px 0; }
+.dash-banner-note { color: var(--muted); font-size: 14px; line-height: 1.5; margin: 10px 0 0; }
+.dash-banner-note::before { content: "✦ "; color: #a78bfa; }
+.dash-banner-brain { font-size: 64px; line-height: 1; filter: drop-shadow(0 0 18px rgba(124, 58, 237, .6)); flex-shrink: 0; }
+@media (max-width: 640px) { .dash-banner-brain { display: none; } }
+
+/* "Your Current Level" heading sits above the two-card row. */
+#dash-content > .dash-analysis-heading { font-size: 20px; font-weight: 700; margin: 4px 0 0; }
+
+/* Current level: compact stat strip under the accuracy donut. */
+.dash-level-strip { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+.dash-level-stat b { display: block; font-size: 16px; }
+.dash-level-stat span { font-size: 11px; color: var(--muted); }
+
+/* Time per Question: big number on the left, mini line chart on the
+   right — the reference's split. */
+.dash-time-flex { display: flex; gap: 28px; align-items: center; }
+.dash-time-left { flex: 0 0 230px; }
+.dash-time-chart { flex: 1; min-width: 0; }
+.dash-time-pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.dash-time-pill.good { background: rgba(34, 197, 94, .15); color: #4ade80; }
+.dash-time-pill.warn { background: rgba(245, 158, 11, .15); color: #fbbf24; }
+@media (max-width: 640px) {
+  .dash-time-flex { flex-direction: column; align-items: stretch; }
+  .dash-time-left { flex: none; }
+}
 
 /* Hero row: the greeting on the left, the profile strip on the
    right — so the wide hero has no empty half. Stacks on phones. */
@@ -411,35 +451,36 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
       <div class="quiz-actions" id="dash-plan-actions"></div>
     </div>
 
-    <!-- Analysis, rebuilt as the reference's cards: Current Level,
-         Average Score, Score Trend, Time per Question, Focus. The
-         empty card shows until the first test is taken. -->
-    <div class="card-dark dash-hide-until-profile" id="dash-analysis-empty-card" hidden>
-      <h3>Your analysis</h3>
-      <p class="muted">No tests taken yet. Take your first mock test and your analysis will appear here — your strengths, your weak spots, and exactly where to put more effort.</p>
+    <!-- Analysis, compact like the new reference: one banner (scope +
+         chips + verdict), a two-card row (accuracy + average by set),
+         full-width Score Trend and Time per Question, and a focus
+         banner at the end. No 3D illustration — the banner's mark is
+         a 🧠 emoji, in the site's own theme. -->
+    <div class="card-dark dash-hide-until-profile" id="dash-analysis-banner">
+      <div class="dash-banner-main">
+        <span class="dash-analysis-badge">📊 Your Analysis</span>
+        <p class="dash-banner-scope" id="dash-analysis-scope">Showing: all subjects</p>
+        <div class="dash-chips" id="dash-chips"></div>
+        <p class="dash-banner-note" id="dash-verdict"></p>
+      </div>
+      <span class="dash-banner-brain" aria-hidden="true">🧠</span>
     </div>
 
+    <h3 class="dash-analysis-heading dash-hide-until-profile" id="dash-analysis-heading">📊 Your Current Level</h3>
+
     <div class="card-dark dash-hide-until-profile" id="dash-level-card">
-      <h3>Your Current Level</h3>
-      <p class="muted" id="dash-analysis-scope" style="margin-bottom:12px;">Showing: all subjects</p>
-      <div class="dash-chips" id="dash-chips"></div>
-      <p id="dash-verdict" style="font-weight:700;line-height:1.5;"></p>
-      <div class="dash-analysis-grid" id="dash-level-grid">
-        <div>
-          <svg id="dash-gauge" width="150" height="92" viewBox="0 0 200 110" role="img" aria-label="Current level gauge"></svg>
-        </div>
-        <div class="dash-level-num" id="dash-level-stats"></div>
-      </div>
-      <div class="dash-analysis-grid" style="margin-top:20px;">
+      <div class="dash-analysis-grid">
         <div>
           <svg id="dash-donut" width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Accuracy breakdown"></svg>
         </div>
         <div id="dash-legend"></div>
       </div>
+      <div class="dash-level-strip" id="dash-level-stats"></div>
     </div>
 
     <div class="card-dark dash-hide-until-profile" id="dash-score-card">
       <h3 id="dash-score-title">Average Score</h3>
+      <div id="dash-score-line"></div>
       <div id="dash-bars"></div>
       <div id="dash-mastery-wrap" hidden>
         <h4 id="dash-mastery-title">Set mastery</h4>
@@ -449,25 +490,32 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     </div>
 
     <div class="card-dark dash-hide-until-profile" id="dash-trend-card">
-      <h3>Score Trend</h3>
-      <div id="dash-trend"></div>
+      <h3>📅 Score Trend</h3>
+      <div class="dash-trend" id="dash-trend"></div>
       <p class="muted" id="dash-trend-note" style="font-size:13px;"></p>
-      <h4>Weekly activity</h4>
-      <div class="dash-trend" id="dash-weekly"></div>
-      <p class="muted" id="dash-weekly-note" style="font-size:13px;"></p>
     </div>
 
     <div class="card-dark dash-hide-until-profile" id="dash-time-card">
-      <h3>Time per Question</h3>
-      <div class="dash-time-big" id="dash-avg-time">—</div>
-      <p class="dash-time-sub" id="dash-avg-time-sub">Average time taken per mock test</p>
-      <div class="dash-trend" id="dash-speed"></div>
+      <h3>⏱️ Time per Question</h3>
+      <div class="dash-time-flex">
+        <div class="dash-time-left">
+          <div class="dash-time-big" id="dash-avg-time">—</div>
+          <p class="dash-time-sub" id="dash-avg-time-sub">Avg. time per question</p>
+          <p class="dash-time-sub" id="dash-avg-test-time" style="margin-bottom:12px;">Avg. time per test: —</p>
+          <span class="dash-time-pill" id="dash-time-change" hidden></span>
+        </div>
+        <div class="dash-time-chart" id="dash-speed"></div>
+      </div>
       <p class="muted" id="dash-speed-note" style="font-size:13px;"></p>
     </div>
 
     <div class="card-dark dash-hide-until-profile" id="dash-focus-card">
-      <h3>Where to put more effort</h3>
-      <ul class="dash-focus" id="dash-focus"></ul>
+      <div class="dash-focus-main">
+        <h3>💡 Where to put more effort</h3>
+        <p id="dash-focus-head"></p>
+        <ul class="dash-focus" id="dash-focus"></ul>
+      </div>
+      <a class="btn btn-white" href="/changexed/mock-tests/">Take a Mock Test →</a>
     </div>
 
     <!-- Per-subject progress -->
@@ -491,14 +539,6 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     <div class="card-dark dash-hide-until-profile" id="dash-quiz-history-card">
       <h3>Quiz history</h3>
       <div id="dash-quiz-history"></div>
-    </div>
-
-    <!-- Insights & next steps: the reference layout's bottom banner —
-         the top "where to put more effort" item, plus a real next step. -->
-    <div class="card-dark dash-insights dash-hide-until-profile" id="dash-insights">
-      <h3>💡 Insights &amp; next steps</h3>
-      <p id="dash-insights-text">Take your first mock test to unlock personalised insights.</p>
-      <a class="btn btn-white" href="/changexed/mock-tests/">Take a Mock Test →</a>
     </div>
 
   </div>
@@ -717,8 +757,7 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     { id: 'dash-focus-card', label: 'Where to put more effort' },
     { id: 'dash-progress', label: 'Progress by subject' },
     { id: 'dash-mock-history-card', label: 'Mock test history' },
-    { id: 'dash-quiz-history-card', label: 'Quiz history' },
-    { id: 'dash-insights', label: 'Insights & next steps' }
+    { id: 'dash-quiz-history-card', label: 'Quiz history' }
   ];
   /* The five analysis cards, in order — used by the layout migration. */
   var ANALYSIS_CARDS = ['dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card'];
@@ -744,16 +783,17 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
         parsed.sizes = parsed.sizes || {};
         /* Migrate saved layouts: 'dash-stats' became 'dash-overview'
            (same slot), 'dash-analysis' split into five cards (same
-           slots, in order), and 'dash-insights' is new (appended at
-           the end, where the banner belongs). */
+           slots, in order), and 'dash-insights' is gone — the focus
+           banner now carries its top item, so drop it. */
         ['order', 'hidden'].forEach(function (k) {
           var i = parsed[k].indexOf('dash-stats');
           if (i !== -1) parsed[k][i] = 'dash-overview';
           var j = parsed[k].indexOf('dash-analysis');
           if (j !== -1) parsed[k].splice.apply(parsed[k], [j, 1].concat(ANALYSIS_CARDS));
+          var m = parsed[k].indexOf('dash-insights');
+          if (m !== -1) parsed[k].splice(m, 1);
         });
         if (parsed.order.indexOf('dash-overview') === -1) parsed.order.unshift('dash-overview');
-        if (parsed.order.indexOf('dash-insights') === -1) parsed.order.push('dash-insights');
         return parsed;
       }
     } catch (e) {}
@@ -775,6 +815,12 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
       var el = $(id);
       if (el) content.appendChild(el);
     });
+    /* The analysis banner + heading are pinned, not sections: keep
+       them directly above the first analysis card. */
+    var lvl = $('dash-level-card');
+    var ban = $('dash-analysis-banner'), head = $('dash-analysis-heading');
+    if (lvl && ban) content.insertBefore(ban, lvl);
+    if (lvl && head) content.insertBefore(head, lvl);
     DASH_SECTIONS.forEach(function (s) {
       var el = $(s.id);
       if (!el) return;
@@ -961,26 +1007,29 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     return Math.round((a.duration_seconds / q) * 10) / 10;
   }
   function renderAnalysis() {
-    var emptyCard = $('dash-analysis-empty-card');
-    if (!emptyCard) return;
     var mocks = mockAttempts();
     var quizzes = quizAttempts();
     var hasData = !!(mocks.length || quizzes.length);
-    emptyCard.hidden = hasData;
     ANALYSIS_CARDS.forEach(function (id) {
       var c = $(id);
       if (c) c.hidden = !hasData;
     });
+    /* The banner always shows — with no data it carries the honest
+       empty message; the heading hides until there is data. */
+    var banner = $('dash-analysis-banner');
+    if (banner) banner.hidden = false;
+    var heading = $('dash-analysis-heading');
+    if (heading) heading.hidden = !hasData;
+    var verdict = $('dash-verdict');
     if (!hasData) {
-      var ins0 = $('dash-insights-text');
-      if (ins0) ins0.textContent = 'Take your first mock test to unlock personalised insights.';
+      if (verdict) verdict.textContent = 'No tests taken yet. Take your first mock test and your analysis will appear here — your strengths, your weak spots, and exactly where to put more effort.';
       return;
     }
     var single = singleSubject();
     var subjName = single ? (SUBJECT_NAMES[single] || single) : null;
     var ordered = dated(mocks);
 
-    /* --- Verdict: strongest vs weakest --- */
+    /* --- Verdict: strongest vs weakest (lives in the banner) --- */
     var verdict = $('dash-verdict');
     if (mocks.length) {
       if (single) {
@@ -1003,26 +1052,23 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
       verdict.textContent = 'No mock tests yet — your quiz rounds average ' + avgPct(quizzes) + '%. Take a mock test to unlock the full analysis.';
     }
 
-    /* --- Current level: gauge + weighted average, trend, consistency --- */
-    var levelGrid = $('dash-level-grid');
+    /* --- Current level: weighted average, trend, consistency — as a
+         compact stat strip under the accuracy donut. The old
+         semicircle gauge is gone; its numbers live here. --- */
     var level = weightedAvg(ordered);
+    var strip = $('dash-level-stats');
+    var best = null, slope = null, sd = null;
     if (!mocks.length || level == null) {
-      if (levelGrid) levelGrid.hidden = true;
+      if (strip) strip.hidden = true;
     } else {
-      if (levelGrid) levelGrid.hidden = false;
+      if (strip) strip.hidden = false;
       var marks = Math.round((level / 100) * 300);
-      var best = Math.max.apply(null, pctList(ordered));
+      best = Math.max.apply(null, pctList(ordered));
       var last10 = pctList(ordered).slice(-10);
-      var slope = linSlope(last10);
-      var sd = stddev(last10);
+      slope = linSlope(last10);
+      sd = stddev(last10);
       var consistency = sd == null ? '—' : sd < 8 ? 'Steady' : sd < 15 ? 'Variable' : 'Uneven';
       var trendTxt = slope == null ? '—' : (slope > 0 ? '+' + slope : '' + slope) + ' pts / test';
-      var band = level < 50 ? '#ef4444' : level < 70 ? '#f59e0b' : '#22c55e';
-      $('dash-gauge').innerHTML =
-        '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(128,128,128,.25)" stroke-width="14" stroke-linecap="round" pathLength="100"/>' +
-        '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="' + band + '" stroke-width="14" stroke-linecap="round" pathLength="100" stroke-dasharray="' + level + ' 100"/>' +
-        '<text x="100" y="82" text-anchor="middle" fill="currentColor" font-size="26" font-weight="800">' + level + '%</text>' +
-        '<text x="100" y="98" text-anchor="middle" fill="currentColor" font-size="10" opacity="0.7">current level</text>';
       var streak = streakDays();
       var monthAgo = Date.now() - 30 * 86400000;
       var last30 = allAttempts.filter(function (a) {
@@ -1030,25 +1076,23 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
         var t = new Date(a.completed_at).getTime();
         return !isNaN(t) && t >= monthAgo;
       }).length;
-      var levelStats = $('dash-level-stats');
-      levelStats.innerHTML = '';
+      strip.innerHTML = '';
       [
-        ['Current level', '<b>' + level + '%</b> (&asymp; ' + marks + ' / 300)'],
-        ['Best test', '<b>' + best + '%</b>'],
-        ['Trend (last 10)', '<b>' + trendTxt + '</b>' + (slope != null && slope > 0.5 ? ' — improving' : slope != null && slope < -0.5 ? ' — dipping' : ' — steady')],
-        ['Consistency', '<b>' + consistency + '</b>' + (sd != null ? ' (&plusmn;' + sd + ' pts)' : '')],
-        ['Streak', '<b>' + streak + (streak === 1 ? ' day' : ' days') + '</b> &middot; ' + last30 + ' tests in the last 30 days']
+        [level + '%', 'Current level · ≈ ' + marks + ' / 300'],
+        [best + '%', 'Best test'],
+        [trendTxt, 'Trend (last 10)'],
+        [consistency + (sd != null ? ' ±' + sd : ''), 'Consistency'],
+        [streak + (streak === 1 ? ' day' : ' days'), 'Streak · ' + last30 + ' tests / 30 days']
       ].forEach(function (row) {
-        var p = document.createElement('p');
-        p.style.margin = '0 0 4px';
+        var s = document.createElement('div');
+        s.className = 'dash-level-stat';
+        var b = document.createElement('b');
+        b.textContent = row[0];
         var lab = document.createElement('span');
-        lab.className = 'muted';
-        lab.textContent = row[0] + ': ';
-        var val = document.createElement('span');
-        val.innerHTML = row[1];
-        p.appendChild(lab);
-        p.appendChild(val);
-        levelStats.appendChild(p);
+        lab.textContent = row[1];
+        s.appendChild(b);
+        s.appendChild(lab);
+        strip.appendChild(s);
       });
     }
 
@@ -1084,21 +1128,57 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
       legend.appendChild(d);
     });
 
-    /* --- Bars: by subject, or by set when one subject is chosen --- */
+    /* --- Average Score: line chart by set (one subject), bars by
+         subject (all subjects). --- */
+    var scoreLine = $('dash-score-line');
     var bars = $('dash-bars');
-    bars.innerHTML = '';
     var scoreTitle = $('dash-score-title');
     if (single) {
       if (scoreTitle) scoreTitle.textContent = 'Average Score by Set — ' + subjName;
+      if (bars) bars.style.display = 'none';
+      if (scoreLine) scoreLine.style.display = '';
       var bySet = {};
       mocks.forEach(function (a) { if (a.set_number == null) return; (bySet[a.set_number] = bySet[a.set_number] || []).push(a); });
-      Object.keys(bySet).sort(function (x, y) { return x - y; }).forEach(function (n) {
-        var a = avgPct(bySet[n]);
-        bars.appendChild(barRow('Set ' + n + ' (' + bySet[n].length + (bySet[n].length === 1 ? ' test' : ' tests') + ')', a == null ? '—' : a + '%', a));
-      });
-      if (!Object.keys(bySet).length) bars.appendChild(emptyNote('No set data yet.'));
+      var setNums = Object.keys(bySet).sort(function (x, y) { return x - y; });
+      scoreLine.innerHTML = '';
+      if (!setNums.length) {
+        scoreLine.appendChild(emptyNote('No set data yet.'));
+      } else {
+        var setPts = setNums.map(function (n) { return { n: +n, avg: avgPct(bySet[n]) }; }).filter(function (q) { return q.avg != null; });
+        var W = 560, H = 170, PL = 34, PR = 10, PT = 12, PB = 24;
+        var pts = setPts.map(function (q, i) {
+          return {
+            x: PL + (setPts.length === 1 ? (W - PL - PR) / 2 : (i * (W - PL - PR)) / Math.max(1, setPts.length - 1)),
+            y: PT + ((100 - q.avg) / 100) * (H - PT - PB), v: q.avg, n: q.n
+          };
+        });
+        var lastPt = pts[pts.length - 1];
+        var bubX = Math.max(PL, Math.min(W - PR - 48, lastPt.x - 24));
+        var bubY = Math.max(PT, lastPt.y - 40);
+        var lineSvg = '<svg width="100%" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Average score by set">' +
+          [0, 50, 100].map(function (v) {
+            var y = PT + ((100 - v) / 100) * (H - PT - PB);
+            return '<line x1="' + PL + '" y1="' + y.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + y.toFixed(1) + '" stroke="rgba(128,128,128,.2)" stroke-width="1"/>' +
+              '<text x="' + (PL - 6) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="currentColor" opacity="0.6">' + v + '%</text>';
+          }).join('');
+        if (pts.length > 1) {
+          lineSvg += '<polygon points="' + pts.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' ') + ' ' + lastPt.x.toFixed(1) + ' ' + (H - PB) + ' ' + pts[0].x.toFixed(1) + ' ' + (H - PB) + '" fill="rgba(124,58,237,0.15)"/>' +
+            '<polyline points="' + pts.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' ') + '" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+        }
+        lineSvg += pts.map(function (q) {
+          return '<circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="4" fill="#7c3aed" stroke="#ffffff" stroke-width="1.5"><title>Set ' + q.n + ' · ' + q.v + '%</title></circle>';
+        }).join('') +
+          '<g><rect x="' + bubX.toFixed(1) + '" y="' + bubY.toFixed(1) + '" width="48" height="24" rx="8" fill="#7c3aed"/><text x="' + (bubX + 24).toFixed(1) + '" y="' + (bubY + 16).toFixed(1) + '" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">' + lastPt.v + '%</text></g>' +
+          '<text x="' + PL + '" y="' + (H - 6) + '" font-size="10" fill="currentColor" opacity="0.6">Set ' + pts[0].n + '</text>' +
+          '<text x="' + (W - PR) + '" y="' + (H - 6) + '" text-anchor="end" font-size="10" fill="currentColor" opacity="0.6">Set ' + lastPt.n + '</text>' +
+          '</svg>';
+        scoreLine.innerHTML = lineSvg;
+      }
     } else {
       if (scoreTitle) scoreTitle.textContent = 'Average Score by Subject';
+      if (scoreLine) scoreLine.style.display = 'none';
+      if (bars) bars.style.display = '';
+      bars.innerHTML = '';
       var byS = {};
       mocks.forEach(function (a) { (byS[a.subject] = byS[a.subject] || []).push(a); });
       SUBJECT_ORDER.forEach(function (slug) {
@@ -1108,42 +1188,36 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
       });
     }
 
-    /* --- Score trend: line chart over the last 20 mock tests --- */
+    /* --- Score Trend: bars of the last 8 mock scores by date. --- */
     var trend = $('dash-trend');
     trend.innerHTML = '';
-    var last = ordered.slice(-20);
+    var last8 = ordered.slice(-8);
     var note = $('dash-trend-note');
-    if (last.length < 2) {
+    if (last8.length < 2) {
       note.textContent = 'Take at least 2 mock tests to see your trend.';
     } else {
-      var W = 560, H = 170, PL = 34, PR = 10, PT = 12, PB = 24;
-      var pts = last.map(function (a, i) {
+      last8.forEach(function (a, i) {
         var p = pct(a);
-        return {
-          x: PL + (i * (W - PL - PR)) / Math.max(1, last.length - 1),
-          y: PT + ((100 - (p == null ? 0 : p)) / 100) * (H - PT - PB),
-          p: p, a: a
-        };
+        var col = document.createElement('div');
+        col.className = 'dash-trend-col';
+        var pctLab = document.createElement('div');
+        pctLab.className = 'dash-trend-pct';
+        pctLab.textContent = (p == null ? '—' : p + '%');
+        var bar = document.createElement('div');
+        bar.className = 'dash-trend-bar' + (p == null ? '' : p < 50 ? ' weak' : p < 70 ? ' mid' : ' strong');
+        bar.style.height = Math.max(4, Math.round((p == null ? 0 : p) * 0.7)) + '%';
+        bar.title = (a.set_number != null ? 'Set ' + a.set_number + ' · ' : '') + fmtDate(a.completed_at) + ' · ' + p + '%';
+        var lab = document.createElement('div');
+        lab.className = 'dash-trend-label';
+        try {
+          lab.textContent = i === last8.length - 1 ? 'Now' : new Date(a.completed_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+        } catch (e) { lab.textContent = ''; }
+        col.appendChild(pctLab);
+        col.appendChild(bar);
+        col.appendChild(lab);
+        trend.appendChild(col);
       });
-      var avgY = level != null ? PT + ((100 - level) / 100) * (H - PT - PB) : null;
-      trend.innerHTML =
-        '<svg width="100%" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Score trend">' +
-        [0, 50, 100].map(function (v) {
-          var y = PT + ((100 - v) / 100) * (H - PT - PB);
-          return '<line x1="' + PL + '" y1="' + y.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + y.toFixed(1) + '" stroke="rgba(128,128,128,.2)" stroke-width="1"/>' +
-            '<text x="' + (PL - 6) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="currentColor" opacity="0.6">' + v + '%</text>';
-        }).join('') +
-        (avgY != null ? '<line x1="' + PL + '" y1="' + avgY.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + avgY.toFixed(1) + '" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="5 4"><title>Current level: ' + level + '%</title></line>' : '') +
-        '<polygon points="' + pts.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' ') + ' ' + pts[pts.length - 1].x.toFixed(1) + ' ' + (H - PB) + ' ' + pts[0].x.toFixed(1) + ' ' + (H - PB) + '" fill="rgba(124,58,237,0.15)"/>' +
-        '<polyline points="' + pts.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' ') + '" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
-        pts.map(function (q) {
-          return '<circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="4" fill="#7c3aed" stroke="#ffffff" stroke-width="1.5"><title>' +
-            esc((q.a.set_number != null ? 'Set ' + q.a.set_number + ' · ' : '') + fmtDate(q.a.completed_at) + ' · ' + q.p + '%') + '</title></circle>';
-        }).join('') +
-        '<text x="' + PL + '" y="' + (H - 6) + '" font-size="10" fill="currentColor" opacity="0.6">' + esc(fmtDate(last[0].completed_at)) + '</text>' +
-        '<text x="' + (W - PR) + '" y="' + (H - 6) + '" text-anchor="end" font-size="10" fill="currentColor" opacity="0.6">' + esc(fmtDate(last[last.length - 1].completed_at)) + '</text>' +
-        '</svg>';
-      var first = pct(last[0]), lastP = pct(last[last.length - 1]);
+      var first = pct(last8[0]), lastP = pct(last8[last8.length - 1]);
       note.textContent = (first != null && lastP != null)
         ? ('First of these: ' + first + '% \u2192 latest: ' + lastP + '%' + (lastP > first ? ' — improving, keep going.' : lastP < first ? ' — dipping. Revise before your next test.' : ' — steady.') +
           (slope != null ? ' Trend: ' + (slope > 0 ? '+' : '') + slope + ' pts per test (last 10).' : ''))
@@ -1187,76 +1261,65 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
       mWrap.hidden = true;
     }
 
-    /* --- Weekly activity: attempts per week, last 8 weeks --- */
-    var weekly = $('dash-weekly');
-    weekly.innerHTML = '';
-    var nowMs = Date.now();
-    var weekCounts = [];
-    for (var w = 7; w >= 0; w--) {
-      var wEnd = nowMs - w * 7 * 86400000;
-      var wStart = wEnd - 7 * 86400000;
-      var c = allAttempts.filter(function (a) {
-        if (!a.completed_at) return false;
-        var t = new Date(a.completed_at).getTime();
-        return !isNaN(t) && t > wStart && t <= wEnd;
-      }).length;
-      weekCounts.push({ c: c, w: w, start: wStart });
-    }
-    var maxW = 1;
-    weekCounts.forEach(function (x) { if (x.c > maxW) maxW = x.c; });
-    weekCounts.forEach(function (x) {
-      var col = document.createElement('div');
-      col.className = 'dash-trend-col';
-      var bar = document.createElement('div');
-      bar.className = 'dash-trend-bar';
-      bar.style.height = Math.max(4, Math.round((x.c / maxW) * 100)) + '%';
-      bar.title = x.c + (x.c === 1 ? ' test' : ' tests');
-      var lab = document.createElement('div');
-      lab.className = 'dash-trend-label';
-      try {
-        lab.textContent = x.w === 0 ? 'Now' : new Date(x.start).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-      } catch (e) { lab.textContent = ''; }
-      col.appendChild(bar);
-      col.appendChild(lab);
-      weekly.appendChild(col);
-    });
-    var total8w = weekCounts.reduce(function (s, x) { return s + x.c; }, 0);
-    $('dash-weekly-note').textContent = total8w + (total8w === 1 ? ' test' : ' tests') + ' in the last 8 weeks.';
-
-    /* --- Time per question: last 8 timed mocks + rushing check --- */
+    /* --- Time per Question: mean seconds per question (big number),
+         average time per test, and a line of sec/question over the
+         last 8 timed mocks. --- */
     var speedInsight = null;
     var speedBox = $('dash-speed');
     speedBox.innerHTML = '';
     var avgTimeEl = $('dash-avg-time');
+    var avgTestEl = $('dash-avg-test-time');
+    var pill = $('dash-time-change');
     var withDur = ordered.slice(-8).filter(function (a) { return secPerQ(a) != null; });
     if (!withDur.length) {
       $('dash-speed-note').textContent = 'Time data will appear here once you finish timed tests.';
       if (avgTimeEl) avgTimeEl.textContent = '—';
+      if (avgTestEl) avgTestEl.textContent = 'Avg. time per test: —';
+      if (pill) pill.hidden = true;
     } else {
       var sp = withDur.map(function (a) { return { a: a, s: secPerQ(a) }; });
+      var meanS = Math.round(sp.reduce(function (s, x) { return s + x.s; }, 0) / sp.length);
+      if (avgTimeEl) avgTimeEl.textContent = '~' + meanS + 's';
+      if (avgTestEl) {
+        var durs = ordered.map(function (a) { return a.duration_seconds; }).filter(function (d) { return d != null; });
+        avgTestEl.textContent = 'Avg. time per test: ' + (durs.length ? fmtDur(Math.round(durs.reduce(function (s, d) { return s + d; }, 0) / durs.length)) : '—');
+      }
+      /* Faster or slower than before? Compare the median sec/question
+         of the earlier half with the recent half. */
+      if (pill) {
+        var half = Math.floor(sp.length / 2);
+        if (half >= 2) {
+          var olderMed = median(sp.slice(0, half).map(function (x) { return x.s; }));
+          var recentMed = median(sp.slice(half).map(function (x) { return x.s; }));
+          var chg = olderMed ? Math.round(((olderMed - recentMed) / olderMed) * 100) : 0;
+          if (Math.abs(chg) >= 1) {
+            pill.hidden = false;
+            pill.textContent = (chg > 0 ? '↓ ' + chg + '% faster' : '↑ ' + Math.abs(chg) + '% slower') + ' than before';
+            pill.className = 'dash-time-pill ' + (chg > 0 ? 'good' : 'warn');
+          } else pill.hidden = true;
+        } else pill.hidden = true;
+      }
+      /* Mini line chart of sec/question over the timed tests. */
       var maxS = 1;
       sp.forEach(function (x) { if (x.s > maxS) maxS = x.s; });
-      sp.forEach(function (x) {
-        var col = document.createElement('div');
-        col.className = 'dash-trend-col';
-        var bar = document.createElement('div');
-        bar.className = 'dash-trend-bar';
-        bar.style.height = Math.max(4, Math.round((x.s / maxS) * 100)) + '%';
-        bar.title = (x.a.set_number != null ? 'Set ' + x.a.set_number + ' · ' : '') + x.s + 's per question';
-        var lab = document.createElement('div');
-        lab.className = 'dash-trend-label';
-        lab.textContent = (x.a.set_number != null ? 'S' + x.a.set_number : '');
-        col.appendChild(bar);
-        col.appendChild(lab);
-        speedBox.appendChild(col);
+      var TW = 560, TH = 110, TPL = 8, TPR = 8, TPT = 14, TPB = 10;
+      var tpts = sp.map(function (x, i) {
+        return {
+          x: TPL + (sp.length === 1 ? (TW - TPL - TPR) / 2 : (i * (TW - TPL - TPR)) / Math.max(1, sp.length - 1)),
+          y: TPT + ((maxS - x.s) / maxS) * (TH - TPT - TPB), s: x.s, a: x.a
+        };
       });
-      var med = median(sp.map(function (x) { return x.s; }));
-      /* Average time taken: the mean duration of the mocks in view —
-         the big number at the top of the Time card. */
-      if (avgTimeEl) {
-        var durs = ordered.map(function (a) { return a.duration_seconds; }).filter(function (d) { return d != null; });
-        avgTimeEl.textContent = durs.length ? fmtDur(Math.round(durs.reduce(function (s, d) { return s + d; }, 0) / durs.length)) : '—';
+      var tSvg = '<svg width="100%" viewBox="0 0 ' + TW + ' ' + TH + '" role="img" aria-label="Seconds per question over time">';
+      if (tpts.length > 1) {
+        tSvg += '<polygon points="' + tpts.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' ') + ' ' + tpts[tpts.length - 1].x.toFixed(1) + ' ' + (TH - TPB) + ' ' + tpts[0].x.toFixed(1) + ' ' + (TH - TPB) + '" fill="rgba(124,58,237,0.15)"/>' +
+          '<polyline points="' + tpts.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' ') + '" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
       }
+      tSvg += tpts.map(function (q) {
+        return '<circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="4" fill="#7c3aed" stroke="#ffffff" stroke-width="1.5"><title>' +
+          esc((q.a.set_number != null ? 'Set ' + q.a.set_number + ' · ' : '') + q.s + 's per question') + '</title></circle>';
+      }).join('') + '</svg>';
+      speedBox.innerHTML = tSvg;
+      var med = median(sp.map(function (x) { return x.s; }));
       var speedNote = 'Median: ' + med + 's per question across your last ' + sp.length + (sp.length === 1 ? ' test' : ' tests') + '.';
       var fast = [], slow = [];
       ordered.forEach(function (a) {
@@ -1321,11 +1384,11 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     if (speedInsight) items.push(speedInsight);
     if (sd != null && sd >= 15) items.push('Your scores swing a lot (\u00B1' + sd + ' pts across your last 10 tests) — steady revision beats cramming before the next test.');
     if (!items.length) items.push('No weak spot stands out — keep taking tests to sharpen your edge.');
-    /* The insights banner shows the top item — the single most
-       useful next step. */
-    var ins = $('dash-insights-text');
-    if (ins) ins.textContent = items[0];
-    items.slice(0, 5).forEach(function (t) {
+    /* The focus banner shows the top item as its headline, with the
+       rest as smaller bullets. */
+    var focusHead = $('dash-focus-head');
+    if (focusHead) focusHead.textContent = items[0];
+    items.slice(1, 5).forEach(function (t) {
       var li = document.createElement('li');
       li.textContent = t;
       focus.appendChild(li);
