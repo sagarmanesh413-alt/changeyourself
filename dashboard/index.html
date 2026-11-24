@@ -258,6 +258,8 @@ html[data-theme="light"] .dash-range-seg { border-color: rgba(0, 0, 0, 0.10); ba
   #dash-content > #dash-analysis-heading,
   #dash-content > #dash-trend-card,
   #dash-content > #dash-time-card,
+  #dash-content > #dash-weekly-card,
+  #dash-content > #dash-recent-card,
   #dash-content > #dash-focus-card,
   #dash-content > .dash-view-tabs { grid-column: 1 / -1; }
 }
@@ -365,6 +367,19 @@ html[data-theme="light"] .dash-view-tabs, html[data-theme="light"] .dash-glass-s
 /* Accuracy ring: the segments sweep in when the card renders. */
 #dash-donut circle { transition: stroke-dashoffset .8s ease, stroke-dasharray .8s ease; }
 
+/* Weekly activity: seven bars (Mon–Sun), one per day, with the
+   mock and quiz counts stacked in two tones. The latest day's bar
+   glows, like the performance bars. */
+.dash-weekly { display: flex; align-items: flex-end; gap: 10px; height: 150px; }
+.dash-weekly-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; min-width: 0; }
+.dash-weekly-count { font-size: 12px; font-weight: 700; }
+.dash-weekly-bar { width: 100%; max-width: 44px; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, #7c3aed, #3b82f6); transform-origin: bottom; animation: dash-bar-in .5s cubic-bezier(.22, .61, .36, 1) both; overflow: hidden; display: flex; flex-direction: column-reverse; }
+.dash-weekly-bar .dash-weekly-mock { background: linear-gradient(180deg, #7c3aed, #6d28d9); }
+.dash-weekly-bar .dash-weekly-quiz { background: linear-gradient(180deg, #60a5fa, #3b82f6); }
+.dash-weekly-bar.latest { box-shadow: 0 0 16px rgba(124, 58, 237, .45); }
+.dash-weekly-label { font-size: 12px; color: var(--muted); }
+.dash-weekly-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 10px; }
+
 /* Performance bars: grow from the baseline, staggered by column. */
 .dash-trend-bar { transform-origin: bottom; animation: dash-bar-in .5s cubic-bezier(.22, .61, .36, 1) both; }
 .dash-trend-col:nth-child(2) .dash-trend-bar { animation-delay: .05s; }
@@ -464,15 +479,12 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 .dash-profile-main #dash-profile-name { font-size: 16px; font-weight: 700; color: var(--text); }
 .dash-profile-subject { margin-left: auto; padding: 5px 10px; border-radius: 999px; background: rgba(124, 58, 237, .12); color: #a78bfa; font-size: 12px; font-weight: 700; white-space: nowrap; }
 .dash-profile-subject:empty { display: none; }
+#dash-hero-view-profile { white-space: nowrap; }
 .dash-hero-visual { display: none; }
 @media (min-width: 1024px) {
-  .dash-hero-row { grid-template-columns: 1fr 220px; }
-  .dash-hero-visual { display: block; position: relative; height: 190px; }
-  .dash-hero-glow { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(124, 58, 237, .45), rgba(124, 58, 237, 0) 65%); filter: blur(10px); }
-  .dash-hero-orbit { position: absolute; left: 50%; top: 50%; width: 170px; height: 170px; margin: -85px 0 0 -85px; border: 1px solid rgba(167, 139, 250, .25); border-radius: 50%; animation: dash-orbit 24s linear infinite; }
-  .dash-hero-orbit::after { content: ""; position: absolute; left: 50%; top: -4px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: #a78bfa; }
-  .dash-hero-orb { position: absolute; left: 50%; top: 50%; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #c4b5fd; background: rgba(124, 58, 237, .16); border: 1px solid rgba(167, 139, 250, .35); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 12px 32px rgba(124, 58, 237, .25); }
-  .dash-hero-orb svg { width: 44px; height: 44px; }
+  .dash-hero-row { grid-template-columns: 1fr 260px; }
+  .dash-hero-visual { display: block; position: relative; height: 210px; }
+  .dash-hero-brain { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: screen; }
 }
 @keyframes dash-orbit { to { transform: rotate(360deg); } }
 
@@ -524,24 +536,22 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     <div>
       <h1 id="dash-hero-title">Your dashboard</h1>
       <p>Let's keep pushing your limits and grow together.</p>
-    </div>
-    <!-- Profile card: lives in the hero, so the wide hero has no
-         empty half. The account actions moved to the topbar avatar
-         menu. -->
-    <div class="card-dark dash-profile">
-      <div class="dash-avatar" id="dash-avatar" aria-hidden="true">?</div>
-      <div class="dash-profile-main">
-        <p id="dash-profile-name">—</p>
-        <p id="dash-email" class="muted">—</p>
-        <p class="muted" id="dash-member">Member since —</p>
+      <!-- Profile card: lives in the hero, so the wide hero has no
+           empty half. -->
+      <div class="card-dark dash-profile">
+        <div class="dash-avatar" id="dash-avatar" aria-hidden="true">?</div>
+        <div class="dash-profile-main">
+          <p id="dash-profile-name">—</p>
+          <p id="dash-email" class="muted">—</p>
+          <p class="muted" id="dash-member">Member since —</p>
+        </div>
+        <span class="dash-profile-subject" id="dash-profile-subject"></span>
+        <button class="btn btn-dark" id="dash-hero-view-profile" type="button">View Profile →</button>
       </div>
-      <span class="dash-profile-subject" id="dash-profile-subject"></span>
     </div>
-  </div>
-  <div class="dash-hero-visual" aria-hidden="true">
-    <span class="dash-hero-glow"></span>
-    <span class="dash-hero-orbit"></span>
-    <span class="dash-hero-orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/><path d="M22 10v6"/></svg></span>
+    <div class="dash-hero-visual" aria-hidden="true">
+      <img src="/dash-brain.png" alt="" class="dash-hero-brain" loading="lazy">
+    </div>
   </div>
 </div></div>
 
@@ -832,6 +842,12 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       <p class="muted" id="dash-speed-note" style="font-size:13px;"></p>
     </div>
 
+    <div class="card-dark dash-hide-until-profile" id="dash-weekly-card">
+      <h3>Weekly Activity</h3>
+      <div class="dash-weekly" id="dash-weekly"></div>
+      <p class="muted" id="dash-weekly-note" style="font-size:13px;"></p>
+    </div>
+
     <div class="card-dark dash-hide-until-profile" id="dash-focus-card">
       <div class="dash-focus-main">
         <h3>Insights &amp; Next Steps</h3>
@@ -850,6 +866,15 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
         <button class="btn btn-dark" id="dash-add-subject-btn" type="button">+ Add subject</button>
         <select id="dash-add-subject-select" aria-label="Add a subject" hidden></select>
       </div>
+    </div>
+
+    <!-- Recent activity (latest attempts, with a link to the full history) -->
+    <div class="card-dark dash-hide-until-profile" id="dash-recent-card">
+      <div class="dash-card-head">
+        <h3>Recent Activity</h3>
+        <button class="btn btn-dark" id="dash-recent-all" type="button">View All →</button>
+      </div>
+      <div id="dash-recent-list"></div>
     </div>
 
     <!-- Mock test history -->
@@ -1076,8 +1101,10 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     { id: 'dash-score-card', label: 'Average Score' },
     { id: 'dash-trend-card', label: 'Score Trend' },
     { id: 'dash-time-card', label: 'Time per Question' },
+    { id: 'dash-weekly-card', label: 'Weekly Activity' },
     { id: 'dash-focus-card', label: 'Insights & Next Steps' },
     { id: 'dash-progress', label: 'Progress by subject' },
+    { id: 'dash-recent-card', label: 'Recent Activity' },
     { id: 'dash-mock-history-card', label: 'Mock test history' },
     { id: 'dash-quiz-history-card', label: 'Quiz history' },
     { id: 'dash-appearance-card', label: 'Appearance' }
@@ -1251,9 +1278,9 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
      Analytics: the analysis banner + five cards. Settings: your
      details + Customise. Learn is a link, not a view. */
   var VIEW_SECTIONS = {
-    dashboard: ['dash-overview', 'dash-week-line', 'dash-plan', 'dash-goals', 'dash-progress'],
+    dashboard: ['dash-overview', 'dash-week-line', 'dash-plan', 'dash-goals', 'dash-progress', 'dash-recent-card'],
     mytests: ['dash-mock-history-card', 'dash-quiz-history-card'],
-    analytics: ['dash-analysis-banner', 'dash-analysis-heading', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card'],
+    analytics: ['dash-analysis-banner', 'dash-analysis-heading', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-weekly-card', 'dash-focus-card'],
     settings: ['dash-details-card', 'dash-customise-row', 'dash-customise', 'dash-appearance-card']
   };
   var currentView = 'dashboard';
@@ -1399,6 +1426,8 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     renderHistory();
     renderChips();
     renderAnalysis();
+    renderWeekly();
+    renderRecent();
     renderGoals();
     renderAddSubject();
   }
@@ -1635,8 +1664,10 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     var level = weightedAvg(ordered);
     var strip = $('dash-level-stats');
     var best = null, slope = null, sd = null;
-    /* The strip always shows — with no mock data it reads zero
-       (exact numbers, never a dash). */
+    /* The strip always shows. A level and a best test need mock
+       tests to exist, so with none they read N/A (an average of no
+       tests is not 0%) — the streak and the counts are real numbers
+       and stay exact. */
     var streak = streakDays();
     var monthAgo = Date.now() - 30 * 86400000;
     var last30 = allAttempts.filter(function (a) {
@@ -1662,8 +1693,8 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     }
     if (!mocks.length || level == null) {
       stripRows([
-        ['0%', 'Current level · 0 / 300'],
-        ['0%', 'Best test'],
+        ['N/A', 'Current level'],
+        ['N/A', 'Best test'],
         ['0 pts / test', 'Trend (last 10)'],
         ['Steady ±0', 'Consistency'],
         [streak + (streak === 1 ? ' day' : ' days'), 'Streak · ' + last30 + ' tests / 30 days']
@@ -1699,7 +1730,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       '<defs><linearGradient id="dash-acc-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>' +
       '<circle cx="70" cy="70" r="52" fill="none" stroke="rgba(128,128,128,.25)" stroke-width="16"/>' +
       '<circle class="dash-donut-arc" cx="70" cy="70" r="52" fill="none" stroke="url(#dash-acc-grad)" stroke-width="16" stroke-linecap="round" stroke-dasharray="0 ' + C.toFixed(1) + '" transform="rotate(-90 70 70)"/>' +
-      '<text x="70" y="67" text-anchor="middle" fill="currentColor" font-size="24" font-weight="800">' + acc + '%</text>' +
+      '<text x="70" y="67" text-anchor="middle" fill="currentColor" font-size="24" font-weight="800">' + (sum ? acc + '%' : 'N/A') + '</text>' +
       '<text x="70" y="86" text-anchor="middle" fill="currentColor" font-size="11" opacity="0.7">accuracy</text>';
     var arc = donut.querySelector('.dash-donut-arc');
     if (arc) {
@@ -1874,8 +1905,8 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     var withDur = ordered.slice(-8).filter(function (a) { return secPerQ(a) != null; });
     if (!withDur.length) {
       $('dash-speed-note').textContent = 'Time data will appear here once you finish timed tests.';
-      if (avgTimeEl) avgTimeEl.textContent = '0s';
-      if (avgTestEl) avgTestEl.textContent = 'Avg. time per test: 0s';
+      if (avgTimeEl) avgTimeEl.textContent = 'N/A';
+      if (avgTestEl) avgTestEl.textContent = 'Avg. time per test: N/A';
       if (pill) pill.hidden = true;
     } else {
       var sp = withDur.map(function (a) { return { a: a, s: secPerQ(a) }; });
@@ -2240,8 +2271,8 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     var avg = avgPct(mocks);
     var best = null;
     mocks.map(pct).forEach(function (p) { if (p != null && (best == null || p > best)) best = p; });
-    $('ov-avg').textContent = avg == null ? '0%' : avg + '%';
-    $('ov-best').textContent = best == null ? '0%' : best + '%';
+    $('ov-avg').textContent = avg == null ? 'N/A' : avg + '%';
+    $('ov-best').textContent = best == null ? 'N/A' : best + '%';
     var rangeTxt = dateRangeDays ? 'in the last ' + dateRangeDays + ' days' : 'all time';
     var q = 0;
     mocks.concat(quizzes).forEach(function (a) { q += (a.correct || 0) + (a.wrong || 0) + (a.skipped || 0); });
@@ -2250,12 +2281,12 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     var slope = null;
     var vals = pctList(dated(mocks)).slice(-10);
     if (vals.length >= 2) slope = linSlope(vals);
-    $('ov-avg-sub').textContent = avg == null ? 'No mock tests yet — your average starts at 0%'
+    $('ov-avg-sub').textContent = avg == null ? 'No mock tests yet — take your first mock test'
       : (slope == null ? 'Average across your mock tests'
         : slope > 0.5 ? 'Rising +' + slope + ' pts / test'
         : slope < -0.5 ? 'Dipping ' + slope + ' pts / test'
         : 'Steady across your last tests');
-    $('ov-best-sub').textContent = best == null ? 'No mock tests yet — your best starts at 0%'
+    $('ov-best-sub').textContent = best == null ? 'No mock tests yet — take your first mock test'
       : 'Best across your mock tests · ' + rangeTxt;
     setChange('ov-avg-change', halfChange(vals));
     setChange('ov-best-change', halfChange(runningBest(dated(mocks))));
@@ -2343,6 +2374,100 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     });
   }
 
+  /* ---------- Weekly Activity: Mon–Sun bars for the current week
+       (mock tests and quiz rounds stacked in two tones, with today
+       highlighted). Counts are real attempts; a day with no activity
+       shows a short empty bar, never an invented number. */
+  function renderWeekly() {
+    var box = $('dash-weekly');
+    var note = $('dash-weekly-note');
+    if (!box) return;
+    box.innerHTML = '';
+    var now = new Date();
+    var dow = (now.getDay() + 6) % 7; /* Monday = 0 */
+    var monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow);
+    monday.setHours(0, 0, 0, 0);
+    var days = [];
+    for (var i = 0; i < 7; i++) {
+      days.push({ date: new Date(monday.getTime() + i * 86400000), mocks: 0, quizzes: 0 });
+    }
+    var max = 0;
+    allAttempts.forEach(function (a) {
+      if (!a.completed_at || !isVisible(a.subject)) return;
+      var t = new Date(a.completed_at).getTime();
+      if (isNaN(t)) return;
+      var idx = Math.floor((t - monday.getTime()) / 86400000);
+      if (idx < 0 || idx > 6) return;
+      if (a.kind === 'mock') days[idx].mocks++;
+      else days[idx].quizzes++;
+      var tot = days[idx].mocks + days[idx].quizzes;
+      if (tot > max) max = tot;
+    });
+    var labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    var total = 0;
+    days.forEach(function (day, i) {
+      var tot = day.mocks + day.quizzes;
+      total += tot;
+      var col = document.createElement('div');
+      col.className = 'dash-weekly-col';
+      var tipTitle = labels[i] + ' · ' + shortDate(day.date.getTime());
+      var tipSub = tot + (tot === 1 ? ' test' : ' tests') + (tot ? ' (' + day.mocks + ' mock' + (day.mocks === 1 ? '' : 's') + ' · ' + day.quizzes + ' quiz round' + (day.quizzes === 1 ? '' : 's') + ')' : '');
+      col.title = tipTitle + ' · ' + tipSub;
+      var count = document.createElement('div');
+      count.className = 'dash-weekly-count';
+      count.textContent = tot || '';
+      var bar = document.createElement('div');
+      bar.className = 'dash-weekly-bar' + (i === dow ? ' latest' : '');
+      if (!tot) {
+        bar.style.height = '4px';
+        bar.style.background = 'rgba(128,128,128,.25)';
+      } else {
+        bar.style.height = Math.max(8, Math.round((tot / max) * 100)) + '%';
+        if (day.mocks) {
+          var m = document.createElement('div');
+          m.className = 'dash-weekly-mock';
+          m.style.height = (day.mocks / tot * 100) + '%';
+          bar.appendChild(m);
+        }
+        if (day.quizzes) {
+          var q = document.createElement('div');
+          q.className = 'dash-weekly-quiz';
+          q.style.height = (day.quizzes / tot * 100) + '%';
+          bar.appendChild(q);
+        }
+      }
+      var lab = document.createElement('div');
+      lab.className = 'dash-weekly-label';
+      lab.textContent = labels[i];
+      col.appendChild(count);
+      col.appendChild(bar);
+      col.appendChild(lab);
+      box.appendChild(col);
+    });
+    if (note) {
+      note.textContent = total
+        ? total + (total === 1 ? ' test' : ' tests') + ' this week · ' + shortDate(monday.getTime()) + ' – ' + shortDate(monday.getTime() + 6 * 86400000) + '. Purple = mock tests, blue = quiz rounds.'
+        : 'No tests this week yet. Take a mock test or a quiz round to see your week fill in.';
+    }
+  }
+  /* ---------- Recent Activity: the latest attempts on the Dashboard
+       view, with a View All action that jumps to the full history.
+       Each row is the same structured history row as My Tests. */
+  function renderRecent() {
+    var list = $('dash-recent-list');
+    if (!list) return;
+    list.innerHTML = '';
+    var recent = allAttempts.slice().sort(function (a, b) {
+      var ta = a.completed_at ? new Date(a.completed_at).getTime() : 0;
+      var tb = b.completed_at ? new Date(b.completed_at).getTime() : 0;
+      return tb - ta;
+    }).slice(0, 3);
+    if (!recent.length) {
+      list.appendChild(emptyNote('No activity yet. Take your first mock test or quiz round to see it here.', '/changexed/mock-tests/', 'Take a mock test →'));
+      return;
+    }
+    recent.forEach(function (a) { list.appendChild(historyRow(a)); });
+  }
   function renderSubjects() {
     var box = $('dash-subjects');
     box.innerHTML = '';
@@ -2806,6 +2931,14 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
   var viewProfile = $('dash-view-profile');
   if (viewProfile) viewProfile.addEventListener('click', function () {
     showView('settings');
+  });
+  var heroViewProfile = $('dash-hero-view-profile');
+  if (heroViewProfile) heroViewProfile.addEventListener('click', function () {
+    showView('settings');
+  });
+  var recentAll = $('dash-recent-all');
+  if (recentAll) recentAll.addEventListener('click', function () {
+    showView('mytests');
   });
   var searchInput = $('dash-search');
   if (searchInput) searchInput.addEventListener('input', function () {
