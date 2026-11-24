@@ -22,7 +22,17 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 /* Your details + Edit profile are one card: the details show by
    default, and Edit profile opens the form in place in the same card. */
 .dash-details-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
-.dash-details-head h3 { margin: 0; }
+/* Card headings are h2 now (was h3) — same size/weight as the shared
+   .card-dark h3 rule in /styles.css, so the look does not change. */
+.card-dark h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.dash-details-head h2 { margin: 0; }
+/* Delete account (danger zone): a red-tinted card and a destructive
+   button. The confirm step is type-to-confirm (type DELETE). */
+.dash-delete-card { border-color: rgba(239, 68, 68, .45); }
+.dash-delete-card h2 { color: #fca5a5; }
+.btn-danger { background: #dc2626; color: #fff; border-color: #dc2626; }
+.btn-danger:hover { background: #b91c1c; border-color: #b91c1c; }
+.btn-danger:disabled { background: #7f1d1d; border-color: #7f1d1d; }
 
 /* Responsive: stack the two-column grids on phones, and let the
    analysis grid stack sooner on tablets. */
@@ -232,7 +242,7 @@ html[data-theme="light"] .dash-range-seg { border-color: rgba(0, 0, 0, 0.10); ba
    put more effort" item + a real next step. A subtle purple tint,
    still a glass card. */
 .dash-focus-card { border-left: 3px solid #7c3aed; background: rgba(124, 58, 237, .06); display: flex; gap: 20px; align-items: flex-start; justify-content: space-between; }
-.dash-focus-card h3 { margin-bottom: 6px; }
+.dash-focus-card h2 { margin-bottom: 6px; }
 .dash-focus-main { flex: 1; min-width: 0; }
 .dash-focus-main p { margin-bottom: 10px; }
 .dash-focus-main .dash-focus { margin-bottom: 0; }
@@ -358,7 +368,7 @@ html[data-theme="light"] .dash-view-tabs, html[data-theme="light"] .dash-glass-s
    for the interactive charts. The chart containers are positioned
    so the tooltip anchors to them. */
 .dash-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-.dash-card-head h3 { margin: 0; }
+.dash-card-head h2 { margin: 0; }
 #dash-score-line, #dash-speed { position: relative; }
 .dash-chart-tip { position: absolute; z-index: 5; pointer-events: none; padding: 8px 10px; border-radius: 10px; background: rgba(20, 20, 25, .95); border: 1px solid rgba(255, 255, 255, .12); color: #ffffff; font-size: 12px; line-height: 1.5; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); white-space: nowrap; transform: translate(-50%, -115%); }
 .dash-chart-tip b { color: #c4b5fd; }
@@ -407,7 +417,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 /* Appearance lives in Settings now (an inline card), not a popover —
    the .dash-glass-* controls below are reused there unchanged. */
 .dash-glass-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.dash-glass-head h3 { margin: 0; }
+.dash-glass-head h2 { margin: 0; }
 .dash-glass-sample { height: 72px; display: flex; align-items: center; justify-content: center; border-radius: 13px; margin: 16px 0; font-size: 13px; color: var(--muted); }
 .dash-glass-presets { display: flex; gap: 6px; margin-bottom: 18px; }
 .dash-glass-presets button { flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 7px 0; font: inherit; font-size: 13px; font-weight: 600; color: var(--text); background: transparent; cursor: pointer; }
@@ -553,13 +563,13 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 
   <!-- Loading -->
   <div class="card-dark" id="dash-loading">
-    <h3>Loading your dashboard…</h3>
+    <h2>Loading your dashboard…</h2>
     <p>Fetching your profile and history.</p>
   </div>
 
   <!-- Signed out -->
   <div class="card-dark" id="dash-locked" hidden>
-    <h3>Sign in to see your dashboard</h3>
+    <h2>Sign in to see your dashboard</h2>
     <p>Your profile, plan and test history live in your account. Sign in with Google or with an email code — it takes a few seconds.</p>
     <p id="dash-locked-msg" class="auth-msg" role="status"></p>
     <button class="btn btn-white" id="dash-signin" type="button">Sign in</button>
@@ -570,7 +580,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 
     <!-- First sign-in: shown until the profile is complete -->
     <div class="card-dark" id="dash-onboard-note" hidden>
-      <h3>Welcome — complete your profile first</h3>
+      <h2>Welcome — complete your profile first</h2>
       <p class="muted">Tell us a little about yourself so your dashboard is set up for you. It only takes a minute — fill in every field below and tap Save profile.</p>
     </div>
 
@@ -578,7 +588,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
          default; Edit profile opens the form in place. -->
     <div class="card-dark" id="dash-details-card">
       <div class="dash-details-head">
-        <h3>Your details</h3>
+        <h2>Your details</h2>
         <button class="btn btn-dark" id="dash-edit-btn" type="button">Edit profile</button>
       </div>
       <div id="dash-details-view">
@@ -633,6 +643,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
             </select>
           </div>
         </div>
+        <p class="muted" style="font-size:13px;margin:2px 0 12px;">All fields are required to keep your dashboard unlocked.</p>
         <div class="quiz-actions">
           <button class="btn btn-white" id="dash-save" type="submit">Save profile</button>
           <button class="btn btn-dark" id="dash-cancel" type="button">Cancel</button>
@@ -647,7 +658,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       <button class="btn btn-dark" id="dash-reset-layout-btn" type="button">Reset layout</button>
     </div>
     <div class="card-dark" id="dash-customise" hidden>
-      <h3>Customise dashboard</h3>
+      <h2>Customise dashboard</h2>
       <p class="muted">Choose which sections you see and move them into your order with the arrows. Drag a card's bottom-right corner to resize it. Your layout is saved on this device.</p>
       <div class="dash-customise-list" id="dash-customise-list"></div>
     </div>
@@ -657,7 +668,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
          your glass stays how you set it. -->
     <div class="card-dark dash-hide-until-profile" id="dash-appearance-card">
       <div class="dash-glass-head">
-        <h3>Appearance</h3>
+        <h2>Appearance</h2>
       </div>
       <p class="muted">Adjust the glass across your dashboard.</p>
       <div class="dash-glass-sample" aria-hidden="true"><span>Live material preview</span></div>
@@ -676,6 +687,31 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
         <input type="range" id="dash-glass-edge" min="0" max="1" step="0.05" aria-label="Edge light"></label>
       <label class="dash-glass-tint">Glass tint <input type="color" id="dash-glass-tint" value="#ffffff" aria-label="Glass tint"></label>
       <button type="button" class="btn btn-dark" id="dash-glass-reset">Reset appearance</button>
+    </div>
+
+    <!-- Delete account (danger zone): two-step type-to-confirm. The
+         actual deletion runs server-side via CYSupa.deleteAccount()
+         (an Edge Function with the service-role key) — the browser
+         never deletes auth.users itself. -->
+    <div class="card-dark dash-delete-card" id="dash-delete-card">
+      <div class="dash-glass-head">
+        <h2>Delete account</h2>
+      </div>
+      <p class="muted">Permanently delete your account and everything stored with it — your profile, your test history and your entitlements. This cannot be undone.</p>
+      <div id="dash-delete-step1">
+        <button type="button" class="btn btn-danger" id="dash-delete-btn">Delete my account</button>
+      </div>
+      <div id="dash-delete-step2" hidden>
+        <p class="muted" style="margin-bottom:8px;">To confirm, type <strong>DELETE</strong> below. Your account, profile, test history and entitlements will be permanently deleted.</p>
+        <div class="dash-field" style="max-width:280px;">
+          <input type="text" id="dash-delete-confirm" autocomplete="off" placeholder="Type DELETE to confirm">
+        </div>
+        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-danger" id="dash-delete-confirm-btn" disabled>Permanently delete my account</button>
+          <button type="button" class="btn btn-dark" id="dash-delete-cancel-btn">Cancel</button>
+        </div>
+      </div>
+      <p class="auth-msg" id="dash-delete-msg" role="status"></p>
     </div>
 
     <!-- Topbar: search, notifications, and the account menu — the
@@ -735,7 +771,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
           <span class="dash-ov-change" id="ov-avg-change" hidden></span>
         </div>
         <div class="dash-ov-value" id="ov-avg">—</div>
-        <div class="dash-ov-label">Average Score</div>
+        <div class="dash-ov-label">All-time average</div>
         <div class="dash-ov-sub" id="ov-avg-sub">—</div>
         <div class="dash-ov-spark" id="ov-avg-spark" aria-hidden="true"></div>
       </div>
@@ -756,7 +792,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 
     <!-- Plan -->
     <div class="card-dark dash-hide-until-profile" id="dash-plan">
-      <h3>Your plan</h3>
+      <h2>Your plan</h2>
       <p id="dash-plan-text" class="muted">Checking your plan…</p>
       <div class="quiz-actions" id="dash-plan-actions"></div>
     </div>
@@ -765,7 +801,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
          study targets — your average, your sets, your streak. Every
          number is exact, and a new user starts at 0. -->
     <div class="card-dark dash-hide-until-profile" id="dash-goals">
-      <h3>Study goals</h3>
+      <h2>Study goals</h2>
       <p class="muted">Real targets from your own tests — they move as you do.</p>
       <div id="dash-goals-list"></div>
     </div>
@@ -785,7 +821,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       <span class="dash-banner-brain" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
     </div>
 
-    <h3 class="dash-analysis-heading dash-hide-until-profile" id="dash-analysis-heading">Your Accuracy</h3>
+    <h2 class="dash-analysis-heading dash-hide-until-profile" id="dash-analysis-heading">Your Accuracy</h2>
 
     <div class="card-dark dash-hide-until-profile" id="dash-level-card">
       <div class="dash-analysis-grid">
@@ -799,7 +835,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 
     <div class="card-dark dash-hide-until-profile" id="dash-score-card">
       <div class="dash-card-head">
-        <h3 id="dash-score-title">Average Score Trend</h3>
+        <h2 id="dash-score-title">Average Score Trend</h2>
         <div class="dash-range-seg" id="dash-range" role="group" aria-label="Time range">
           <button type="button" data-range="7" aria-pressed="false">7D</button>
           <button type="button" data-range="30" aria-pressed="false">30D</button>
@@ -817,13 +853,13 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     </div>
 
     <div class="card-dark dash-hide-until-profile" id="dash-trend-card">
-      <h3>Performance History</h3>
+      <h2>Performance History</h2>
       <div class="dash-trend" id="dash-trend"></div>
       <p class="muted" id="dash-trend-note" style="font-size:13px;"></p>
     </div>
 
     <div class="card-dark dash-hide-until-profile" id="dash-time-card">
-      <h3>Time per Question</h3>
+      <h2>Time per Question</h2>
       <div class="dash-time-flex">
         <div class="dash-time-left">
           <div class="dash-time-big" id="dash-avg-time">—</div>
@@ -837,14 +873,14 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     </div>
 
     <div class="card-dark dash-hide-until-profile" id="dash-weekly-card">
-      <h3>Weekly Activity</h3>
+      <h2>Weekly Activity</h2>
       <div class="dash-weekly" id="dash-weekly"></div>
       <p class="muted" id="dash-weekly-note" style="font-size:13px;"></p>
     </div>
 
     <div class="card-dark dash-hide-until-profile" id="dash-focus-card">
       <div class="dash-focus-main">
-        <h3>Insights &amp; Next Steps</h3>
+        <h2>Insights &amp; Next Steps</h2>
         <p id="dash-focus-head"></p>
         <ul class="dash-focus" id="dash-focus"></ul>
       </div>
@@ -853,7 +889,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 
     <!-- Per-subject progress -->
     <div class="card-dark dash-hide-until-profile" id="dash-progress">
-      <h3>Progress by subject</h3>
+      <h2>Progress by subject</h2>
       <div id="dash-subjects"></div>
       <p class="muted" id="dash-subjects-note" style="font-size:13px;margin-top:10px;"></p>
       <div id="dash-add-subject" style="margin-top:12px;" hidden>
@@ -865,7 +901,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     <!-- Recent activity (latest attempts, with a link to the full history) -->
     <div class="card-dark dash-hide-until-profile" id="dash-recent-card">
       <div class="dash-card-head">
-        <h3>Recent Activity</h3>
+        <h2>Recent Activity</h2>
         <button class="btn btn-dark" id="dash-recent-all" type="button">View All →</button>
       </div>
       <div id="dash-recent-list"></div>
@@ -873,13 +909,13 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 
     <!-- Mock test history -->
     <div class="card-dark dash-hide-until-profile" id="dash-mock-history-card">
-      <h3 id="dash-mock-title">Mock test history</h3>
+      <h2 id="dash-mock-title">Mock test history</h2>
       <div id="dash-mock-history"></div>
     </div>
 
     <!-- Quiz history -->
     <div class="card-dark dash-hide-until-profile" id="dash-quiz-history-card">
-      <h3>Quiz history</h3>
+      <h2>Quiz history</h2>
       <div id="dash-quiz-history"></div>
     </div>
 
@@ -889,7 +925,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 </div><!-- /.dash-main -->
 </div><!-- /.dash-shell -->
 
-<footer class="footer"><div class="container"><div class="footer-links"><a href="/">Home</a><a href="/about/">About</a><a href="/pricing/">Pricing</a><a href="/changexed/mock-tests/">Mock Tests</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://www.youtube.com/@ChangeXed" target="_blank" rel="noopener">Contact</a></div><img src="/logo.png" alt="ChangeYourself" class="footer-logo"><p class="footer-tag">ChangeYourself — Learn. Grow. Transform.</p><p class="footer-copy">© 2026 ChangeYourself.in</p></div></footer>
+<footer class="footer"><div class="container"><div class="footer-links"><a href="/">Home</a><a href="/about/">About</a><a href="/pricing/">Pricing</a><a href="/changexed/mock-tests/">Mock Tests</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/refund/">Refund</a><a href="https://www.youtube.com/@ChangeXed" target="_blank" rel="noopener">Contact</a></div><img src="/logo.png" alt="ChangeYourself" class="footer-logo"><p class="footer-tag">ChangeYourself — Learn. Grow. Transform.</p><p class="footer-copy">© 2026 ChangeYourself.in</p></div></footer>
 
 <!-- No dock on the dashboard: it is an app-like page, same as the mock-test and quiz pages. -->
 <div class="toast" id="toast" role="status"></div>
@@ -1101,7 +1137,8 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     { id: 'dash-recent-card', label: 'Recent Activity' },
     { id: 'dash-mock-history-card', label: 'Mock test history' },
     { id: 'dash-quiz-history-card', label: 'Quiz history' },
-    { id: 'dash-appearance-card', label: 'Appearance' }
+    { id: 'dash-appearance-card', label: 'Appearance' },
+    { id: 'dash-delete-card', label: 'Delete account' }
   ];
   /* The five analysis cards, in order — used by the layout migration. */
   var ANALYSIS_CARDS = ['dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card'];
@@ -1146,6 +1183,10 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
         /* 'dash-appearance-card' is new — put it at the end. */
         if (parsed.order.indexOf('dash-appearance-card') === -1) {
           parsed.order.push('dash-appearance-card');
+        }
+        /* 'dash-delete-card' is new — put it at the end. */
+        if (parsed.order.indexOf('dash-delete-card') === -1) {
+          parsed.order.push('dash-delete-card');
         }
         return parsed;
       }
@@ -1275,7 +1316,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     dashboard: ['dash-overview', 'dash-week-line', 'dash-plan', 'dash-goals', 'dash-progress', 'dash-recent-card'],
     mytests: ['dash-mock-history-card', 'dash-quiz-history-card'],
     analytics: ['dash-analysis-banner', 'dash-analysis-heading', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-weekly-card', 'dash-time-card', 'dash-focus-card'],
-    settings: ['dash-details-card', 'dash-customise-row', 'dash-customise', 'dash-appearance-card']
+    settings: ['dash-details-card', 'dash-customise-row', 'dash-customise', 'dash-appearance-card', 'dash-delete-card']
   };
   var currentView = 'dashboard';
   function applyVisibility() {
@@ -1432,12 +1473,21 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
      (weights 1,2,3,4,5 — the latest test counts most). A plain all-time
      average lets old weak scores drag the number down; the weighted
      level answers "how good am I right now". Shown as % and as
-     projected marks out of 300.
+     projected marks out of 300. The overview tile and the "Reach 80%
+     average" goal use the plain all-time average of all mock score%
+     (avgPct), not the weighted level — the two are labelled
+     differently ("All-time average" vs "Current level (recent tests
+     weighted)") so they are not confused.
      TREND = least-squares slope of score% over the last 10 mocks
      (points per test). |slope| < 0.5 counts as steady.
      CONSISTENCY = standard deviation of the last 10 score%:
      under 8 steady, 8–15 variable, over 15 uneven.
-     ACCURACY = correct / (correct + wrong) across the visible mocks.
+     ACCURACY = correct / total questions (correct + wrong + skipped)
+     across the visible mocks — the same number as the marks-based
+     score% (score / total marks), because each correct answer is
+     worth 2 marks in a mock (1 in a quiz) and there is no partial
+     credit. The history row and the accuracy ring both show this
+     one number (the history row uses pct(a), the marks-based score%).
      SPEED = median seconds per question across the last 5 mocks. A
      rushing insight is shown only when the data supports it: at least
      3 fast (<60s/q) and 3 slow (>=60s/q) attempts, with slow accuracy
@@ -1687,10 +1737,10 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     }
     if (!mocks.length || level == null) {
       stripRows([
-        ['N/A', 'Current level'],
+        ['N/A', 'Current level (recent tests weighted)'],
         ['N/A', 'Best test'],
-        ['0 pts / test', 'Trend (last 10)'],
-        ['Steady ±0', 'Consistency'],
+        ['N/A', 'Trend (last 10)'],
+        ['N/A', 'Consistency'],
         [streak + (streak === 1 ? ' day' : ' days'), 'Streak · ' + last30 + ' tests / 30 days']
       ]);
     } else {
@@ -1699,10 +1749,10 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       var last10 = pctList(ordered).slice(-10);
       slope = linSlope(last10);
       sd = stddev(last10);
-      var consistency = sd == null ? 'Steady' : sd < 8 ? 'Steady' : sd < 15 ? 'Variable' : 'Uneven';
-      var trendTxt = slope == null ? '0 pts / test' : (slope > 0 ? '+' + slope : '' + slope) + ' pts / test';
+      var consistency = sd == null ? 'N/A' : sd < 8 ? 'Steady' : sd < 15 ? 'Variable' : 'Uneven';
+      var trendTxt = slope == null ? 'N/A' : (slope > 0 ? '+' + slope : '' + slope) + ' pts / test';
       stripRows([
-        [level + '%', 'Current level · ' + marks + ' / 300'],
+        [level + '%', 'Current level (recent tests weighted) · ' + marks + ' / 300'],
         [best + '%', 'Best test'],
         [trendTxt, 'Trend (last 10)'],
         [consistency + (sd != null ? ' ±' + sd : ''), 'Consistency'],
@@ -1887,16 +1937,16 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       mWrap.hidden = true;
     }
 
-    /* --- Time per Question: mean seconds per question (big number),
+    /* --- Time per Question: median seconds per question (big number),
          average time per test, and a line of sec/question over the
-         last 8 timed mocks. --- */
+         last 5 timed mocks. --- */
     var speedInsight = null;
     var speedBox = $('dash-speed');
     speedBox.innerHTML = '';
     var avgTimeEl = $('dash-avg-time');
     var avgTestEl = $('dash-avg-test-time');
     var pill = $('dash-time-change');
-    var withDur = ordered.slice(-8).filter(function (a) { return secPerQ(a) != null; });
+    var withDur = ordered.slice(-5).filter(function (a) { return secPerQ(a) != null; });
     if (!withDur.length) {
       $('dash-speed-note').textContent = 'Time data will appear here once you finish timed tests.';
       if (avgTimeEl) avgTimeEl.textContent = 'N/A';
@@ -1904,8 +1954,8 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       if (pill) pill.hidden = true;
     } else {
       var sp = withDur.map(function (a) { return { a: a, s: secPerQ(a) }; });
-      var meanS = Math.round(sp.reduce(function (s, x) { return s + x.s; }, 0) / sp.length);
-      if (avgTimeEl) avgTimeEl.textContent = meanS + 's';
+      var medS = median(sp.map(function (x) { return x.s; }));
+      if (avgTimeEl) avgTimeEl.textContent = medS == null ? 'N/A' : Math.round(medS) + 's';
       if (avgTestEl) {
         var durs = ordered.map(function (a) { return a.duration_seconds; }).filter(function (d) { return d != null; });
         avgTestEl.textContent = 'Avg. time per test: ' + (durs.length ? fmtDur(Math.round(durs.reduce(function (s, d) { return s + d; }, 0) / durs.length)) : '—');
@@ -1972,7 +2022,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     var items = [];
     function skippedRate(list) {
       var t = 0, s = 0;
-      list.forEach(function (a) { t += a.total || 0; s += a.skipped || 0; });
+      list.forEach(function (a) { t += (a.correct || 0) + (a.wrong || 0) + (a.skipped || 0); s += a.skipped || 0; });
       return t ? Math.round((s / t) * 100) : 0;
     }
     function avgDur(list) {
@@ -2160,23 +2210,78 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     if (profileRow && profileRow.target_subject) visibleSubjects = [profileRow.target_subject];
     renderAll();
   }
-  function renderPlan(ent) {
+  /* ---------- Per-subject entitlements ----------
+     The plan card lists WHICH subjects are unlocked, not a generic
+     "full access". The new contract is getEntitlement(userId, subject)
+     (product 'mocktests:<subject>'); supabase.js still has the old
+     single-product signature, so the dashboard first queries the
+     entitlements table directly through the CYSupa client (one query;
+     RLS still applies — a user only ever sees their own rows) and
+     filters by the 'mocktests:' prefix. If that is unavailable it
+     falls back to one getEntitlement call per subject, accepting only
+     rows whose product is exactly 'mocktests:<subject>'. A legacy
+     'mocktests' row (no subject) cannot say which subject was bought,
+     so it never counts as an unlock. */
+  function fetchEntitlements(userId) {
+    var subjects = SUBJECT_ORDER.filter(function (s) { return s !== 'most-probable'; });
+    function fromRows(rows) {
+      var out = [];
+      (rows || []).forEach(function (r) {
+        if (!r || typeof r.product !== 'string') return;
+        if (r.product.indexOf('mocktests:') !== 0) return;
+        var subj = r.product.slice('mocktests:'.length);
+        if (subjects.indexOf(subj) === -1) return;
+        out.push({ subject: subj, purchased_at: r.purchased_at || null });
+      });
+      return out;
+    }
+    function viaGetEntitlement() {
+      if (!window.CYSupa || typeof window.CYSupa.getEntitlement !== 'function') return Promise.resolve([]);
+      return Promise.all(subjects.map(function (s) {
+        var p;
+        try { p = window.CYSupa.getEntitlement(userId, s); } catch (e) { return null; }
+        return Promise.resolve(p).then(function (ent) {
+          if (ent && ent.product === 'mocktests:' + s) return { subject: s, purchased_at: ent.purchased_at || null };
+          return null;
+        }).catch(function () { return null; });
+      })).then(function (results) { return results.filter(function (x) { return !!x; }); });
+    }
+    /* Direct table query (preferred: one round trip). */
+    if (window.CYSupa && window.CYSupa.ready && typeof window.CYSupa.ready.then === 'function') {
+      return window.CYSupa.ready.then(function (c) {
+        if (!c) return viaGetEntitlement();
+        return c.from('entitlements').select('product,status,purchased_at')
+          .eq('user_id', userId).eq('status', 'active')
+          .then(function (r) {
+            if (r.error) return viaGetEntitlement();
+            return fromRows(r.data);
+          }).catch(function () { return viaGetEntitlement(); });
+      }).catch(function () { return viaGetEntitlement(); });
+    }
+    return viaGetEntitlement();
+  }
+  function renderPlan(ents) {
     var text = $('dash-plan-text');
     var actions = $('dash-plan-actions');
     actions.innerHTML = '';
+    /* Accept an array of {subject, purchased_at}; a lone legacy row
+       (or anything without a subject) does not count as an unlock. */
+    var list = Array.isArray(ents) ? ents : (ents ? [ents] : []);
+    list = list.filter(function (e) { return e && e.subject; });
+    var names = list.map(function (e) { return SUBJECT_NAMES[e.subject] || e.subject; });
     /* The sidebar's plan card shows the same status, one line. */
     var sideText = $('dash-side-plan-text');
     var sideLink = $('dash-side-plan-link');
-    if (sideText) sideText.textContent = ent
-      ? 'Test Series — full access in your subject.'
+    if (sideText) sideText.textContent = names.length
+      ? 'Test Series — unlocked in ' + names.join(', ') + '.'
       : 'Tests 1–3 free · Unlock all 20 for ₹249 / subject.';
     if (sideLink) {
-      sideLink.href = ent ? '/changexed/mock-tests/' : '/pricing/';
-      sideLink.textContent = ent ? 'Take a mock test →' : 'See pricing →';
+      sideLink.href = names.length ? '/changexed/mock-tests/' : '/pricing/';
+      sideLink.textContent = names.length ? 'Take a mock test →' : 'See pricing →';
     }
-    if (ent) {
-      text.textContent = 'Test Series — Full access. All 20 mock tests in your subject are unlocked.' +
-        (ent.purchased_at ? ' Purchased on ' + fmtDate(ent.purchased_at) + '.' : '');
+    if (names.length) {
+      text.textContent = 'Test Series — Unlocked in ' + names.join(', ') + '. All 20 mock tests in each unlocked subject are available.' +
+        (list[0].purchased_at ? ' First purchased on ' + fmtDate(list[0].purchased_at) + '.' : '');
       var a = document.createElement('a');
       a.className = 'btn btn-white';
       a.href = '/changexed/mock-tests/';
@@ -2315,8 +2420,10 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     var list = $('dash-goals-list');
     if (!list) return;
     var mocks = mockAttempts();
-    var level = weightedAvg(dated(mocks));
-    var avg = level != null ? level : (avgPct(mocks) != null ? avgPct(mocks) : 0);
+    /* Goal 1 tracks the plain all-time average (avgPct), not the
+       recency-weighted current level — it is labelled "average", so it
+       must use the average. */
+    var avg = avgPct(mocks) != null ? avgPct(mocks) : 0;
     var streak = streakDays();
     var subj = singleSubject() || (typeof profileRow !== 'undefined' && profileRow && profileRow.target_subject) || 'psychology';
     var sets = {};
@@ -2567,8 +2674,13 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     extra.style.fontSize = '13px';
     var extraBits = [];
     if (a.duration_seconds != null && a.total) {
-      var perQ = Math.round(a.duration_seconds / a.total);
-      extraBits.push('About ' + (perQ >= 60 ? Math.floor(perQ / 60) + 'm ' + (perQ % 60) + 's' : perQ + 's') + ' per question');
+      /* secPerQ divides by the question count (correct + wrong +
+         skipped), not by total MARKS — a.total is 300 for a mock. */
+      var perQ = secPerQ(a);
+      if (perQ != null) {
+        perQ = Math.round(perQ);
+        extraBits.push('About ' + (perQ >= 60 ? Math.floor(perQ / 60) + 'm ' + (perQ % 60) + 's' : perQ + 's') + ' per question');
+      }
     }
     extra.textContent = extraBits.join(' · ');
     details.appendChild(extra);
@@ -2653,21 +2765,36 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       var d = new Date(dob + 'T00:00:00');
       if (isNaN(d.getTime())) { msg.textContent = 'Enter a valid date of birth.'; return; }
       if (d.getTime() > Date.now()) { msg.textContent = 'Date of birth cannot be in the future.'; return; }
+      /* Plausible age: 13 to 100. */
+      var nowD = new Date();
+      var age = nowD.getFullYear() - d.getFullYear();
+      var dm = nowD.getMonth() - d.getMonth();
+      if (dm < 0 || (dm === 0 && nowD.getDate() < d.getDate())) age--;
+      if (age < 13 || age > 100) { msg.textContent = 'Enter a date of birth for someone aged 13 to 100.'; return; }
     }
     var work = $('f-work').value || '';
     if (work && ['working', 'not_working', 'student'].indexOf(work) === -1) {
       msg.textContent = 'Choose a valid work status.'; return;
     }
     var subject = $('f-subject').value || '';
-    if (subject && SUBJECT_ORDER.indexOf(subject) === -1 && subject !== 'most-probable') {
+    /* 'most-probable' is a test category, not a UGC NET subject — it is
+       not offered by the select and is not accepted here. Only the 10
+       real subjects (or empty) pass validation. */
+    if (subject && (SUBJECT_ORDER.indexOf(subject) === -1 || subject === 'most-probable')) {
       msg.textContent = 'Choose a valid target subject.'; return;
     }
-    /* While the first-sign-in gate is up, every field is required —
-       the form is the front door, not an optional extra. Later edits
-       (gate already lifted) keep the old lenient behaviour. */
-    var onboarding = false;
-    try { onboarding = document.body.classList.contains('dash-onboarding'); } catch (e) {}
-    if (onboarding) {
+    var phone = $('f-phone').value.trim() || '';
+    if (phone) {
+      /* Digits, 10–15 chars, optional leading + (spaces, dashes and
+         brackets are ignored). */
+      var digits = phone.replace(/[\s\-()]/g, '');
+      if (!/^\+?[0-9]{10,15}$/.test(digits)) { msg.textContent = 'Enter a valid phone number (10–15 digits, optional + country code).'; return; }
+    }
+    /* All 7 fields are permanently required — onboarding and later
+       edits alike. Letting a field be cleared would save it as null
+       and the profile gate would silently re-lock the dashboard, so
+       the form refuses an empty field instead of saving it. */
+    {
       var labels = { 'f-name': 'Full name', 'f-dob': 'Date of birth', 'f-qual': 'Qualification', 'f-work': 'Work status', 'f-phone': 'Phone', 'f-city': 'City', 'f-subject': 'Target subject' };
       var missing = [];
       var firstMissing = null;
@@ -2746,7 +2873,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
             profileRow = p;
             renderProfile();
           });
-          window.CYSupa.getEntitlement(sessionUser.id).then(renderPlan);
+          fetchEntitlements(sessionUser.id).then(renderPlan);
           window.CYSupa.fetchAttempts(sessionUser.id).then(function (attempts) {
             allAttempts = attempts || [];
             renderAll();
@@ -2767,6 +2894,61 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       window.location.reload();
     }
   });
+  /* ---------- Delete account (danger zone) ----------
+     Two-step type-to-confirm. The deletion itself runs server-side
+     via CYSupa.deleteAccount() (an Edge Function with the
+     service-role key) — the browser never deletes auth.users.
+     If the function is not available yet, say so plainly and point
+     at the email route instead of failing silently. On success, sign
+     out and go home. */
+  (function () {
+    var delBtn = $('dash-delete-btn'), step1 = $('dash-delete-step1'), step2 = $('dash-delete-step2'),
+      confirmInput = $('dash-delete-confirm'), confirmBtn = $('dash-delete-confirm-btn'),
+      cancelBtn = $('dash-delete-cancel-btn'), delMsg = $('dash-delete-msg');
+    if (!delBtn || !step1 || !step2 || !confirmInput || !confirmBtn || !cancelBtn || !delMsg) return;
+    function setDelMsg(t) { delMsg.textContent = t || ''; delMsg.className = 'auth-msg'; }
+    delBtn.addEventListener('click', function () {
+      step1.hidden = true; step2.hidden = false;
+      confirmInput.value = ''; confirmBtn.disabled = true; setDelMsg('');
+      try { confirmInput.focus(); } catch (e) {}
+    });
+    cancelBtn.addEventListener('click', function () {
+      step2.hidden = true; step1.hidden = false; setDelMsg('');
+    });
+    confirmInput.addEventListener('input', function () {
+      confirmBtn.disabled = String(confirmInput.value || '').trim() !== 'DELETE';
+    });
+    confirmBtn.addEventListener('click', function () {
+      if (String(confirmInput.value || '').trim() !== 'DELETE') return;
+      if (!window.CYSupa || typeof window.CYSupa.deleteAccount !== 'function') {
+        setDelMsg('Account deletion is not available yet. To delete your account, email officialchangeyourself@gmail.com and we will delete it for you.');
+        return;
+      }
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Deleting…';
+      setDelMsg('');
+      var p;
+      try { p = window.CYSupa.deleteAccount(); } catch (e) { p = Promise.reject(e); }
+      Promise.resolve(p).then(function (r) {
+        if (r && r.ok === false) {
+          setDelMsg(r.error || 'Could not delete your account. Try again.');
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = 'Permanently delete my account';
+          return;
+        }
+        /* Deleted server-side — sign out and go home. */
+        if (window.CYSupa && typeof window.CYSupa.signOut === 'function') {
+          window.CYSupa.signOut().then(function () { window.location.href = '/'; });
+        } else {
+          window.location.href = '/';
+        }
+      }).catch(function (e) {
+        setDelMsg((e && (e.message || e.error)) || 'Could not delete your account. Try again.');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Permanently delete my account';
+      });
+    });
+  })();
   $('dash-form').addEventListener('submit', onSave);
   $('dash-customise-btn').addEventListener('click', function () {
     var p = $('dash-customise');
