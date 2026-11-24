@@ -143,16 +143,14 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   .dash-shell.side-collapsed .dash-main { margin-left: 92px; }
   .dash-shell { padding: 0 20px; }
   .dash-side.collapsed { width: 72px; }
-  .dash-side.collapsed .dash-side-logo span, .dash-side.collapsed .dash-side-link span, .dash-side.collapsed .dash-side-plan, .dash-side.collapsed .dash-side-plus, .dash-side.collapsed .dash-side-theme { display: none; }
+  .dash-side.collapsed .dash-side-link span, .dash-side.collapsed .dash-side-plan { display: none; }
   .dash-side.collapsed .dash-side-link { justify-content: center; padding: 11px 0; }
   .dash-side.collapsed .dash-side-head { justify-content: center; padding: 4px 0 12px; }
   .dash-side.collapsed .dash-side-collapse svg { transform: rotate(180deg); }
   .dash-side.collapsed .dash-side-link { position: relative; }
   .dash-side.collapsed .dash-side-link:hover::after { content: attr(data-tip); position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%); padding: 6px 10px; border-radius: 8px; background: rgba(30, 30, 35, .95); color: #ffffff; font-size: 13px; font-weight: 600; white-space: nowrap; box-shadow: 0 4px 16px rgba(0, 0, 0, .35); z-index: 10; }
 }
-.dash-side-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 12px; }
-.dash-side-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 700; font-size: 15px; }
-.dash-side-logo img { width: 34px; height: 34px; border-radius: 8px; display: block; }
+.dash-side-head { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 4px 4px 12px; }
 .dash-side-collapse { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .05); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .dash-side-collapse:hover { color: var(--text); background: rgba(124, 58, 237, .12); }
 .dash-side-collapse svg { width: 16px; height: 16px; transition: transform .3s ease; }
@@ -166,20 +164,6 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-side-plan-icon svg { width: 28px; height: 28px; }
 .dash-side-plan p { font-size: 13px; color: var(--muted); margin: 0 0 10px; line-height: 1.5; }
 .dash-side-plan .card-link { font-size: 14px; }
-/* Upgrade to Plus: the reference layout's upsell card, near the
-   bottom of the sidebar. There is no Plus tier yet, so the button
-   goes to the pricing page (the site's upgrade path). */
-.dash-side-plus { margin-top: 12px; padding: 14px; border-radius: 14px; background: linear-gradient(135deg, rgba(124, 58, 237, .35), rgba(59, 130, 246, .25)); border: 1px solid rgba(167, 139, 250, .30); }
-.dash-side-plus-icon { display: block; width: 28px; height: 28px; color: #fbbf24; margin-bottom: 8px; }
-.dash-side-plus-icon svg { width: 28px; height: 28px; }
-.dash-side-plus p { font-size: 13px; color: var(--text); margin: 0 0 12px; line-height: 1.5; }
-.dash-side-plus p strong { font-size: 15px; }
-.dash-side-plus .btn { width: 100%; justify-content: center; }
-.dash-side-theme { display: flex; gap: 3px; padding: 3px; border-radius: 11px; border: 1px solid rgba(255, 255, 255, .10); background: rgba(255, 255, 255, .04); margin-top: 12px; }
-.dash-side-theme button { flex: 1; padding: 8px; border-radius: 8px; border: none; background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.dash-side-theme button:hover { color: var(--text); }
-.dash-side-theme button[aria-pressed="true"] { background: #7c3aed; color: #ffffff; }
-.dash-side-theme svg { width: 18px; height: 18px; }
 
 /* View tabs: the sidebar is hidden on phones, so these switch views
    there. Hidden on desktop, where the sidebar does the job. */
@@ -523,7 +507,6 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
        the mock tests. The bottom card is the real plan, not an upsell. -->
   <aside class="dash-side dash-hide-until-profile" id="dash-side" aria-label="Dashboard sections">
     <div class="dash-side-head">
-      <a class="dash-side-logo" href="/" aria-label="ChangeYourself home"><img src="/logo.png" alt="ChangeYourself"><span>ChangeYourself</span></a>
       <button class="dash-side-collapse" id="dash-collapse" type="button" aria-label="Collapse sidebar" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button>
     </div>
     <nav class="dash-side-nav" aria-label="Dashboard">
@@ -537,15 +520,6 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       <span class="dash-side-plan-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/></svg></span>
       <p id="dash-side-plan-text">Checking your plan…</p>
       <a class="card-link" id="dash-side-plan-link" href="/pricing/">See pricing →</a>
-    </div>
-    <div class="dash-side-plus" id="dash-side-plus">
-      <span class="dash-side-plus-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/></svg></span>
-      <p><strong>Upgrade to Plus</strong><br>Unlock more features and personalized learning</p>
-      <a class="btn btn-white" href="/pricing/">Upgrade →</a>
-    </div>
-    <div class="dash-side-theme" role="group" aria-label="Theme">
-      <button type="button" id="dash-theme-dark" aria-pressed="true" aria-label="Dark theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-      <button type="button" id="dash-theme-light" aria-pressed="false" aria-label="Light theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
     </div>
   </aside>
   <div class="dash-side-backdrop" id="dash-side-backdrop" hidden></div>
