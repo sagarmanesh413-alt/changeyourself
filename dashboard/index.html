@@ -11,6 +11,14 @@
 /* First sign-in: hide everything except the profile + form until the profile is complete. */
 body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 
+/* Profile card: the name lives in the page header now, so the card is
+   avatar + email + member-since + sign out, with clean, even spacing. */
+.dash-profile { gap: 20px; }
+.dash-profile-main #dash-email { font-size: 16px; font-weight: 600; color: var(--text); }
+.dash-profile-main #dash-member { font-size: 14px; }
+.dash-profile-main p { margin-bottom: 4px; }
+.dash-profile-main p:last-child { margin-bottom: 0; }
+
 /* Analysis + interactivity (kept here so it overrides styles.css). */
 .dash-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 6px; }
 .dash-chip { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
@@ -56,7 +64,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 </nav>
 
 <div class="page-head"><div class="container">
-  <h1>Your dashboard</h1>
+  <h1 id="dash-hero-title">Your dashboard</h1>
   <p>Everything about your learning — your profile, your plan, and every mock test and quiz round you have taken.</p>
 </div></div>
 
@@ -89,7 +97,6 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     <div class="card-dark dash-profile">
       <div class="dash-avatar" id="dash-avatar" aria-hidden="true">?</div>
       <div class="dash-profile-main">
-        <h2 id="dash-name">—</h2>
         <p id="dash-email" class="muted">—</p>
         <p class="muted" id="dash-member">Member since —</p>
       </div>
@@ -619,7 +626,12 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     var name = (profileRow && profileRow.full_name) || md.full_name || md.name || '';
     var email = (sessionUser && sessionUser.email) || (profileRow && profileRow.email) || '';
     var memberSince = fmtDate((profileRow && profileRow.created_at) || (sessionUser && sessionUser.created_at));
-    $('dash-name').textContent = name || email || 'Your account';
+    /* The name lives in the page header, not in the profile card. */
+    var hero = $('dash-hero-title');
+    if (hero) {
+      var first = String(name || '').trim().split(/\s+/)[0] || '';
+      hero.textContent = first ? ('Welcome back, ' + first) : 'Your dashboard';
+    }
     $('dash-email').textContent = email;
     $('dash-member').textContent = memberSince ? 'Member since ' + memberSince : '';
     $('dash-avatar').textContent = initialsFor(name);
