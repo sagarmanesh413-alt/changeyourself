@@ -52,10 +52,8 @@ img { max-width: 100%; }
   gap: 2px;
   max-width: calc(100vw - 24px);
   padding: 7px 9px;
-  background: rgba(0, 0, 0, 0.35);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  /* The liquid glass layer (added by main.js) provides the
+     background, blur and border — the nav itself stays bare. */
   border-radius: 999px;
 }
 .nav .logo {
@@ -81,13 +79,13 @@ img { max-width: 100%; }
 .nav a.nav-link {
   padding: 7px 13px;
   border-radius: 999px;
-  color: #ffffff;
+  /* Colour comes from the liquid pill's tone variables (muted
+     normally, full on the active/hovered link). */
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
 }
-.nav a.nav-link:hover { background: rgba(255, 255, 255, 0.10); }
 .login-btn {
   margin-left: 4px;
   padding: 8px 16px;
@@ -372,7 +370,8 @@ img { max-width: 100%; }
 .nimbus-item:focus-visible{outline:2px solid #00A2FF;outline-offset:2px}
 .nv-ico{position:relative;display:inline-flex;flex:none}
 .nv-ico svg{width:18px;height:18px;transition:transform .45s cubic-bezier(.3,1.6,.5,1)}
-.nimbus-item[aria-current="page"] .nv-ico svg{transform:translateY(-1px) scale(1.08)}
+.nv-ico img{transition:transform .45s cubic-bezier(.3,1.6,.5,1)}
+.nimbus-item[aria-current="page"] .nv-ico svg,.nimbus-item[aria-current="page"] .nv-ico img{transform:translateY(-1px) scale(1.08)}
 .nv-door{fill:transparent}
 .nv-ico[data-fx="pop"] svg{animation:nvPop .5s cubic-bezier(.3,1.6,.5,1) both}
 @keyframes nvPop{0%{transform:scale(.72)}60%{transform:scale(1.2)}100%{transform:translateY(-1px) scale(1.08)}}
@@ -390,7 +389,7 @@ img { max-width: 100%; }
 @keyframes nvSplashR{0%,44%{opacity:0;transform:none}50%{opacity:.9;transform:translate(5px,-7px)}75%,100%{opacity:0;transform:translate(12px,1px) scale(.4)}}
 .nv-ico[data-fx="spin"] svg{animation:nvSpin 1s cubic-bezier(.2,.75,.25,1) both}
 @keyframes nvSpin{0%{transform:perspective(80px) rotateY(0)}100%{transform:perspective(80px) rotateY(360deg) translateY(-1px) scale(1.08)}}
-.nv-ico[data-fx="glow"] svg{animation:nvHop .8s cubic-bezier(.3,1.4,.5,1) both;transform-origin:50% 100%}
+.nv-ico[data-fx="glow"] svg,.nv-ico[data-fx="glow"] img{animation:nvHop .8s cubic-bezier(.3,1.4,.5,1) both;transform-origin:50% 100%}
 @keyframes nvHop{0%{transform:none}30%{transform:translateY(-5px) scale(1.04,.96)}55%{transform:translateY(0) scale(1.12,.88)}75%{transform:translateY(-2px) scale(.98,1.04)}100%{transform:translateY(-1px) scale(1.08)}}
 .nv-ico[data-fx="glow"] .nv-door{animation:nvDoor 1.3s ease both}
 @keyframes nvDoor{0%{fill:transparent}30%{fill:#FFF3A8}100%{fill:rgba(126,232,255,.6)}}
@@ -400,6 +399,14 @@ img { max-width: 100%; }
 .nimbus-nav[data-compact="true"] .nimbus-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (max-width:520px){.nimbus-nav:not([data-compact="false"]) .nimbus-item{padding:0 13px}.nimbus-nav:not([data-compact="false"]) .nimbus-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}
 @media (prefers-reduced-motion:reduce){.nv-ico svg,.nv-ico::before,.nv-ico::after,.nv-door{animation:none!important;transition:none}}
+/* Header liquid pill: the nav links are text, so their labels stay
+   visible (the nav is not compact); the logo is the Home item and
+   keeps its tile. Login and the theme toggle are actions, not
+   items — they keep their own buttons and never move the drop. */
+.nav .nimbus-item { height: 36px; font-weight: 600; }
+.nav a.logo.nimbus-item { padding: 0; height: 36px; }
+.nav .logo .nv-ico img { width: 34px; height: 34px; border-radius: 8px; display: block; }
+.nav .logo .nimbus-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* The dock keeps its own fixed spot at the bottom of the screen;
    the pill above is the liquid glass. */
 .dock {
@@ -687,18 +694,10 @@ html[data-theme="light"] {
 html[data-theme="light"] body {
   background-image: radial-gradient(rgba(0, 0, 0, 0.09) 1px, transparent 1.4px);
 }
-/* Top nav: light glass pill, dark text. */
-html[data-theme="light"] .nav {
-  background: rgba(255, 255, 255, 0.75);
-  border-color: rgba(0, 0, 0, 0.10);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
-}
 html[data-theme="light"] .nav .logo {
   background: rgba(0, 0, 0, 0.05);
   border-color: rgba(0, 0, 0, 0.14);
 }
-html[data-theme="light"] .nav a.nav-link { color: #111111; }
-html[data-theme="light"] .nav a.nav-link:hover { background: rgba(0, 0, 0, 0.06); }
 html[data-theme="light"] .login-btn {
   border-color: rgba(0, 0, 0, 0.35);
   color: #111111;
