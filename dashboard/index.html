@@ -128,14 +128,22 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
    slide-out drawer. The active item is a translucent purple glass,
    not a solid block. */
 .dash-shell { display: flex; align-items: stretch; gap: 20px; padding: 0 20px; }
+/* The dashboard is a full app shell: the site's top nav is hidden
+   here (the sidebar + topbar are the navigation), so the sidebar
+   can occupy the complete viewport height, and the hero needs no
+   160px clearance for a nav that is not there. */
+body > nav.nav { display: none; }
+.dash-main .page-head { padding: 28px 0 32px; text-align: left; }
+.dash-main .page-head p, .dash-main .dash-profile { text-align: left; }
 .dash-main { flex: 1; min-width: 0; }
 .dash-side { display: flex; flex-direction: column; gap: 4px; position: fixed; left: 0; top: 0; bottom: 0; z-index: 80; width: 272px; max-width: 82vw; padding: 16px 12px; border-radius: 0 20px 20px 0; overflow-y: auto; overflow-x: hidden; transform: translateX(-105%); visibility: hidden; transition: transform .3s ease, visibility .3s ease, width .3s ease, flex-basis .3s ease; }
 .dash-side.open { transform: translateX(0); visibility: visible; }
 .dash-side-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, .55); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 @media (min-width: 1024px) {
-  .dash-side { position: sticky; top: 76px; bottom: auto; left: auto; z-index: 1; flex: 0 0 232px; width: 232px; max-width: none; height: calc(100vh - 92px); margin: 0; border-radius: 20px; transform: none; visibility: visible; transition: width .3s ease, flex-basis .3s ease; }
+  .dash-side { position: sticky; top: 0; bottom: auto; left: auto; z-index: 1; flex: 0 0 232px; width: 232px; max-width: none; height: 100vh; margin: 0; border-radius: 0 20px 20px 0; transform: none; visibility: visible; transition: width .3s ease, flex-basis .3s ease; }
+  .dash-shell { padding: 0 20px 0 0; }
   .dash-side.collapsed { flex-basis: 72px; width: 72px; }
-  .dash-side.collapsed .dash-side-logo span, .dash-side.collapsed .dash-side-link span, .dash-side.collapsed .dash-side-plan, .dash-side.collapsed .dash-side-theme { display: none; }
+  .dash-side.collapsed .dash-side-logo span, .dash-side.collapsed .dash-side-link span, .dash-side.collapsed .dash-side-plan, .dash-side.collapsed .dash-side-plus, .dash-side.collapsed .dash-side-theme { display: none; }
   .dash-side.collapsed .dash-side-link { justify-content: center; padding: 11px 0; }
   .dash-side.collapsed .dash-side-head { justify-content: center; padding: 4px 0 12px; }
   .dash-side.collapsed .dash-side-collapse svg { transform: rotate(180deg); }
@@ -158,6 +166,15 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-side-plan-icon svg { width: 28px; height: 28px; }
 .dash-side-plan p { font-size: 13px; color: var(--muted); margin: 0 0 10px; line-height: 1.5; }
 .dash-side-plan .card-link { font-size: 14px; }
+/* Upgrade to Plus: the reference layout's upsell card, near the
+   bottom of the sidebar. There is no Plus tier yet, so the button
+   goes to the pricing page (the site's upgrade path). */
+.dash-side-plus { margin-top: 12px; padding: 14px; border-radius: 14px; background: linear-gradient(135deg, rgba(124, 58, 237, .35), rgba(59, 130, 246, .25)); border: 1px solid rgba(167, 139, 250, .30); }
+.dash-side-plus-icon { display: block; width: 28px; height: 28px; color: #fbbf24; margin-bottom: 8px; }
+.dash-side-plus-icon svg { width: 28px; height: 28px; }
+.dash-side-plus p { font-size: 13px; color: var(--text); margin: 0 0 12px; line-height: 1.5; }
+.dash-side-plus p strong { font-size: 15px; }
+.dash-side-plus .btn { width: 100%; justify-content: center; }
 .dash-side-theme { display: flex; gap: 3px; padding: 3px; border-radius: 11px; border: 1px solid rgba(255, 255, 255, .10); background: rgba(255, 255, 255, .04); margin-top: 12px; }
 .dash-side-theme button { flex: 1; padding: 8px; border-radius: 8px; border: none; background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .dash-side-theme button:hover { color: var(--text); }
@@ -257,8 +274,6 @@ html[data-theme="light"] .dash-range-seg { border-color: rgba(0, 0, 0, 0.10); ba
   #dash-content > #dash-analysis-banner,
   #dash-content > #dash-analysis-heading,
   #dash-content > #dash-trend-card,
-  #dash-content > #dash-time-card,
-  #dash-content > #dash-weekly-card,
   #dash-content > #dash-recent-card,
   #dash-content > #dash-focus-card,
   #dash-content > .dash-view-tabs { grid-column: 1 / -1; }
@@ -484,7 +499,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 @media (min-width: 1024px) {
   .dash-hero-row { grid-template-columns: 1fr 260px; }
   .dash-hero-visual { display: block; position: relative; height: 210px; }
-  .dash-hero-brain { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: screen; }
+  .dash-hero-brain { width: 100%; height: 100%; object-fit: contain; }
 }
 @keyframes dash-orbit { to { transform: rotate(360deg); } }
 
@@ -522,6 +537,11 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       <span class="dash-side-plan-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/></svg></span>
       <p id="dash-side-plan-text">Checking your plan…</p>
       <a class="card-link" id="dash-side-plan-link" href="/pricing/">See pricing →</a>
+    </div>
+    <div class="dash-side-plus" id="dash-side-plus">
+      <span class="dash-side-plus-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/></svg></span>
+      <p><strong>Upgrade to Plus</strong><br>Unlock more features and personalized learning</p>
+      <a class="btn btn-white" href="/pricing/">Upgrade →</a>
     </div>
     <div class="dash-side-theme" role="group" aria-label="Theme">
       <button type="button" id="dash-theme-dark" aria-pressed="true" aria-label="Dark theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
@@ -1100,8 +1120,8 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     { id: 'dash-level-card', label: 'Your Accuracy' },
     { id: 'dash-score-card', label: 'Average Score' },
     { id: 'dash-trend-card', label: 'Score Trend' },
-    { id: 'dash-time-card', label: 'Time per Question' },
     { id: 'dash-weekly-card', label: 'Weekly Activity' },
+    { id: 'dash-time-card', label: 'Time per Question' },
     { id: 'dash-focus-card', label: 'Insights & Next Steps' },
     { id: 'dash-progress', label: 'Progress by subject' },
     { id: 'dash-recent-card', label: 'Recent Activity' },
@@ -1280,7 +1300,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
   var VIEW_SECTIONS = {
     dashboard: ['dash-overview', 'dash-week-line', 'dash-plan', 'dash-goals', 'dash-progress', 'dash-recent-card'],
     mytests: ['dash-mock-history-card', 'dash-quiz-history-card'],
-    analytics: ['dash-analysis-banner', 'dash-analysis-heading', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-weekly-card', 'dash-focus-card'],
+    analytics: ['dash-analysis-banner', 'dash-analysis-heading', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-weekly-card', 'dash-time-card', 'dash-focus-card'],
     settings: ['dash-details-card', 'dash-customise-row', 'dash-customise', 'dash-appearance-card']
   };
   var currentView = 'dashboard';
@@ -2376,8 +2396,10 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 
   /* ---------- Weekly Activity: Mon–Sun bars for the current week
        (mock tests and quiz rounds stacked in two tones, with today
-       highlighted). Counts are real attempts; a day with no activity
-       shows a short empty bar, never an invented number. */
+       highlighted). This is a measure of how much you practised, so
+       it counts every attempt — a Paper 1 / Paper 2 quiz is real
+       practice even when a subject is focused. A day with no
+       activity shows a short empty bar, never an invented number. */
   function renderWeekly() {
     var box = $('dash-weekly');
     var note = $('dash-weekly-note');
@@ -2393,7 +2415,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     }
     var max = 0;
     allAttempts.forEach(function (a) {
-      if (!a.completed_at || !isVisible(a.subject)) return;
+      if (!a.completed_at) return;
       var t = new Date(a.completed_at).getTime();
       if (isNaN(t)) return;
       var idx = Math.floor((t - monday.getTime()) / 86400000);
