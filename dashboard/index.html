@@ -202,6 +202,81 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
   box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.05), 0 10px 26px rgba(124, 58, 237, 0.10);
 }
 
+/* ---- Adjustable glass (the GlassWorkspace design) ----
+   The dashboard's glass is adjustable: blur, opacity, saturation,
+   tint and edge light, from the "Adjust glass" panel in the topbar.
+   The purple ring and soft glow from the reference stay — the
+   material adds the frosted tint and the inset edge light on top.
+   Defaults are the component's Frosted preset. */
+:root {
+  --dash-blur: 22px;
+  --dash-opacity: .3;
+  --dash-saturation: 1.2;
+  --dash-tint: #ffffff;
+  --dash-edge: .6;
+  --dash-surface-rgb: 35, 35, 40;
+}
+html[data-theme="light"] { --dash-surface-rgb: 255, 255, 255; }
+.dash-main .card-dark, .dash-overview .dash-ov-tile, .dash-side,
+.dash-topbar, .dash-view-tabs, .dash-glass-sample {
+  background: rgba(var(--dash-surface-rgb), var(--dash-opacity));
+  background: color-mix(in srgb, color-mix(in srgb, var(--dash-tint) 12%, rgb(var(--dash-surface-rgb))) calc(var(--dash-opacity) * 100%), transparent);
+  -webkit-backdrop-filter: blur(var(--dash-blur)) saturate(var(--dash-saturation));
+  backdrop-filter: blur(var(--dash-blur)) saturate(var(--dash-saturation));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff calc(var(--dash-edge) * 100%), transparent),
+    inset 0 0 0 1px color-mix(in srgb, #ffffff calc(var(--dash-edge) * 30%), transparent),
+    0 0 0 1px rgba(124, 58, 237, 0.05),
+    0 10px 30px rgba(0, 0, 0, 0.28);
+}
+html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-overview .dash-ov-tile, html[data-theme="light"] .dash-side,
+html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs, html[data-theme="light"] .dash-glass-sample {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff calc(var(--dash-edge) * 100%), transparent),
+    inset 0 0 0 1px color-mix(in srgb, #ffffff calc(var(--dash-edge) * 30%), transparent),
+    0 0 0 1px rgba(124, 58, 237, 0.05),
+    0 10px 26px rgba(124, 58, 237, 0.10);
+}
+
+/* The topbar is a glass panel now (the component's topbar) — search,
+   time range and the Adjust glass button sit inside it. */
+.dash-topbar { padding: 12px 14px; border-radius: 20px; border: 1px solid rgba(139, 92, 246, 0.25); margin-bottom: 16px; }
+
+/* The view tabs are the dock now (the component's bottom dock): a
+   glass pill holding the four views, the active one solid purple. */
+.dash-view-tabs { padding: 5px; border-radius: 999px; border: 1px solid rgba(139, 92, 246, 0.25); width: fit-content; max-width: 100%; }
+.dash-view-tab { border: none; }
+
+/* Adjust glass panel: the component's material popover, fixed at the
+   top right so it stays put while the dashboard scrolls. */
+#dash-glass-panel { position: fixed; right: 16px; top: 76px; z-index: 40; width: 300px; max-width: calc(100vw - 32px); max-height: calc(100vh - 96px); overflow-y: auto; }
+.dash-glass-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dash-glass-head h3 { margin: 0; }
+.dash-glass-sample { height: 72px; display: flex; align-items: center; justify-content: center; border-radius: 13px; margin: 16px 0; font-size: 13px; color: var(--muted); }
+.dash-glass-presets { display: flex; gap: 6px; margin-bottom: 18px; }
+.dash-glass-presets button { flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 7px 0; font: inherit; font-size: 13px; font-weight: 600; color: var(--text); background: transparent; cursor: pointer; }
+.dash-glass-presets button:hover { background: rgba(124, 58, 237, .12); }
+.dash-glass-range { display: block; margin: 16px 0; }
+.dash-glass-range > span { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; }
+.dash-glass-range output { font-size: 12px; color: var(--muted); font-weight: 400; }
+.dash-glass-range input { width: 100%; accent-color: #7c3aed; height: 18px; margin: 8px 0 0; cursor: pointer; }
+.dash-glass-tint { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; margin-top: 18px; }
+.dash-glass-tint input { height: 30px; width: 44px; padding: 2px; background: none; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+#dash-glass-reset { width: 100%; margin-top: 20px; }
+@media (max-width: 640px) { #dash-glass-panel { top: 70px; } }
+
+/* Study goals: the component's savings goals, with real study
+   targets — average, sets, streak — and exact numbers. */
+.dash-goal + .dash-goal { margin-top: 22px; }
+.dash-goal-top { display: flex; align-items: center; gap: 10px; }
+.dash-goal-icon { width: 34px; height: 34px; border-radius: 10px; background: rgba(124, 58, 237, .12); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.dash-goal-top strong { font-size: 15px; font-weight: 600; flex: 1; }
+.dash-goal-top > span:last-child { font-size: 13px; color: var(--muted); }
+.dash-goal-track { height: 8px; background: var(--border); margin: 12px 0 8px; border-radius: 999px; overflow: hidden; }
+.dash-goal-track i { height: 100%; display: block; background: linear-gradient(90deg, #7c3aed, #3b82f6); border-radius: 999px; }
+.dash-goal p { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); margin: 0; }
+.dash-goal p strong { font-weight: 600; color: var(--text); }
+
 /* Time per Question: the big average-time number. */
 .dash-time-big { font-size: 34px; font-weight: 800; line-height: 1.1; margin: 4px 0 2px; }
 .dash-time-sub { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
@@ -421,6 +496,34 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
         <option value="30">Last 30 days</option>
         <option value="90">Last 90 days</option>
       </select>
+      <button class="btn btn-dark" id="dash-glass-btn" type="button" aria-expanded="false" aria-controls="dash-glass-panel">Adjust glass</button>
+    </div>
+
+    <!-- Adjust glass: the GlassWorkspace material panel — blur,
+         opacity, saturation, tint and edge light, with presets.
+         Saved on this device, so your glass stays how you set it. -->
+    <div class="card-dark" id="dash-glass-panel" hidden role="dialog" aria-label="Glass appearance">
+      <div class="dash-glass-head">
+        <h3>Glass appearance</h3>
+        <button type="button" class="btn btn-dark" id="dash-glass-close" aria-label="Close glass settings">✕</button>
+      </div>
+      <p class="muted">Adjust the glass across your dashboard.</p>
+      <div class="dash-glass-sample" aria-hidden="true"><span>Live material preview</span></div>
+      <div class="dash-glass-presets" role="group" aria-label="Glass presets">
+        <button type="button" data-glass-preset="clear">Clear</button>
+        <button type="button" data-glass-preset="frosted">Frosted</button>
+        <button type="button" data-glass-preset="solid">Solid</button>
+      </div>
+      <label class="dash-glass-range"><span>Blur <output id="dash-glass-blur-out">22 px</output></span>
+        <input type="range" id="dash-glass-blur" min="0" max="40" step="1" aria-label="Blur"></label>
+      <label class="dash-glass-range"><span>Opacity <output id="dash-glass-opacity-out">30%</output></span>
+        <input type="range" id="dash-glass-opacity" min="0.08" max="0.9" step="0.01" aria-label="Opacity"></label>
+      <label class="dash-glass-range"><span>Saturation <output id="dash-glass-saturation-out">120%</output></span>
+        <input type="range" id="dash-glass-saturation" min="0.5" max="2" step="0.05" aria-label="Saturation"></label>
+      <label class="dash-glass-range"><span>Edge light <output id="dash-glass-edge-out">60%</output></span>
+        <input type="range" id="dash-glass-edge" min="0" max="1" step="0.05" aria-label="Edge light"></label>
+      <label class="dash-glass-tint">Glass tint <input type="color" id="dash-glass-tint" value="#ffffff" aria-label="Glass tint"></label>
+      <button type="button" class="btn btn-dark" id="dash-glass-reset">Reset appearance</button>
     </div>
 
     <!-- View tabs: the sidebar is hidden on phones, so these switch
@@ -467,6 +570,15 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
       <h3>Your plan</h3>
       <p id="dash-plan-text" class="muted">Checking your plan…</p>
       <div class="quiz-actions" id="dash-plan-actions"></div>
+    </div>
+
+    <!-- Study goals: the GlassWorkspace savings goals, with real
+         study targets — your average, your sets, your streak. Every
+         number is exact, and a new user starts at 0. -->
+    <div class="card-dark dash-hide-until-profile" id="dash-goals">
+      <h3>🎯 Study goals</h3>
+      <p class="muted">Real targets from your own tests — they move as you do.</p>
+      <div id="dash-goals-list"></div>
     </div>
 
     <!-- Analysis, compact like the new reference: one banner (scope +
@@ -766,6 +878,7 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
   var DASH_SECTIONS = [
     { id: 'dash-overview', label: 'Your overview' },
     { id: 'dash-plan', label: 'Your plan' },
+    { id: 'dash-goals', label: 'Study goals' },
     { id: 'dash-level-card', label: 'Your Current Level' },
     { id: 'dash-score-card', label: 'Average Score' },
     { id: 'dash-trend-card', label: 'Score Trend' },
@@ -777,7 +890,7 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
   ];
   /* The five analysis cards, in order — used by the layout migration. */
   var ANALYSIS_CARDS = ['dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card'];
-  var RESIZABLE = ['dash-details-card', 'dash-plan', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card', 'dash-progress', 'dash-mock-history-card', 'dash-quiz-history-card'];
+  var RESIZABLE = ['dash-details-card', 'dash-plan', 'dash-goals', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card', 'dash-progress', 'dash-mock-history-card', 'dash-quiz-history-card'];
   var LAYOUT_KEY = 'cy-dash-layout-v1';
   var layoutMem = null;
   function layoutStore() {
@@ -810,6 +923,11 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
           if (m !== -1) parsed[k].splice(m, 1);
         });
         if (parsed.order.indexOf('dash-overview') === -1) parsed.order.unshift('dash-overview');
+        /* 'dash-goals' is new — put it after the plan in saved layouts. */
+        if (parsed.order.indexOf('dash-goals') === -1) {
+          var pg = parsed.order.indexOf('dash-plan');
+          parsed.order.splice(pg === -1 ? 1 : pg + 1, 0, 'dash-goals');
+        }
         return parsed;
       }
     } catch (e) {}
@@ -823,6 +941,130 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     var st = layoutStore();
     if (st) { try { st.setItem(LAYOUT_KEY, raw); } catch (e) {} }
   }
+
+  /* ---------- Adjustable glass (the GlassWorkspace design) ----------
+     The dashboard's glass is adjustable: blur, opacity, saturation,
+     tint and edge light, from the "Adjust glass" panel in the topbar.
+     Saved on this device (guarded storage, same as the layout), so
+     your glass stays how you set it. Defaults are the component's
+     Frosted preset. */
+  var GLASS_DEFAULTS = { blur: 22, opacity: 0.3, saturation: 1.2, tint: '#ffffff', edge: 0.6 };
+  var GLASS_PRESETS = {
+    clear: { blur: 8, opacity: 0.12, saturation: 1.1, edge: 0.8 },
+    frosted: { blur: 22, opacity: 0.3, saturation: 1.2, tint: '#ffffff', edge: 0.6 },
+    solid: { blur: 32, opacity: 0.86, saturation: 1, edge: 0.35 }
+  };
+  var GLASS_KEY = 'cy-dash-glass-v1';
+  var glassMem = null;
+  function glassStore() {
+    try { if (window.localStorage) return window.localStorage; } catch (e) {}
+    return null;
+  }
+  function normalizeGlass(v) {
+    v = v || {};
+    function bounded(x, min, max, fb) { return Number.isFinite(x) ? Math.min(max, Math.max(min, x)) : fb; }
+    return {
+      blur: bounded(v.blur, 0, 40, GLASS_DEFAULTS.blur),
+      opacity: bounded(v.opacity, 0.08, 0.9, GLASS_DEFAULTS.opacity),
+      saturation: bounded(v.saturation, 0.5, 2, GLASS_DEFAULTS.saturation),
+      edge: bounded(v.edge, 0, 1, GLASS_DEFAULTS.edge),
+      tint: /^#[0-9a-f]{6}$/i.test(v.tint || '') ? v.tint : GLASS_DEFAULTS.tint
+    };
+  }
+  function loadGlass() {
+    var raw = null;
+    var st = glassStore();
+    if (st) { try { raw = st.getItem(GLASS_KEY); } catch (e) {} }
+    if (raw == null) raw = glassMem;
+    try {
+      var parsed = raw ? JSON.parse(raw) : null;
+      if (parsed) return normalizeGlass(parsed);
+    } catch (e) {}
+    return normalizeGlass({});
+  }
+  var dashGlass = loadGlass();
+  function saveGlass() {
+    var raw = '';
+    try { raw = JSON.stringify(dashGlass); } catch (e) {}
+    glassMem = raw;
+    var st = glassStore();
+    if (st) { try { st.setItem(GLASS_KEY, raw); } catch (e) {} }
+  }
+  function applyGlass() {
+    var r = document.documentElement;
+    try {
+      r.style.setProperty('--dash-blur', dashGlass.blur + 'px');
+      r.style.setProperty('--dash-opacity', String(dashGlass.opacity));
+      r.style.setProperty('--dash-saturation', String(dashGlass.saturation));
+      r.style.setProperty('--dash-tint', dashGlass.tint);
+      r.style.setProperty('--dash-edge', String(dashGlass.edge));
+    } catch (e) {}
+    /* Keep the panel controls in sync with the material. */
+    var map = [
+      ['dash-glass-blur', dashGlass.blur, 'dash-glass-blur-out', Math.round(dashGlass.blur) + ' px'],
+      ['dash-glass-opacity', dashGlass.opacity, 'dash-glass-opacity-out', Math.round(dashGlass.opacity * 100) + '%'],
+      ['dash-glass-saturation', dashGlass.saturation, 'dash-glass-saturation-out', Math.round(dashGlass.saturation * 100) + '%'],
+      ['dash-glass-edge', dashGlass.edge, 'dash-glass-edge-out', Math.round(dashGlass.edge * 100) + '%']
+    ];
+    map.forEach(function (m) {
+      var inp = $(m[0]), out = $(m[2]);
+      if (inp) inp.value = m[1];
+      if (out) out.textContent = m[3];
+    });
+    var tint = $('dash-glass-tint');
+    if (tint) tint.value = dashGlass.tint;
+  }
+  function updateGlass(patch) {
+    dashGlass = normalizeGlass(Object.assign({}, dashGlass, patch));
+    applyGlass();
+    saveGlass();
+  }
+  function closeGlass() {
+    var panel = $('dash-glass-panel');
+    if (panel) panel.hidden = true;
+    var btn = $('dash-glass-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+  function initGlass() {
+    applyGlass();
+    var btn = $('dash-glass-btn');
+    var panel = $('dash-glass-panel');
+    if (!btn || !panel) return;
+    btn.addEventListener('click', function () {
+      var open = panel.hidden;
+      panel.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+      if (open) {
+        var first = panel.querySelector('button, input');
+        if (first) first.focus();
+      }
+    });
+    var close = $('dash-glass-close');
+    if (close) close.addEventListener('click', function () { closeGlass(); btn.focus(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !panel.hidden) { closeGlass(); btn.focus(); }
+    });
+    Array.prototype.slice.call(panel.querySelectorAll('[data-glass-preset]')).forEach(function (b) {
+      b.addEventListener('click', function () {
+        var p = GLASS_PRESETS[b.getAttribute('data-glass-preset')];
+        if (p) updateGlass(p);
+      });
+    });
+    [['dash-glass-blur', 'blur'], ['dash-glass-opacity', 'opacity'], ['dash-glass-saturation', 'saturation'], ['dash-glass-edge', 'edge']].forEach(function (pair) {
+      var inp = $(pair[0]);
+      if (!inp) return;
+      inp.addEventListener('input', function () {
+        var patch = {};
+        patch[pair[1]] = Number(inp.value);
+        updateGlass(patch);
+      });
+    });
+    var tint = $('dash-glass-tint');
+    if (tint) tint.addEventListener('input', function () { updateGlass({ tint: tint.value }); });
+    var reset = $('dash-glass-reset');
+    if (reset) reset.addEventListener('click', function () { updateGlass(normalizeGlass(GLASS_DEFAULTS)); });
+  }
+  initGlass();
   /* ---------- Dashboard views ----------
      The sidebar (and the phone tabs) switch between four views; only
      one view's sections are shown at a time, so the dashboard never
@@ -832,7 +1074,7 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
      Analytics: the analysis banner + five cards. Settings: your
      details + Customise. Learn is a link, not a view. */
   var VIEW_SECTIONS = {
-    dashboard: ['dash-overview', 'dash-plan', 'dash-progress'],
+    dashboard: ['dash-overview', 'dash-plan', 'dash-goals', 'dash-progress'],
     mytests: ['dash-mock-history-card', 'dash-quiz-history-card'],
     analytics: ['dash-analysis-banner', 'dash-analysis-heading', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card'],
     settings: ['dash-details-card', 'dash-customise-row', 'dash-customise']
@@ -852,6 +1094,8 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     currentView = name;
     var tb = $('dash-topbar');
     if (tb) tb.hidden = (name === 'settings');
+    /* The topbar hides in Settings, so the glass panel goes with it. */
+    if (name === 'settings') closeGlass();
     Array.prototype.slice.call(document.querySelectorAll('[data-side-view]')).forEach(function (l) {
       l.classList.toggle('active', l.getAttribute('data-side-view') === name);
     });
@@ -968,6 +1212,7 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     renderHistory();
     renderChips();
     renderAnalysis();
+    renderGoals();
     renderAddSubject();
   }
   /* ---------- Analysis v2: the algorithm ----------
@@ -1051,28 +1296,27 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     var mocks = mockAttempts();
     var quizzes = quizAttempts();
     var hasData = !!(mocks.length || quizzes.length);
+    /* The analysis cards always show — with no data they read zero,
+       so a new user's dashboard starts at 0 instead of looking empty.
+       The banner still carries the honest "no tests yet" message. */
     ANALYSIS_CARDS.forEach(function (id) {
       var c = $(id);
-      if (c) c.hidden = !hasData;
+      if (c) c.hidden = false;
     });
-    /* The banner always shows — with no data it carries the honest
-       empty message; the heading hides until there is data. */
     var banner = $('dash-analysis-banner');
     if (banner) banner.hidden = false;
     var heading = $('dash-analysis-heading');
-    if (heading) heading.hidden = !hasData;
+    if (heading) heading.hidden = false;
     var verdict = $('dash-verdict');
-    if (!hasData) {
-      if (verdict) verdict.textContent = 'No tests taken yet. Take your first mock test and your analysis will appear here — your strengths, your weak spots, and exactly where to put more effort.';
-      return;
+    if (!hasData && verdict) {
+      verdict.textContent = 'No tests taken yet. Take your first mock test and your analysis will appear here — your strengths, your weak spots, and exactly where to put more effort.';
     }
     var single = singleSubject();
     var subjName = single ? (SUBJECT_NAMES[single] || single) : null;
     var ordered = dated(mocks);
 
     /* --- Verdict: strongest vs weakest (lives in the banner) --- */
-    var verdict = $('dash-verdict');
-    if (mocks.length) {
+    if (hasData && mocks.length) {
       if (single) {
         var avg = avgPct(mocks);
         verdict.textContent = 'In ' + subjName + ' your average is ' + avg + '% across ' + mocks.length + (mocks.length === 1 ? ' test' : ' tests') + '. ' +
@@ -1089,7 +1333,7 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
           verdict.textContent = 'Your average in ' + subs[0].name + ' is ' + subs[0].avg + '%. Take tests in another subject to compare.';
         }
       }
-    } else {
+    } else if (hasData) {
       verdict.textContent = 'No mock tests yet — your quiz rounds average ' + avgPct(quizzes) + '%. Take a mock test to unlock the full analysis.';
     }
 
@@ -1099,32 +1343,20 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     var level = weightedAvg(ordered);
     var strip = $('dash-level-stats');
     var best = null, slope = null, sd = null;
-    if (!mocks.length || level == null) {
-      if (strip) strip.hidden = true;
-    } else {
-      if (strip) strip.hidden = false;
-      var marks = Math.round((level / 100) * 300);
-      best = Math.max.apply(null, pctList(ordered));
-      var last10 = pctList(ordered).slice(-10);
-      slope = linSlope(last10);
-      sd = stddev(last10);
-      var consistency = sd == null ? '—' : sd < 8 ? 'Steady' : sd < 15 ? 'Variable' : 'Uneven';
-      var trendTxt = slope == null ? '—' : (slope > 0 ? '+' + slope : '' + slope) + ' pts / test';
-      var streak = streakDays();
-      var monthAgo = Date.now() - 30 * 86400000;
-      var last30 = allAttempts.filter(function (a) {
-        if (!a.completed_at) return false;
-        var t = new Date(a.completed_at).getTime();
-        return !isNaN(t) && t >= monthAgo;
-      }).length;
+    /* The strip always shows — with no mock data it reads zero
+       (exact numbers, never a dash). */
+    var streak = streakDays();
+    var monthAgo = Date.now() - 30 * 86400000;
+    var last30 = allAttempts.filter(function (a) {
+      if (!a.completed_at) return false;
+      var t = new Date(a.completed_at).getTime();
+      return !isNaN(t) && t >= monthAgo;
+    }).length;
+    function stripRows(rows) {
+      if (!strip) return;
+      strip.hidden = false;
       strip.innerHTML = '';
-      [
-        [level + '%', 'Current level · ≈ ' + marks + ' / 300'],
-        [best + '%', 'Best test'],
-        [trendTxt, 'Trend (last 10)'],
-        [consistency + (sd != null ? ' ±' + sd : ''), 'Consistency'],
-        [streak + (streak === 1 ? ' day' : ' days'), 'Streak · ' + last30 + ' tests / 30 days']
-      ].forEach(function (row) {
+      rows.forEach(function (row) {
         var s = document.createElement('div');
         s.className = 'dash-level-stat';
         var b = document.createElement('b');
@@ -1135,6 +1367,30 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
         s.appendChild(lab);
         strip.appendChild(s);
       });
+    }
+    if (!mocks.length || level == null) {
+      stripRows([
+        ['0%', 'Current level · 0 / 300'],
+        ['0%', 'Best test'],
+        ['0 pts / test', 'Trend (last 10)'],
+        ['Steady ±0', 'Consistency'],
+        [streak + (streak === 1 ? ' day' : ' days'), 'Streak · ' + last30 + ' tests / 30 days']
+      ]);
+    } else {
+      var marks = Math.round((level / 100) * 300);
+      best = Math.max.apply(null, pctList(ordered));
+      var last10 = pctList(ordered).slice(-10);
+      slope = linSlope(last10);
+      sd = stddev(last10);
+      var consistency = sd == null ? 'Steady' : sd < 8 ? 'Steady' : sd < 15 ? 'Variable' : 'Uneven';
+      var trendTxt = slope == null ? '0 pts / test' : (slope > 0 ? '+' + slope : '' + slope) + ' pts / test';
+      stripRows([
+        [level + '%', 'Current level · ' + marks + ' / 300'],
+        [best + '%', 'Best test'],
+        [trendTxt, 'Trend (last 10)'],
+        [consistency + (sd != null ? ' ±' + sd : ''), 'Consistency'],
+        [streak + (streak === 1 ? ' day' : ' days'), 'Streak · ' + last30 + ' tests / 30 days']
+      ]);
     }
 
     /* --- Donut: correct / wrong / skipped --- */
@@ -1314,13 +1570,13 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     var withDur = ordered.slice(-8).filter(function (a) { return secPerQ(a) != null; });
     if (!withDur.length) {
       $('dash-speed-note').textContent = 'Time data will appear here once you finish timed tests.';
-      if (avgTimeEl) avgTimeEl.textContent = '—';
-      if (avgTestEl) avgTestEl.textContent = 'Avg. time per test: —';
+      if (avgTimeEl) avgTimeEl.textContent = '0s';
+      if (avgTestEl) avgTestEl.textContent = 'Avg. time per test: 0s';
       if (pill) pill.hidden = true;
     } else {
       var sp = withDur.map(function (a) { return { a: a, s: secPerQ(a) }; });
       var meanS = Math.round(sp.reduce(function (s, x) { return s + x.s; }, 0) / sp.length);
-      if (avgTimeEl) avgTimeEl.textContent = '~' + meanS + 's';
+      if (avgTimeEl) avgTimeEl.textContent = meanS + 's';
       if (avgTestEl) {
         var durs = ordered.map(function (a) { return a.duration_seconds; }).filter(function (d) { return d != null; });
         avgTestEl.textContent = 'Avg. time per test: ' + (durs.length ? fmtDur(Math.round(durs.reduce(function (s, d) { return s + d; }, 0) / durs.length)) : '—');
@@ -1424,6 +1680,7 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     }
     if (speedInsight) items.push(speedInsight);
     if (sd != null && sd >= 15) items.push('Your scores swing a lot (\u00B1' + sd + ' pts across your last 10 tests) — steady revision beats cramming before the next test.');
+    if (!hasData) items = ['Take your first mock test — your focus areas will appear here.'];
     if (!items.length) items.push('No weak spot stands out — keep taking tests to sharpen your edge.');
     /* The focus banner shows the top item as its headline, with the
        rest as smaller bullets. */
@@ -1621,7 +1878,7 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     var avg = avgPct(mocks);
     var best = null;
     mocks.map(pct).forEach(function (p) { if (p != null && (best == null || p > best)) best = p; });
-    $('ov-avg').textContent = avg == null ? '—' : avg + '%';
+    $('ov-avg').textContent = avg == null ? '0%' : avg + '%';
     var rangeTxt = dateRangeDays ? 'in the last ' + dateRangeDays + ' days' : 'all time';
     $('ov-tests-sub').textContent = quizzes.length + (quizzes.length === 1 ? ' quiz round' : ' quiz rounds') + ' · ' + rangeTxt;
     $('ov-questions-sub').textContent = 'Across mocks and quizzes · ' + rangeTxt;
@@ -1629,7 +1886,7 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
     var slope = null;
     var vals = pctList(dated(mocks)).slice(-10);
     if (vals.length >= 2) slope = linSlope(vals);
-    $('ov-avg-sub').textContent = avg == null ? 'Take a mock test to see your average'
+    $('ov-avg-sub').textContent = avg == null ? 'No mock tests yet — your average starts at 0%'
       : (best != null ? 'Best: ' + best + '% · ' : '') +
         (slope == null ? 'Average across your mock tests'
           : slope > 0.5 ? 'Rising +' + slope + ' pts / test'
@@ -1650,6 +1907,68 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
       weekEl.textContent = weekAttempts.length + (weekAttempts.length === 1 ? ' test' : ' tests') + ' · ' + weekQ + ' questions · ' + streak + '-day streak';
     }
   }
+
+  /* ---------- Study goals: the component's savings goals, with real
+       study targets — your average, your sets, your streak. Every
+       number is exact (one decimal on percentages, whole counts
+       elsewhere), and a new user starts at 0. ---------- */
+  function renderGoals() {
+    var list = $('dash-goals-list');
+    if (!list) return;
+    var mocks = mockAttempts();
+    var level = weightedAvg(dated(mocks));
+    var avg = level != null ? level : (avgPct(mocks) != null ? avgPct(mocks) : 0);
+    var streak = streakDays();
+    var subj = singleSubject() || (typeof profileRow !== 'undefined' && profileRow && profileRow.target_subject) || 'psychology';
+    var sets = {};
+    mocks.forEach(function (a) { if (a.subject === subj && a.set_number != null) sets[a.set_number] = true; });
+    var setCount = Object.keys(sets).length;
+    var goals = [
+      { icon: '🎯', name: 'Reach 80% average', cur: avg, target: 80, curText: avg + '%', targetText: 'of 80%' },
+      { icon: '📚', name: 'Complete all 20 sets in ' + (SUBJECT_NAMES[subj] || subj), cur: setCount, target: 20, curText: String(setCount), targetText: 'of 20 sets' },
+      { icon: '🔥', name: '30-day streak', cur: streak, target: 30, curText: String(streak), targetText: 'of 30 days' }
+    ];
+    list.innerHTML = '';
+    goals.forEach(function (g) {
+      var p = Math.min(100, Math.round((g.cur / g.target) * 1000) / 10);
+      var div = document.createElement('div');
+      div.className = 'dash-goal';
+      var top = document.createElement('div');
+      top.className = 'dash-goal-top';
+      var ic = document.createElement('span');
+      ic.className = 'dash-goal-icon';
+      ic.textContent = g.icon;
+      var nm = document.createElement('strong');
+      nm.textContent = g.name;
+      var pc = document.createElement('span');
+      pc.textContent = p + '%';
+      top.appendChild(ic);
+      top.appendChild(nm);
+      top.appendChild(pc);
+      var track = document.createElement('div');
+      track.className = 'dash-goal-track';
+      track.setAttribute('role', 'progressbar');
+      track.setAttribute('aria-label', g.name);
+      track.setAttribute('aria-valuenow', String(p));
+      track.setAttribute('aria-valuemin', '0');
+      track.setAttribute('aria-valuemax', '100');
+      var fill = document.createElement('i');
+      fill.style.width = p + '%';
+      track.appendChild(fill);
+      var row = document.createElement('p');
+      var cur = document.createElement('strong');
+      cur.textContent = g.curText;
+      var tgt = document.createElement('span');
+      tgt.textContent = g.targetText;
+      row.appendChild(cur);
+      row.appendChild(tgt);
+      div.appendChild(top);
+      div.appendChild(track);
+      div.appendChild(row);
+      list.appendChild(div);
+    });
+  }
+
   function renderSubjects() {
     var box = $('dash-subjects');
     box.innerHTML = '';
