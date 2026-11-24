@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Career Assessment — Find the Career That Fits You | ChangeYourself.in</title>
+<meta name="description" content="A short, free assessment that maps your skills, interests and way of working to career paths that fit you — plus a UGC NET path finder.">
+<script>try{var t=localStorage.getItem("cy-theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;}}catch(e){}</script>
+<link rel="stylesheet" href="/styles.css">
+<link rel="icon" href="/logo.png">
+<style>
+/* Career assessment app. Reuses the shared .quiz-* styles; the
+   match bars and result cards are assessment-specific. */
+.assess-head { padding: 150px 0 40px; text-align: center; }
+.assess-head h1 { font-size: clamp(30px, 5.5vw, 46px); font-weight: 700; line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 14px; }
+.assess-head p { max-width: 620px; margin: 0 auto; color: var(--muted); font-size: 17px; }
+.assess-mode { cursor: pointer; }
+.assess-mode h3 { margin-bottom: 6px; }
+.assess-mode p { flex-grow: 1; margin-bottom: 18px; }
+.assess-mode .btn { justify-content: center; width: 100%; }
+.assess-last { max-width: 720px; margin: 24px auto 0; text-align: center; }
+.assess-bar-row { margin-bottom: 12px; }
+.assess-bar-label { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; font-weight: 600; margin-bottom: 5px; }
+.assess-bar-label span:last-child { color: var(--muted); font-weight: 700; }
+.assess-bar-track { height: 9px; border-radius: 999px; background: var(--border); overflow: hidden; }
+.assess-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #7c3aed, #3b82f6); }
+.assess-match { margin-bottom: 16px; }
+.assess-match h3 { margin-bottom: 2px; }
+.assess-match .assess-why { color: var(--muted); font-size: 14px; margin-bottom: 10px; }
+.assess-match p { margin-bottom: 8px; }
+.assess-match p b { color: var(--text); }
+.assess-note { max-width: 720px; margin: 0 auto 20px; padding: 16px 18px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); font-size: 15px; color: var(--muted); }
+.assess-note b { color: var(--text); }
+.assess-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+.assess-actions .btn { justify-content: center; }
+@media (max-width: 640px) {
+  .assess-head { padding: 132px 0 32px; }
+}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="logo" href="/" aria-label="ChangeYourself home"><img src="/logo.png" alt="ChangeYourself"></a>
+  <a class="nav-link" href="/about/">About</a>
+  <a class="nav-link" href="/pricing/">Pricing</a>
+  <a class="nav-link" href="/changexed/">ChangeXed</a>
+  <button class="login-btn" id="loginBtn" type="button">Login</button>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+</nav>
+
+<!-- No dock on the assessment: it is an app-like page, same as the mock-test and quiz pages. -->
+
+<section class="section"><div class="container">
+
+  <!-- Start: pick a mode -->
+  <div id="screen-start">
+    <div class="assess-head">
+      <span class="badge">Free · About 5 minutes</span>
+      <h1>Find the career that fits you</h1>
+      <p>Answer a few honest questions about what you're good at, what you enjoy, and how you like to work. There are no right or wrong answers — and no email needed.</p>
+    </div>
+    <div class="grid-2">
+      <div class="card-dark assess-mode" id="mode-general" role="button" tabindex="0">
+        <h3>Explore careers</h3>
+        <p>15 quick questions. We match your skills, interests and way of working to career paths, explain what each one is really like day to day, and tell you the first step.</p>
+        <span class="btn btn-white">Start the assessment →</span>
+      </div>
+      <div class="card-dark assess-mode" id="mode-net" role="button" tabindex="0">
+        <h3>UGC NET path finder</h3>
+        <p>8 questions for UGC NET aspirants. We suggest the subject that fits your background and interests, whether JRF or Assistant Professor suits you, and where to start preparing.</p>
+        <span class="btn btn-dark">Find my NET path →</span>
+      </div>
+    </div>
+    <div class="assess-last" id="last-result" hidden>
+      <p class="muted" id="last-result-text"></p>
+      <p><button class="btn btn-dark" id="last-result-btn" type="button">See my last result</button></p>
+    </div>
+  </div>
+
+  <!-- Quiz: one question at a time -->
+  <div id="screen-quiz" hidden>
+    <div class="quiz-card">
+      <div class="quiz-top"><span class="quiz-tag" id="quiz-tag"></span><span id="quiz-count"></span></div>
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-fill"></div></div>
+      <h2 class="quiz-q" id="quiz-q"></h2>
+      <div class="quiz-opts" id="quiz-opts"></div>
+      <div class="quiz-actions">
+        <button class="btn btn-dark" id="quiz-back" type="button">← Back</button>
+        <button class="btn btn-dark" id="quiz-quit" type="button">Quit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="screen-results" hidden>
+    <div id="results-body"></div>
+    <div class="assess-actions">
+      <button class="btn btn-white" id="retake-btn" type="button">Retake the assessment</button>
+      <a class="btn btn-dark" href="/career-assessment/quiz/">Back to start</a>
+    </div>
+  </div>
+
+</div></section>
+
+<footer class="footer"><div class="container"><div class="footer-links"><a href="/">Home</a><a href="/about/">About</a><a href="/pricing/">Pricing</a><a href="/changexed/mock-tests/">Mock Tests</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://www.youtube.com/@ChangeXed" target="_blank" rel="noopener">Contact</a></div><img src="/logo.png" alt="ChangeYourself" class="footer-logo"><p class="footer-tag">ChangeYourself — Learn. Grow. Transform.</p><p class="footer-copy">© 2026 ChangeYourself.in</p></div></footer>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="/main.js"></script>
+<script src="/supabase.js"></script>
+<script src="/auth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- Guarded storage (localStorage when it works, memory when the webview blocks it) ---------- */
+  var memStore = {};
+  function storeGet(k) {
+    try { var v = window.localStorage.getItem(k); if (v != null) return v; } catch (e) {}
+    return memStore[k] || null;
+  }
+  function storeSet(k, v) {
+    memStore[k] = v;
+    try { window.localStorage.setItem(k, v); } catch (e) {}
+  }
+  var RESULT_KEY = 'cy-career-result-v1';
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  /* ---------- Dimensions ----------
+     Six plain-language dimensions. Each question offers four options and
+     each option adds to exactly one dimension, so a dimension's score is
+     simply how often the user picked it. Dimensions appear 9–11 times
+     across the 15 questions, so scores are normalised per dimension
+     (picks / appearances) before careers are matched — otherwise the
+     dimensions that appear most would always win. */
+  var DIMS = {
+    P: 'Working with people',
+    I: 'Working with ideas',
+    B: 'Making & fixing things',
+    N: 'Working with numbers',
+    L: 'Leading & organising',
+    C: 'Creating & designing'
+  };
+
+  /* ---------- General assessment: 15 questions ---------- */
+  var GENERAL_QS = [
+    { q: 'What sounds like a good day at work?', opts: [
+      { t: 'Helping someone through a tough problem', d: 'P' },
+      { t: 'Getting to the bottom of a tricky question', d: 'I' },
+      { t: 'Creating something original', d: 'C' },
+      { t: 'Working with numbers, budgets or data', d: 'N' } ] },
+    { q: 'What are you naturally good at?', opts: [
+      { t: 'Listening and understanding people', d: 'P' },
+      { t: 'Coming up with original ideas', d: 'C' },
+      { t: 'Leading a group and getting things done', d: 'L' },
+      { t: 'Spotting patterns in numbers', d: 'N' } ] },
+    { q: 'How do you like to work best?', opts: [
+      { t: 'In a team, talking things through', d: 'P' },
+      { t: 'Sketching or designing something new', d: 'C' },
+      { t: 'With my hands, tools or materials', d: 'B' },
+      { t: 'With a plan, a spreadsheet or a system', d: 'N' } ] },
+    { q: 'Pick the school subject you liked most.', opts: [
+      { t: 'Psychology', d: 'P' },
+      { t: 'Maths', d: 'N' },
+      { t: 'Science', d: 'I' },
+      { t: 'Art or music', d: 'C' } ] },
+    { q: 'What matters most to you in a job?', opts: [
+      { t: 'Learning new things every day', d: 'I' },
+      { t: 'Leading a team towards a shared goal', d: 'L' },
+      { t: 'Creative freedom to do it my way', d: 'C' },
+      { t: 'A steady income and security', d: 'N' } ] },
+    { q: 'Your friends come to you for…', opts: [
+      { t: 'Advice when life gets hard', d: 'P' },
+      { t: 'Help fixing something that is broken', d: 'B' },
+      { t: 'Help with money or planning', d: 'N' },
+      { t: 'Getting a group organised', d: 'L' } ] },
+    { q: 'Which task would you pick?', opts: [
+      { t: 'Teaching someone a new skill', d: 'P' },
+      { t: 'Researching a topic and writing it up', d: 'I' },
+      { t: 'Designing a poster or a room', d: 'C' },
+      { t: 'Running a small business for a day', d: 'L' } ] },
+    { q: 'How do you make big decisions?', opts: [
+      { t: 'By how they affect the people involved', d: 'P' },
+      { t: 'By what the team needs and can deliver', d: 'L' },
+      { t: 'By trying it out and seeing what happens', d: 'B' },
+      { t: 'By the numbers — costs, risks, returns', d: 'N' } ] },
+    { q: 'What kind of problems do you enjoy?', opts: [
+      { t: 'Abstract problems — ideas and theories', d: 'I' },
+      { t: 'Practical problems — things that do not work', d: 'B' },
+      { t: 'Design problems — making things better', d: 'C' },
+      { t: 'Organisational problems — people and plans', d: 'L' } ] },
+    { q: 'Your ideal workplace is…', opts: [
+      { t: 'A school, hospital or community centre', d: 'P' },
+      { t: 'A lab, a library or a study', d: 'I' },
+      { t: 'A workshop, a studio or a site', d: 'B' },
+      { t: 'An office where I run the show', d: 'L' } ] },
+    { q: 'What do you want to be known for?', opts: [
+      { t: 'Knowing my subject inside out', d: 'I' },
+      { t: 'Creating work that is truly original', d: 'C' },
+      { t: 'Being sharp with money and data', d: 'N' },
+      { t: 'Leading a team people love working in', d: 'L' } ] },
+    { q: 'A free afternoon — what do you do?', opts: [
+      { t: 'Volunteer or mentor someone', d: 'P' },
+      { t: 'Planning a budget or tracking something', d: 'N' },
+      { t: 'Build, repair or make something', d: 'B' },
+      { t: 'Draw, write or create something', d: 'C' } ] },
+    { q: 'Which skill do you most want to build?', opts: [
+      { t: 'Communication and counselling', d: 'P' },
+      { t: 'Research and writing', d: 'I' },
+      { t: 'Technical or craft skills', d: 'B' },
+      { t: 'Management and leadership', d: 'L' } ] },
+    { q: 'What does success look like in ten years?', opts: [
+      { t: 'Being an expert in my field', d: 'I' },
+      { t: 'Having built something of my own', d: 'B' },
+      { t: 'Running a team or a company', d: 'L' },
+      { t: 'Creating work people remember', d: 'C' } ] },
+    { q: 'What would you rather be doing?', opts: [
+      { t: 'Working with numbers and patterns', d: 'N' },
+      { t: 'Leading a project from start to finish', d: 'L' },
+      { t: 'Creating something original', d: 'C' },
+      { t: 'Building something with my own hands', d: 'B' } ] }
+  ];
+
+  /* ---------- Careers: 20 paths, each weighted 0–3 per dimension ----------
+     w is [P, I, B, N, L, C]. "day" is what the work is really like;
+     "first" is the honest first step — a degree, an exam, or something
+     to try this week. No salary promises, no "guaranteed" claims. */
+  var CAREERS = [
+    { name: 'Teacher / Lecturer', w: [3, 2, 0, 0, 1, 0],
+      day: 'Plan lessons, teach classes, and guide students through the subject — patient work, every day different.',
+      first: 'A degree in your subject plus B.Ed. Start tutoring one student to see if you love teaching.' },
+    { name: 'Psychologist / Counsellor', w: [3, 2, 0, 0, 0, 0],
+      day: 'Listen carefully, understand what is really going on, and help people find a way forward.',
+      first: 'B.A. Psychology, then M.A. Psychology. Volunteer at a counselling helpline while you study.' },
+    { name: 'Social Worker', w: [3, 1, 0, 0, 1, 0],
+      day: 'Work with people and communities who need support — practical help, not just sympathy.',
+      first: 'Volunteer with an NGO for a month. Consider B.S.W. or M.S.W. if it feels right.' },
+    { name: 'Nurse', w: [3, 0, 1, 0, 0, 0],
+      day: 'Care for patients, stay calm under pressure, and work as part of a team around the clock.',
+      first: 'B.Sc. Nursing or GNM. Spend a day shadowing at a local clinic if you can.' },
+    { name: 'Researcher / Professor', w: [1, 3, 0, 0, 0, 0],
+      day: 'Study one subject deeply, run studies, publish your findings, and teach the next generation.',
+      first: 'A Master\u2019s in your subject, then UGC NET and a PhD. Our mock tests are a good place to start.' },
+    { name: 'Data Analyst', w: [0, 2, 0, 3, 0, 0],
+      day: 'Turn raw numbers into answers that people can act on — dashboards, reports, and clear stories.',
+      first: 'Learn Excel and SQL, then analyse one real dataset and write up what you found.' },
+    { name: 'Software Developer', w: [0, 2, 2, 1, 0, 0],
+      day: 'Build apps and systems that solve real problems — mostly thinking, some typing, lots of debugging.',
+      first: 'Pick Python or JavaScript and build three small projects you can show someone.' },
+    { name: 'Accountant', w: [0, 0, 0, 3, 1, 0],
+      day: 'Keep a business\u2019s money straight, legal, and understood — steady, detail-heavy work.',
+      first: 'B.Com, then CA or CMA foundation. Practise on one real set of accounts.' },
+    { name: 'Civil Services Officer', w: [1, 2, 0, 0, 2, 0],
+      day: 'Run public programmes and serve people at scale — big responsibility, slow-moving systems.',
+      first: 'Start with NCERTs and current affairs. UPSC preparation is a marathon, not a sprint.' },
+    { name: 'Bank Officer', w: [1, 0, 0, 2, 1, 0],
+      day: 'Help customers with accounts, loans and savings — people-facing work with clear rules.',
+      first: 'Prepare for IBPS or SBI exams. Practise quantitative aptitude daily.' },
+    { name: 'Engineer', w: [0, 1, 3, 2, 0, 0],
+      day: 'Design and build things that work in the real world — from bridges to circuits to software.',
+      first: 'B.Tech in your branch. Build a small portfolio of things you have actually made.' },
+    { name: 'Designer', w: [0, 0, 1, 0, 0, 3],
+      day: 'Make products, spaces and screens look and feel right — taste, craft, and endless revision.',
+      first: 'Build a portfolio of five strong pieces. Learn Figma — it is free to start.' },
+    { name: 'Writer / Content Creator', w: [0, 2, 0, 0, 0, 2],
+      day: 'Explain ideas clearly in words, audio or video — and keep showing up even when nobody is watching yet.',
+      first: 'Publish ten pieces on a topic you care about. The first ten are practice; that is the point.' },
+    { name: 'Digital Marketer', w: [0, 0, 0, 1, 2, 2],
+      day: 'Help the right people find the right product — ads, content, and reading what the numbers say.',
+      first: 'Learn SEO and ads basics, then run one small campaign for a real business or cause.' },
+    { name: 'Entrepreneur', w: [0, 0, 0, 2, 3, 1],
+      day: 'Build a business from nothing — product, customers, team, and every problem in between.',
+      first: 'Solve one small problem for real paying customers before you build anything big.' },
+    { name: 'Lawyer', w: [2, 2, 0, 0, 1, 0],
+      day: 'Argue, draft and advise — in court and out of it. Reading, writing, and standing your ground.',
+      first: 'LL.B., then intern at a firm or with a senior advocate to see the work up close.' },
+    { name: 'Journalist', w: [1, 2, 0, 0, 0, 2],
+      day: 'Find the story, check it properly, and tell it true — often on a deadline.',
+      first: 'Write every day. Pitch stories to local outlets and build a small body of published work.' },
+    { name: 'HR Manager', w: [2, 0, 0, 0, 2, 0],
+      day: 'Hire, support and grow the people in a company — the human side of running a business.',
+      first: 'An MBA in HR, or start in a people-operations role and learn the work from inside.' },
+    { name: 'Scientist', w: [0, 3, 1, 0, 0, 0],
+      day: 'Run experiments, follow the evidence, and push what we know a little further.',
+      first: 'M.Sc. in your science, then CSIR NET or GATE. Read one research paper a week.' },
+    { name: 'Police / Defence Officer', w: [1, 0, 1, 0, 2, 0],
+      day: 'Serve, protect and lead under pressure — discipline, fitness, and quick decisions.',
+      first: 'Prepare for SSC, CDS or your state police exam. Start the physical training now, not later.' }
+  ];
+
+  /* ---------- UGC NET path finder: 8 questions ----------
+     Q1 (degree) is worth +3 to its subject — background matters most.
+     Q2 and Q5 add interest points (+2/+1). Q3 and Q6 set the path
+     (JRF / Assistant Professor / both). Q4, Q7 and Q8 shape the advice. */
+  var NET_SUBJECTS = {
+    'psychology': 'Psychology', 'commerce': 'Commerce', 'management': 'Management',
+    'english': 'English', 'political-science': 'Political Science', 'history': 'History',
+    'economics': 'Economics', 'computer-science': 'Computer Science and Applications',
+    'sociology': 'Sociology', 'law': 'Law'
+  };
+  var NET_QS = [
+    { q: 'What did you study — your degree subject?', opts: [
+      { t: 'Psychology', s: { psychology: 3 } },
+      { t: 'Commerce', s: { commerce: 3 } },
+      { t: 'Management', s: { management: 3 } },
+      { t: 'English', s: { english: 3 } },
+      { t: 'Political Science', s: { 'political-science': 3 } },
+      { t: 'History', s: { history: 3 } },
+      { t: 'Economics', s: { economics: 3 } },
+      { t: 'Computer Science', s: { 'computer-science': 3 } },
+      { t: 'Sociology', s: { sociology: 3 } },
+      { t: 'Law', s: { law: 3 } } ] },
+    { q: 'What do you enjoy most?', opts: [
+      { t: 'Understanding how people think and feel', s: { psychology: 2, sociology: 1 } },
+      { t: 'Numbers, markets and money', s: { economics: 2, commerce: 1 } },
+      { t: 'Reading, language and stories', s: { english: 2 } },
+      { t: 'Politics, power and society', s: { 'political-science': 2, history: 1 } },
+      { t: 'Technology and systems', s: { 'computer-science': 2 } },
+      { t: 'Rules, rights and justice', s: { law: 2 } },
+      { t: 'Business, teams and organisations', s: { management: 2, commerce: 1 } },
+      { t: 'The past and how societies change', s: { history: 2, sociology: 1 } } ] },
+    { q: 'Teaching, research — or both?', opts: [
+      { t: 'Teaching — I want to teach', path: 'professor' },
+      { t: 'Research — I want to discover', path: 'jrf' },
+      { t: 'Both — I want every door open', path: 'both' },
+      { t: 'Not sure yet', path: 'unsure' } ] },
+    { q: 'How do you feel about 6–12 months of preparation?', opts: [
+      { t: 'Ready — I will put in the work', pace: 'steady' },
+      { t: 'Nervous but willing', pace: 'guided' },
+      { t: 'I want the shortest path there is', pace: 'fast' } ] },
+    { q: 'Which kind of questions do you enjoy?', opts: [
+      { t: 'Human behaviour and the mind', s: { psychology: 2 } },
+      { t: 'Case studies, companies and markets', s: { management: 2, commerce: 1 } },
+      { t: 'Texts, poems and critical ideas', s: { english: 2 } },
+      { t: 'Data, models and the economy', s: { economics: 2 } },
+      { t: 'Code, logic and systems', s: { 'computer-science': 2 } },
+      { t: 'Society, culture and institutions', s: { sociology: 2, 'political-science': 1 } },
+      { t: 'Laws, cases and arguments', s: { law: 2 } },
+      { t: 'Events, eras and sources', s: { history: 2 } } ] },
+    { q: 'Your goal after NET?', opts: [
+      { t: 'Assistant Professor', path: 'professor' },
+      { t: 'JRF + PhD', path: 'jrf' },
+      { t: 'Both — keep every door open', path: 'both' },
+      { t: 'Just the qualification for now', path: 'unsure' } ] },
+    { q: 'How much time can you give every day?', opts: [
+      { t: 'About 2 hours', time: '2' },
+      { t: 'About 4 hours', time: '4' },
+      { t: '6 hours or more', time: '6' } ] },
+    { q: 'Have you started preparing?', opts: [
+      { t: 'Yes, I have begun', started: true },
+      { t: 'No, starting from zero', started: false } ] }
+  ];
+
+  /* ---------- App state ---------- */
+  var state = { mode: null, idx: 0, answers: [] };
+  var savedResult = null;
+  try { savedResult = storeGet(RESULT_KEY) ? JSON.parse(storeGet(RESULT_KEY)) : null; } catch (e) { savedResult = null; }
+
+  function show(id) {
+    ['screen-start', 'screen-quiz', 'screen-results'].forEach(function (s) {
+      var el = $(s);
+      if (el) el.hidden = (s !== id);
+    });
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+  }
+
+  function questions() { return state.mode === 'net' ? NET_QS : GENERAL_QS; }
+  function tag() { return state.mode === 'net' ? 'UGC NET path finder' : 'Career assessment'; }
+
+  function start(mode) {
+    state.mode = mode;
+    state.idx = 0;
+    state.answers = [];
+    show('screen-quiz');
+    renderQ();
+  }
+
+  function renderQ() {
+    var qs = questions();
+    var q = qs[state.idx];
+    $('quiz-tag').textContent = tag();
+    $('quiz-count').textContent = 'Question ' + (state.idx + 1) + ' of ' + qs.length;
+    $('quiz-fill').style.width = Math.round(((state.idx) / qs.length) * 100) + '%';
+    $('quiz-q').textContent = q.q;
+    var box = $('quiz-opts');
+    box.innerHTML = '';
+    q.opts.forEach(function (opt, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'quiz-opt';
+      var letter = document.createElement('span');
+      letter.className = 'opt-letter';
+      letter.textContent = String.fromCharCode(65 + i);
+      var txt = document.createElement('span');
+      txt.textContent = opt.t;
+      b.appendChild(letter);
+      b.appendChild(txt);
+      b.addEventListener('click', function () { pick(i); });
+      box.appendChild(b);
+    });
+    $('quiz-back').style.visibility = state.idx === 0 ? 'hidden' : 'visible';
+  }
+
+  function pick(i) {
+    state.answers[state.idx] = i;
+    var qs = questions();
+    if (state.idx + 1 >= qs.length) { finish(); return; }
+    state.idx++;
+    renderQ();
+  }
+
+  function saveResult(result) {
+    try { storeSet(RESULT_KEY, JSON.stringify(result)); } catch (e) {}
+    savedResult = result;
+    renderLastResult();
+  }
+
+  function renderLastResult() {
+    var wrap = $('last-result');
+    if (!wrap) return;
+    if (!savedResult) { wrap.hidden = true; return; }
+    wrap.hidden = false;
+    $('last-result-text').textContent = savedResult.mode === 'net'
+      ? 'Your last result: UGC NET path — ' + (NET_SUBJECTS[savedResult.subject] || savedResult.subject) + '.'
+      : 'Your last result: top match ' + (savedResult.top && savedResult.top[0] ? savedResult.top[0].name : '') + '.';
+  }
+
+  /* ---------- General scoring ----------
+     Normalise each dimension (picks / appearances), then each career's
+     match is the weighted average of the user's normalised dimensions. */
+  function finish() {
+    if (state.mode === 'net') { finishNet(); return; }
+    var picks = { P: 0, I: 0, B: 0, N: 0, L: 0, C: 0 };
+    var apps = { P: 0, I: 0, B: 0, N: 0, L: 0, C: 0 };
+    GENERAL_QS.forEach(function (q) {
+      q.opts.forEach(function (o) { apps[o.d]++; });
+    });
+    GENERAL_QS.forEach(function (q, qi) {
+      var chosen = q.opts[state.answers[qi]];
+      if (chosen) picks[chosen.d]++;
+    });
+    var norm = {};
+    Object.keys(DIMS).forEach(function (d) {
+      norm[d] = apps[d] ? Math.round((picks[d] / apps[d]) * 100) : 0;
+    });
+    var dimKeys = ['P', 'I', 'B', 'N', 'L', 'C'];
+    var scored = CAREERS.map(function (c) {
+      var num = 0, den = 0;
+      c.w.forEach(function (w, i) { num += norm[dimKeys[i]] * w; den += w * 100; });
+      return { name: c.name, match: den ? Math.round((num / den) * 100) : 0, day: c.day, first: c.first, w: c.w };
+    }).sort(function (a, b) { return b.match - a.match; });
+    var top = scored.slice(0, 5);
+    saveResult({ mode: 'general', top: top.map(function (t) { return { name: t.name, match: t.match }; }), norm: norm, at: new Date().toISOString() });
+    renderGeneralResults(top, norm);
+  }
+
+  function barRow(label, valueText, pct) {
+    var row = document.createElement('div');
+    row.className = 'assess-bar-row';
+    var lab = document.createElement('div');
+    lab.className = 'assess-bar-label';
+    var l = document.createElement('span');
+    l.textContent = label;
+    var v = document.createElement('span');
+    v.textContent = valueText;
+    lab.appendChild(l);
+    lab.appendChild(v);
+    var track = document.createElement('div');
+    track.className = 'assess-bar-track';
+    var fill = document.createElement('div');
+    fill.className = 'assess-bar-fill';
+    fill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+    track.appendChild(fill);
+    row.appendChild(lab);
+    row.appendChild(track);
+    return row;
+  }
+
+  function renderGeneralResults(top, norm) {
+    var body = $('results-body');
+    body.innerHTML = '';
+    var h = document.createElement('h2');
+    h.textContent = 'Your top career matches';
+    h.style.textAlign = 'center';
+    h.style.marginBottom = '8px';
+    body.appendChild(h);
+    var sub = document.createElement('p');
+    sub.className = 'muted';
+    sub.style.textAlign = 'center';
+    sub.style.marginBottom = '28px';
+    sub.textContent = 'Based on your answers — not a test you can pass or fail. A match means the work fits how you think and what you enjoy, not that the other paths are closed to you.';
+    body.appendChild(sub);
+
+    var profTitle = document.createElement('h3');
+    profTitle.textContent = 'Your profile';
+    body.appendChild(profTitle);
+    var profBox = document.createElement('div');
+    profBox.className = 'card-dark';
+    profBox.style.marginBottom = '28px';
+    ['P', 'I', 'B', 'N', 'L', 'C'].forEach(function (d) {
+      profBox.appendChild(barRow(DIMS[d], norm[d] + '%', norm[d]));
+    });
+    body.appendChild(profBox);
+
+    top.forEach(function (c, i) {
+      var card = document.createElement('div');
+      card.className = 'card-dark assess-match';
+      var title = document.createElement('h3');
+      title.textContent = (i + 1) + '. ' + c.name;
+      card.appendChild(title);
+      var dimKeys = ['P', 'I', 'B', 'N', 'L', 'C'];
+      var whyDims = c.w.map(function (w, j) { return { d: dimKeys[j], w: w, n: norm[dimKeys[j]] }; })
+        .filter(function (x) { return x.w > 0; })
+        .sort(function (a, b) { return (b.n * b.w) - (a.n * a.w); })
+        .slice(0, 2)
+        .map(function (x) { return DIMS[x.d].toLowerCase(); });
+      var why = document.createElement('p');
+      why.className = 'assess-why';
+      why.textContent = whyDims.length
+        ? 'Why it fits: you scored highest on ' + whyDims.join(' and ') + '.'
+        : '';
+      card.appendChild(why);
+      card.appendChild(barRow('Match', c.match + '%', c.match));
+      var day = document.createElement('p');
+      var dayB = document.createElement('b');
+      dayB.textContent = 'Day to day: ';
+      day.appendChild(dayB);
+      day.appendChild(document.createTextNode(c.day));
+      card.appendChild(day);
+      var first = document.createElement('p');
+      var firstB = document.createElement('b');
+      firstB.textContent = 'First step: ';
+      first.appendChild(firstB);
+      first.appendChild(document.createTextNode(c.first));
+      card.appendChild(first);
+      body.appendChild(card);
+    });
+
+    var note = document.createElement('div');
+    note.className = 'assess-note';
+    note.innerHTML = 'A match is a starting point, not a verdict. If a career below the top 5 pulls at you, trust that too — try its first step for a week and see how it feels.';
+    body.appendChild(note);
+    show('screen-results');
+  }
+
+  /* ---------- NET scoring ----------
+     Degree (Q1) is worth +3; interests (Q2, Q5) add +2/+1. The highest
+     total wins; a tie goes to the degree subject. The path comes from
+     Q3 and Q6 (JRF / Assistant Professor / both). */
+  function finishNet() {
+    var scores = {};
+    var degree = null;
+    NET_QS.forEach(function (q, qi) {
+      var chosen = q.opts[state.answers[qi]];
+      if (!chosen) return;
+      if (chosen.s) {
+        Object.keys(chosen.s).forEach(function (slug) {
+          scores[slug] = (scores[slug] || 0) + chosen.s[slug];
+        });
+      }
+      if (qi === 0 && chosen.s) degree = Object.keys(chosen.s)[0];
+    });
+    var ranked = Object.keys(scores).map(function (s) { return { slug: s, score: scores[s] }; })
+      .sort(function (a, b) {
+        if (b.score !== a.score) return b.score - a.score;
+        if (a.slug === degree) return -1;
+        if (b.slug === degree) return 1;
+        return 0;
+      });
+    var top = ranked[0];
+    var runner = ranked[1] || null;
+    var paths = [];
+    [2, 5].forEach(function (qi) {
+      var chosen = NET_QS[qi].opts[state.answers[qi]];
+      if (chosen && chosen.path) paths.push(chosen.path);
+    });
+    var path;
+    if (paths.indexOf('both') !== -1 || (paths.indexOf('jrf') !== -1 && paths.indexOf('professor') !== -1)) path = 'both';
+    else if (paths.indexOf('jrf') !== -1) path = 'jrf';
+    else if (paths.indexOf('professor') !== -1) path = 'professor';
+    else path = 'unsure';
+    var paceOpt = NET_QS[3].opts[state.answers[3]] || {};
+    var timeOpt = NET_QS[6].opts[state.answers[6]] || {};
+    var startedOpt = NET_QS[7].opts[state.answers[7]] || {};
+    var result = {
+      mode: 'net', subject: top ? top.slug : degree, runner: runner ? runner.slug : null,
+      degree: degree, path: path, pace: paceOpt.pace || 'steady',
+      time: timeOpt.time || '4', started: !!startedOpt.started,
+      at: new Date().toISOString()
+    };
+    saveResult(result);
+    renderNetResults(result);
+  }
+
+  function renderNetResults(r) {
+    var body = $('results-body');
+    body.innerHTML = '';
+    var subjName = NET_SUBJECTS[r.subject] || r.subject;
+    var h = document.createElement('h2');
+    h.textContent = 'Your UGC NET path';
+    h.style.textAlign = 'center';
+    h.style.marginBottom = '8px';
+    body.appendChild(h);
+    var sub = document.createElement('p');
+    sub.className = 'muted';
+    sub.style.textAlign = 'center';
+    sub.style.marginBottom = '28px';
+    sub.textContent = 'A suggestion based on your background and interests — not a rule. You can switch subjects; the exam format is the same either way.';
+    body.appendChild(sub);
+
+    var card = document.createElement('div');
+    card.className = 'card-dark assess-match';
+    var title = document.createElement('h3');
+    title.textContent = 'Recommended subject: ' + subjName;
+    card.appendChild(title);
+    var why = document.createElement('p');
+    why.className = 'assess-why';
+    why.textContent = (r.degree && r.degree === r.subject)
+      ? 'Your degree and your interests point the same way.'
+      : 'Your interests point here, even though your degree is in ' + (NET_SUBJECTS[r.degree] || r.degree) + ' — both are valid starting points.';
+    card.appendChild(why);
+    var pathLine = document.createElement('p');
+    var pathB = document.createElement('b');
+    pathB.textContent = 'Your path: ';
+    pathLine.appendChild(pathB);
+    pathLine.appendChild(document.createTextNode(
+      r.path === 'jrf' ? 'JRF + PhD — aim for the top scores and research.' :
+      r.path === 'professor' ? 'Assistant Professor — clear the exam and start teaching.' :
+      r.path === 'both' ? 'JRF + Assistant Professor — keep both doors open and aim high.' :
+      'Decide after your first mock test — see how the subject feels.'));
+    card.appendChild(pathLine);
+    var plan = document.createElement('p');
+    var planB = document.createElement('b');
+    planB.textContent = 'Your first week: ';
+    plan.appendChild(planB);
+    plan.appendChild(document.createTextNode(
+      (r.started ? 'You have begun — ' : 'Starting from zero — ') +
+      'give it ' + r.time + ' hours a day. ' +
+      (r.pace === 'fast' ? 'Start with Paper 1 (it is the same for every subject) and take Mock Test 1 this week.' :
+       r.pace === 'guided' ? 'Start with Paper 1 and take Mock Test 1 — the full explanations will teach you as you go.' :
+       'Work through Paper 1 first, then take Mock Test 1 in ' + subjName + ' and review every explanation.')));
+    card.appendChild(plan);
+    var cta = document.createElement('a');
+    cta.className = 'btn btn-white';
+    cta.href = '/changexed/mock-tests/?subject=' + r.subject;
+    cta.textContent = 'Start Mock Test 1 in ' + subjName + ' →';
+    cta.style.justifyContent = 'center';
+    card.appendChild(cta);
+    body.appendChild(card);
+
+    if (r.runner && r.runner !== r.subject) {
+      var run = document.createElement('div');
+      run.className = 'assess-note';
+      run.innerHTML = 'Close second: <b>' + esc(NET_SUBJECTS[r.runner] || r.runner) + '</b>. If ' + esc(subjName) + ' does not click after a couple of mock tests, try this one instead.';
+      body.appendChild(run);
+    }
+    var series = document.createElement('p');
+    series.style.textAlign = 'center';
+    var seriesLink = document.createElement('a');
+    seriesLink.className = 'card-link';
+    seriesLink.href = '/changexed/';
+    seriesLink.textContent = 'See the full UGC NET test series →';
+    series.appendChild(seriesLink);
+    body.appendChild(series);
+    show('screen-results');
+  }
+
+  /* ---------- Wiring ---------- */
+  function bindMode(el, mode) {
+    if (!el) return;
+    el.addEventListener('click', function () { start(mode); });
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); start(mode); }
+    });
+  }
+  bindMode($('mode-general'), 'general');
+  bindMode($('mode-net'), 'net');
+  $('quiz-back').addEventListener('click', function () {
+    if (state.idx > 0) { state.idx--; renderQ(); }
+  });
+  $('quiz-quit').addEventListener('click', function () { show('screen-start'); });
+  $('retake-btn').addEventListener('click', function () {
+    if (state.mode) start(state.mode);
+    else show('screen-start');
+  });
+  $('last-result-btn').addEventListener('click', function () {
+    if (!savedResult) return;
+    if (savedResult.mode === 'net') { renderNetResults(savedResult); return; }
+    /* General results were saved with their top matches; rebuild the
+       profile bars from the saved norms. */
+    if (savedResult.top) {
+      var top = savedResult.top.map(function (t) {
+        var c = null;
+        CAREERS.forEach(function (cc) { if (cc.name === t.name) c = cc; });
+        return { name: t.name, match: t.match, day: c ? c.day : '', first: c ? c.first : '', w: c ? c.w : [0, 0, 0, 0, 0, 0] };
+      });
+      renderGeneralResults(top, savedResult.norm || { P: 0, I: 0, B: 0, N: 0, L: 0, C: 0 });
+    }
+  });
+  renderLastResult();
+})();
+</script>
+</body>
+</html>
