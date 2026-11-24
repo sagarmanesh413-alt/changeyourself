@@ -43,7 +43,7 @@ img { max-width: 100%; }
    fixed nav scrolls over the page content. */
 .nav {
   position: fixed;
-  top: 16px;
+  top: calc(16px + env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 60;
@@ -180,7 +180,7 @@ img { max-width: 100%; }
   letter-spacing: 0.2px;
 }
 .hero-title {
-  font-size: clamp(42px, 7.5vw, 68px);
+  font-size: clamp(34px, 7.5vw, 68px);
   font-weight: 300;
   line-height: 1.08;
   letter-spacing: -1px;
@@ -345,7 +345,7 @@ img { max-width: 100%; }
 /* ---------- Floating bottom dock ---------- */
 .dock {
   position: fixed;
-  bottom: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 60;
@@ -727,19 +727,33 @@ html[data-theme="light"] .cta::after {
 }
 
 /* ---------- Responsive ---------- */
+/* Tablets: 3-column grids drop to 2 instead of jumping straight to 1. */
+@media (max-width: 900px) {
+  .grid-3, .addon-grid { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 640px) {
   .section { padding: 56px 0; }
   .hero { padding: 140px 0 64px; }
   .grid-2, .grid-3, .tiers { grid-template-columns: 1fr; }
   .addon-grid { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2, 1fr); }
-  .nav { gap: 0; padding: 6px 7px; top: 10px; }
+  .nav { gap: 0; padding: 6px 7px; top: calc(10px + env(safe-area-inset-top, 0px)); }
   .nav a.nav-link { padding: 6px 9px; font-size: 13px; }
   .login-btn { padding: 7px 12px; font-size: 13px; }
   .mock-band { padding: 34px 20px; }
   .dock a { width: 38px; height: 38px; }
   .dock a svg { width: 18px; height: 18px; }
   .hero-sub { font-size: 16px; }
+  .card-dark { padding: 20px; }
+  .page-head { padding: 132px 0 44px; }
+}
+@media (max-width: 380px) {
+  /* The smallest phones: drop the About link (still in the footer)
+     so the nav pill fits, and shrink the dock icons. */
+  .nav a.nav-link[href="/about/"] { display: none; }
+  .dock { gap: 4px; padding: 6px; }
+  .dock a { width: 32px; height: 32px; }
+  .dock a svg { width: 16px; height: 16px; }
 }
 
 /* ---------- Scroll reveal & hero parallax ----------
