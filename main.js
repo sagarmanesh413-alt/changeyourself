@@ -76,13 +76,33 @@
     toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 4000);
   }
 
-  /* Login is a placeholder for now. */
-  var loginBtn = document.getElementById("loginBtn");
-  if (loginBtn) {
-    loginBtn.addEventListener("click", function () {
-      showToast("Login is coming soon — the mock tests are free for now.");
-    });
+  /* ---------- Auth scripts (Supabase client + login modal) ----------
+     Loaded dynamically so the 11 small pages share one wiring point.
+     Guarded against duplicates: the dashboard and the mock-test app
+     load the same files with explicit <script> tags. auth.js is only
+     injected after supabase.js has parsed (it needs window.CYSupa). */
+  function loadAuthScripts() {
+    if (!document.querySelector('script[src="/supabase.js"]')) {
+      var s1 = document.createElement("script");
+      s1.src = "/supabase.js";
+      s1.onload = function () {
+        if (!document.querySelector('script[src="/auth.js"]')) {
+          var s2 = document.createElement("script");
+          s2.src = "/auth.js";
+          document.head.appendChild(s2);
+        }
+      };
+      document.head.appendChild(s1);
+    } else if (!document.querySelector('script[src="/auth.js"]')) {
+      var s2b = document.createElement("script");
+      s2b.src = "/auth.js";
+      document.head.appendChild(s2b);
+    }
   }
+  loadAuthScripts();
+
+  /* The Login button is owned by /auth.js now (real sign-in with Google
+     or email code). No toast handler here any more. */
 
   /* Any element marked data-soon shows a toast instead of navigating. */
   var soonEls = document.querySelectorAll("[data-soon]");
