@@ -6,6 +6,10 @@
 <title>Your Dashboard — ChangeYourself.in</title>
 <meta name="description" content="Your ChangeYourself dashboard — profile, plan, stats and your full mock-test and quiz history.">
 <script>try{var t=localStorage.getItem("cy-theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;}}catch(e){}</script>
+<style>
+/* First sign-in: hide everything except the profile + form until the profile is complete. */
+body.dash-onboarding .dash-hide-until-profile { display: none !important; }
+</style>
 <link rel="stylesheet" href="/styles.css">
   <link rel="icon" href="/logo.png">
 </head>
@@ -42,6 +46,12 @@
 
   <!-- Signed in -->
   <div id="dash-content" hidden>
+
+    <!-- First sign-in: shown until the profile is complete -->
+    <div class="card-dark" id="dash-onboard-note" hidden>
+      <h3>Welcome — complete your profile first</h3>
+      <p class="muted">Tell us a little about yourself so your dashboard is set up for you. It only takes a minute — fill in every field below and tap Save profile.</p>
+    </div>
 
     <!-- Profile -->
     <div class="card-dark dash-profile">
@@ -119,14 +129,14 @@
     </div>
 
     <!-- Plan -->
-    <div class="card-dark" id="dash-plan">
+    <div class="card-dark dash-hide-until-profile" id="dash-plan">
       <h3>Your plan</h3>
       <p id="dash-plan-text" class="muted">Checking your plan…</p>
       <div class="quiz-actions" id="dash-plan-actions"></div>
     </div>
 
     <!-- Stats -->
-    <div class="stats" id="dash-stats">
+    <div class="stats dash-hide-until-profile" id="dash-stats">
       <div class="stat"><div class="stat-num" id="stat-mock">0</div><div class="stat-label">Mock tests taken</div></div>
       <div class="stat"><div class="stat-num" id="stat-quiz">0</div><div class="stat-label">Quiz rounds</div></div>
       <div class="stat"><div class="stat-num" id="stat-avg">—</div><div class="stat-label">Average mock score</div></div>
@@ -134,19 +144,19 @@
     </div>
 
     <!-- Per-subject progress -->
-    <div class="card-dark">
+    <div class="card-dark dash-hide-until-profile">
       <h3>Progress by subject</h3>
       <div id="dash-subjects"></div>
     </div>
 
     <!-- Mock test history -->
-    <div class="card-dark">
+    <div class="card-dark dash-hide-until-profile">
       <h3>Mock test history</h3>
       <div id="dash-mock-history"></div>
     </div>
 
     <!-- Quiz history -->
-    <div class="card-dark">
+    <div class="card-dark dash-hide-until-profile">
       <h3>Quiz history</h3>
       <div id="dash-quiz-history"></div>
     </div>
@@ -190,6 +200,15 @@
       if (isNaN(d.getTime())) return '';
       return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
     } catch (e) { return ''; }
+  }
+  /* Avatar initials come from the NAME only — never from the email.
+     "Manesh Sagar" -> "MS", "MANESH" -> "M", no name -> "?". */
+  function initialsFor(name) {
+    var parts = String(name || '').trim().split(/\s+/).filter(function (w) { return w; });
+    if (!parts.length) return '?';
+    var first = parts[0].charAt(0);
+    var last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : '';
+    return (first + last).toUpperCase();
   }
   function fmtDur(sec) {
     if (sec == null) return '';
@@ -250,6 +269,33 @@
     div.appendChild(v);
     return div;
   }
+  /* ---------- First sign-in gate ----------
+     A profile counts as complete only when every field of the form is
+     filled in the profile ROW (Google metadata does not count — the
+     row is what the form saves). While it is incomplete, the dashboard
+     hides the plan, stats, progress and history, shows the welcome
+     note, and brings the form into view. */
+  var REQUIRED_PROFILE_FIELDS = ['full_name', 'date_of_birth', 'qualification', 'employment_status', 'phone', 'city', 'target_subject'];
+  function profileComplete(row) {
+    if (!row) return false;
+    return REQUIRED_PROFILE_FIELDS.every(function (k) {
+      var v = row[k];
+      return v !== null && v !== undefined && String(v).trim() !== '';
+    });
+  }
+  function applyProfileGate() {
+    var done = profileComplete(profileRow);
+    try { document.body.classList.toggle('dash-onboarding', !done); } catch (e) {}
+    var note = $('dash-onboard-note');
+    if (note) note.hidden = done;
+    if (!done) {
+      /* Guarded scroll: some phone webviews throw on scroll calls. */
+      try {
+        var f = $('dash-form');
+        if (f && f.scrollIntoView) f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (e) {}
+    }
+  }
   function renderProfile() {
     var md = (sessionUser && sessionUser.user_metadata) || {};
     var name = (profileRow && profileRow.full_name) || md.full_name || md.name || '';
@@ -258,7 +304,7 @@
     $('dash-name').textContent = name || email || 'Your account';
     $('dash-email').textContent = email;
     $('dash-member').textContent = memberSince ? 'Member since ' + memberSince : '';
-    $('dash-avatar').textContent = (name || email || '?').trim().charAt(0).toUpperCase() || '?';
+    $('dash-avatar').textContent = initialsFor(name);
 
     var fields = $('dash-fields');
     fields.innerHTML = '';
@@ -277,6 +323,8 @@
     $('f-phone').value = (profileRow && profileRow.phone) || '';
     $('f-city').value = (profileRow && profileRow.city) || '';
     $('f-subject').value = (profileRow && profileRow.target_subject) || '';
+
+    applyProfileGate();
   }
   function renderPlan(ent) {
     var text = $('dash-plan-text');
@@ -441,6 +489,29 @@
     var subject = $('f-subject').value || '';
     if (subject && SUBJECT_ORDER.indexOf(subject) === -1 && subject !== 'most-probable') {
       msg.textContent = 'Choose a valid target subject.'; return;
+    }
+    /* While the first-sign-in gate is up, every field is required —
+       the form is the front door, not an optional extra. Later edits
+       (gate already lifted) keep the old lenient behaviour. */
+    var onboarding = false;
+    try { onboarding = document.body.classList.contains('dash-onboarding'); } catch (e) {}
+    if (onboarding) {
+      var labels = { 'f-name': 'Full name', 'f-dob': 'Date of birth', 'f-qual': 'Qualification', 'f-work': 'Work status', 'f-phone': 'Phone', 'f-city': 'City', 'f-subject': 'Target subject' };
+      var missing = [];
+      var firstMissing = null;
+      Object.keys(labels).forEach(function (id) {
+        var el = $(id);
+        var v = el ? String(el.value || '').trim() : '';
+        if (!v) {
+          missing.push(labels[id]);
+          if (!firstMissing && el) firstMissing = el;
+        }
+      });
+      if (missing.length) {
+        msg.textContent = 'Please fill in all the fields to continue: ' + missing.join(', ') + '.';
+        if (firstMissing) { try { firstMissing.focus(); } catch (e) {} }
+        return;
+      }
     }
     var fields = {
       full_name: $('f-name').value.trim() || null,
