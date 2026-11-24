@@ -98,6 +98,8 @@
 <!-- No dock on this page: it would cover the quiz buttons, same as the mock-test page. -->
 <div class="toast" id="toast" role="status"></div>
 <script src="/main.js"></script>
+<script src="/supabase.js"></script>
+<script src="/auth.js"></script>
 <script>
 (function () {
   'use strict';
@@ -150,7 +152,7 @@
   var BEST_KEY = { p1: 'cy-quiz-best-p1', p2: 'cy-quiz-best-p2', mixed: 'cy-quiz-best-mixed' };
   var MODE_LABEL = { p1: 'Paper 1', p2: 'Paper 2', mixed: 'Mixed' };
   var ROUND = 10;
-  var mode = 'mixed', round = [], idx = 0, score = 0, answers = [];
+  var mode = 'mixed', round = [], idx = 0, score = 0, answers = [], roundStartedAt = 0;
 
   function best(m) {
     var n = parseInt(store.get(BEST_KEY[m]), 10);
@@ -168,6 +170,7 @@
 
   function startRound(m) {
     mode = m;
+    roundStartedAt = Date.now();
     var pool = DATA.filter(function (q) {
       return m === 'mixed' ? true : q.p === (m === 'p1' ? '1' : '2');
     });
@@ -220,6 +223,14 @@
     var b = best(mode);
     var isBest = score > b;
     if (isBest) { try { store.set(BEST_KEY[mode], String(score)); } catch (e) {} }
+    /* Save the round to the signed-in user's history. Fire-and-forget:
+       recordAttempt never throws and never blocks the results screen. */
+    try {
+      if (window.CYSupa && window.CYSupa.recordAttempt) {
+        var secs = roundStartedAt ? Math.max(0, Math.round((Date.now() - roundStartedAt) / 1000)) : null;
+        window.CYSupa.recordAttempt({ kind: 'quiz', subject: mode === 'p1' ? 'paper1' : (mode === 'p2' ? 'paper2' : 'mixed'), set_number: null, score: score, total: ROUND, correct: score, wrong: answers.filter(function (a) { return !a.correct; }).length, skipped: 0, duration_seconds: secs });
+      }
+    } catch (e) {}
     $('res-score').textContent = score;
     $('res-best').textContent = isBest
       ? 'New best for ' + MODE_LABEL[mode] + '!'
