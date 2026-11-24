@@ -118,9 +118,6 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-side-plan { margin-top: auto; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: rgba(124, 58, 237, .08); }
 .dash-side-plan p { font-size: 13px; color: var(--muted); margin: 0 0 10px; line-height: 1.5; }
 .dash-side-plan .card-link { font-size: 14px; }
-.dash-side-theme { margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; }
-.dash-side-theme:hover { color: var(--text); }
-.dash-side-theme svg { width: 18px; height: 18px; flex-shrink: 0; }
 
 /* View tabs: the sidebar is hidden on phones, so these switch views
    there. Hidden on desktop, where the sidebar does the job. */
@@ -131,19 +128,31 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 
 /* Topbar: live search over the history + a real time range. */
 .dash-topbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-.dash-search { flex: 1; min-width: 200px; padding: 11px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font: inherit; font-size: 15px; }
+.dash-search { flex: 1; min-width: 200px; padding: 11px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.10); background: rgba(255, 255, 255, 0.04); color: var(--text); font: inherit; font-size: 15px; }
+html[data-theme="light"] .dash-search { border-color: rgba(0, 0, 0, 0.10); background: rgba(0, 0, 0, 0.03); }
 .dash-search::placeholder { color: var(--muted); }
-#dash-range { padding: 11px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font: inherit; font-size: 15px; }
-#dash-range option { background: #ffffff; color: #000000; }
+/* Time range: a segmented control (All / 30 / 90 days) — clearer
+   and faster than a dropdown for three options. */
+.dash-range-seg { display: flex; gap: 3px; padding: 3px; border-radius: 11px; border: 1px solid rgba(255, 255, 255, 0.10); background: rgba(255, 255, 255, 0.04); flex-shrink: 0; }
+html[data-theme="light"] .dash-range-seg { border-color: rgba(0, 0, 0, 0.10); background: rgba(0, 0, 0, 0.03); }
+.dash-range-seg button { padding: 8px 14px; border-radius: 8px; border: none; background: transparent; color: var(--muted); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.dash-range-seg button:hover { color: var(--text); }
+.dash-range-seg button[aria-pressed="true"] { background: #7c3aed; color: #ffffff; }
+
+/* "This week" summary: a quiet line under the overview tiles. */
+#dash-week-line { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* Study-goal icons are inline SVGs now, not emoji. */
+.dash-goal-icon svg { width: 18px; height: 18px; }
 
 /* Your overview: four tiles of real numbers. */
 .dash-overview { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-.dash-ov-tile { padding: 18px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); }
-.dash-ov-icon { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 20px; }
-.dash-ov-icon svg { width: 20px; height: 20px; }
-.dash-ov-label { font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
-.dash-ov-value { font-size: 26px; font-weight: 800; line-height: 1.1; }
-.dash-ov-sub { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+.dash-ov-tile { padding: 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); }
+.dash-ov-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; background: rgba(124, 58, 237, .12); color: #a78bfa; }
+.dash-ov-icon svg { width: 19px; height: 19px; }
+.dash-ov-label { font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 6px; }
+.dash-ov-value { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.dash-ov-sub { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
 @media (max-width: 640px) {
   .dash-overview { grid-template-columns: repeat(2, 1fr); }
 }
@@ -151,7 +160,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 /* Focus banner: the reference's bottom banner — the top "where to
    put more effort" item + a real next step. A subtle purple tint,
    still a glass card. */
-.dash-focus-card { border-color: rgba(124, 58, 237, .45); background: linear-gradient(90deg, rgba(124, 58, 237, .16), rgba(59, 130, 246, .08)); display: flex; gap: 20px; align-items: flex-start; justify-content: space-between; }
+.dash-focus-card { border-left: 3px solid #7c3aed; background: rgba(124, 58, 237, .06); display: flex; gap: 20px; align-items: flex-start; justify-content: space-between; }
 .dash-focus-card h3 { margin-bottom: 6px; }
 .dash-focus-main { flex: 1; min-width: 0; }
 .dash-focus-main p { margin-bottom: 10px; }
@@ -188,19 +197,19 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
    keeps its own width — it is outside .dash-main. */
 .dash-main .container { max-width: none; }
 
-/* The reference's border: a purple-tinted ring on every dashboard
-   card, tile and panel, with a soft glow. The travelling beam on top
-   is unchanged. Scoped to the dashboard so the rest of the site
-   keeps its own border. */
-.dash-main .card-dark, .dash-overview .dash-ov-tile, .dash-side,
-.dash-topbar .dash-search, .dash-topbar #dash-range {
-  border: 1px solid rgba(139, 92, 246, 0.25);
-  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.05), 0 10px 30px rgba(0, 0, 0, 0.28);
+/* Professional cards: a quiet neutral border and a soft shadow.
+   Purple is reserved for the active item, the primary button, the
+   chart line and the progress fills — not for every card's edge. */
+.dash-main .card-dark, .dash-overview .dash-ov-tile, .dash-side {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.20), 0 8px 24px rgba(0, 0, 0, 0.16);
 }
-.dash-main .card-dark.dash-focus-card { border-color: rgba(124, 58, 237, 0.5); }
 html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-overview .dash-ov-tile, html[data-theme="light"] .dash-side {
-  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.05), 0 10px 26px rgba(124, 58, 237, 0.10);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06);
 }
+.dash-topbar .dash-search { border: 1px solid rgba(255, 255, 255, 0.10); }
+html[data-theme="light"] .dash-topbar .dash-search { border-color: rgba(0, 0, 0, 0.10); }
 
 /* ---- Adjustable glass (the GlassWorkspace design) ----
    The dashboard's glass is adjustable: blur, opacity, saturation,
@@ -209,16 +218,16 @@ html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-o
    material adds the frosted tint and the inset edge light on top.
    Defaults are the component's Frosted preset. */
 :root {
-  --dash-blur: 22px;
-  --dash-opacity: .3;
-  --dash-saturation: 1.2;
+  --dash-blur: 20px;
+  --dash-opacity: .55;
+  --dash-saturation: 1.15;
   --dash-tint: #ffffff;
-  --dash-edge: .6;
+  --dash-edge: .35;
   --dash-surface-rgb: 35, 35, 40;
 }
 html[data-theme="light"] { --dash-surface-rgb: 255, 255, 255; }
 .dash-main .card-dark, .dash-overview .dash-ov-tile, .dash-side,
-.dash-topbar, .dash-view-tabs, .dash-glass-sample {
+.dash-view-tabs, .dash-glass-sample {
   background: rgba(var(--dash-surface-rgb), var(--dash-opacity));
   background: color-mix(in srgb, color-mix(in srgb, var(--dash-tint) 12%, rgb(var(--dash-surface-rgb))) calc(var(--dash-opacity) * 100%), transparent);
   -webkit-backdrop-filter: blur(var(--dash-blur)) saturate(var(--dash-saturation));
@@ -226,30 +235,31 @@ html[data-theme="light"] { --dash-surface-rgb: 255, 255, 255; }
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, #ffffff calc(var(--dash-edge) * 100%), transparent),
     inset 0 0 0 1px color-mix(in srgb, #ffffff calc(var(--dash-edge) * 30%), transparent),
-    0 0 0 1px rgba(124, 58, 237, 0.05),
-    0 10px 30px rgba(0, 0, 0, 0.28);
+    0 1px 2px rgba(0, 0, 0, 0.20),
+    0 8px 24px rgba(0, 0, 0, 0.16);
 }
 html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-overview .dash-ov-tile, html[data-theme="light"] .dash-side,
-html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs, html[data-theme="light"] .dash-glass-sample {
+html[data-theme="light"] .dash-view-tabs, html[data-theme="light"] .dash-glass-sample {
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, #ffffff calc(var(--dash-edge) * 100%), transparent),
     inset 0 0 0 1px color-mix(in srgb, #ffffff calc(var(--dash-edge) * 30%), transparent),
-    0 0 0 1px rgba(124, 58, 237, 0.05),
-    0 10px 26px rgba(124, 58, 237, 0.10);
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
-/* The topbar is a glass panel now (the component's topbar) — search,
-   time range and the Adjust glass button sit inside it. */
-.dash-topbar { padding: 12px 14px; border-radius: 20px; border: 1px solid rgba(139, 92, 246, 0.25); margin-bottom: 16px; }
+/* The topbar is a clean row, not a panel — the search and the time
+   range sit directly on the page, the way a professional dashboard
+   does it. */
+.dash-topbar { padding: 0; border: none; margin-bottom: 16px; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 
 /* The view tabs are the dock now (the component's bottom dock): a
    glass pill holding the four views, the active one solid purple. */
-.dash-view-tabs { padding: 5px; border-radius: 999px; border: 1px solid rgba(139, 92, 246, 0.25); width: fit-content; max-width: 100%; }
+.dash-view-tabs { padding: 5px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.10); background: rgba(255, 255, 255, 0.03); width: fit-content; max-width: 100%; }
+html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); background: rgba(0, 0, 0, 0.03); }
 .dash-view-tab { border: none; }
 
-/* Adjust glass panel: the component's material popover, fixed at the
-   top right so it stays put while the dashboard scrolls. */
-#dash-glass-panel { position: fixed; right: 16px; top: 76px; z-index: 40; width: 300px; max-width: calc(100vw - 32px); max-height: calc(100vh - 96px); overflow-y: auto; }
+/* Appearance lives in Settings now (an inline card), not a popover —
+   the .dash-glass-* controls below are reused there unchanged. */
 .dash-glass-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dash-glass-head h3 { margin: 0; }
 .dash-glass-sample { height: 72px; display: flex; align-items: center; justify-content: center; border-radius: 13px; margin: 16px 0; font-size: 13px; color: var(--muted); }
@@ -263,8 +273,6 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
 .dash-glass-tint { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; margin-top: 18px; }
 .dash-glass-tint input { height: 30px; width: 44px; padding: 2px; background: none; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
 #dash-glass-reset { width: 100%; margin-top: 20px; }
-@media (max-width: 640px) { #dash-glass-panel { top: 70px; } }
-
 /* Study goals: the component's savings goals, with real study
    targets — average, sets, streak — and exact numbers. */
 .dash-goal + .dash-goal { margin-top: 22px; }
@@ -281,16 +289,17 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
 .dash-time-big { font-size: 34px; font-weight: 800; line-height: 1.1; margin: 4px 0 2px; }
 .dash-time-sub { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
 
-/* Analysis banner: scope + subject chips + the verdict, with a 🧠
-   mark where the reference puts its 3D brain (no 3D anywhere on
-   the site — the emoji keeps the same idea in the site's own idiom). */
+/* Analysis banner: scope + subject chips + the verdict, with a
+   clean chart icon where the reference puts its 3D brain (no 3D
+   anywhere on the site). */
 .dash-analysis-banner { display: flex; gap: 20px; align-items: center; }
 .dash-banner-main { flex: 1; min-width: 0; }
 .dash-analysis-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(124, 58, 237, .15); color: #a78bfa; font-size: 13px; font-weight: 700; }
 .dash-banner-scope { font-size: 20px; font-weight: 700; margin: 12px 0; }
 .dash-banner-note { color: var(--muted); font-size: 14px; line-height: 1.5; margin: 10px 0 0; }
 .dash-banner-note::before { content: "✦ "; color: #a78bfa; }
-.dash-banner-brain { font-size: 64px; line-height: 1; filter: drop-shadow(0 0 18px rgba(124, 58, 237, .6)); flex-shrink: 0; }
+.dash-banner-brain { width: 56px; height: 56px; border-radius: 16px; background: rgba(124, 58, 237, .12); color: #a78bfa; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dash-banner-brain svg { width: 28px; height: 28px; }
 @media (max-width: 640px) { .dash-banner-brain { display: none; } }
 
 /* "Your Current Level" heading sits above the two-card row. */
@@ -322,12 +331,6 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
   .dash-hero-row { grid-template-columns: 1fr 1fr; }
 }
 
-/* Sidebar "This week": fills the sidebar's middle with something
-   real — this week's tests, questions and streak — plus a next step. */
-.dash-side-week { padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: rgba(124, 58, 237, 0.08); }
-.dash-side-week h4 { margin: 0 0 6px; font-size: 14px; }
-.dash-side-week p { font-size: 13px; color: var(--muted); margin: 0 0 12px; line-height: 1.5; }
-.dash-side-week .btn { width: 100%; justify-content: center; }
 </style>
 </style>
   <link rel="icon" href="/logo.png">
@@ -352,16 +355,10 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
     <button type="button" class="dash-side-link" data-side-view="analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</button>
     <a class="dash-side-link" href="/changexed/mock-tests/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Learn</a>
     <button type="button" class="dash-side-link" data-side-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Settings</button>
-    <div class="dash-side-week">
-      <h4>📅 This week</h4>
-      <p id="dash-side-week-text">—</p>
-      <a class="btn btn-white" href="/changexed/mock-tests/">Take a Mock Test →</a>
-    </div>
     <div class="dash-side-plan">
       <p id="dash-side-plan-text">Checking your plan…</p>
       <a class="card-link" id="dash-side-plan-link" href="/pricing/">See pricing →</a>
     </div>
-    <button type="button" class="dash-side-theme" id="dash-side-theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Switch theme</button>
   </aside>
   <div class="dash-main">
 
@@ -488,24 +485,12 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
       <div class="dash-customise-list" id="dash-customise-list"></div>
     </div>
 
-    <!-- Topbar: live search over the history + a real time range. -->
-    <div class="dash-topbar dash-hide-until-profile" id="dash-topbar">
-      <input type="search" class="dash-search" id="dash-search" placeholder="Search your tests… (subject, set, date)" aria-label="Search your test history">
-      <select id="dash-range" aria-label="Time range">
-        <option value="0">All time</option>
-        <option value="30">Last 30 days</option>
-        <option value="90">Last 90 days</option>
-      </select>
-      <button class="btn btn-dark" id="dash-glass-btn" type="button" aria-expanded="false" aria-controls="dash-glass-panel">Adjust glass</button>
-    </div>
-
-    <!-- Adjust glass: the GlassWorkspace material panel — blur,
-         opacity, saturation, tint and edge light, with presets.
-         Saved on this device, so your glass stays how you set it. -->
-    <div class="card-dark" id="dash-glass-panel" hidden role="dialog" aria-label="Glass appearance">
+    <!-- Appearance: the glass material — blur, opacity, saturation,
+         tint and edge light, with presets. Saved on this device, so
+         your glass stays how you set it. -->
+    <div class="card-dark dash-hide-until-profile" id="dash-appearance-card">
       <div class="dash-glass-head">
-        <h3>Glass appearance</h3>
-        <button type="button" class="btn btn-dark" id="dash-glass-close" aria-label="Close glass settings">✕</button>
+        <h3>Appearance</h3>
       </div>
       <p class="muted">Adjust the glass across your dashboard.</p>
       <div class="dash-glass-sample" aria-hidden="true"><span>Live material preview</span></div>
@@ -514,16 +499,26 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
         <button type="button" data-glass-preset="frosted">Frosted</button>
         <button type="button" data-glass-preset="solid">Solid</button>
       </div>
-      <label class="dash-glass-range"><span>Blur <output id="dash-glass-blur-out">22 px</output></span>
+      <label class="dash-glass-range"><span>Blur <output id="dash-glass-blur-out">20 px</output></span>
         <input type="range" id="dash-glass-blur" min="0" max="40" step="1" aria-label="Blur"></label>
-      <label class="dash-glass-range"><span>Opacity <output id="dash-glass-opacity-out">30%</output></span>
+      <label class="dash-glass-range"><span>Opacity <output id="dash-glass-opacity-out">55%</output></span>
         <input type="range" id="dash-glass-opacity" min="0.08" max="0.9" step="0.01" aria-label="Opacity"></label>
-      <label class="dash-glass-range"><span>Saturation <output id="dash-glass-saturation-out">120%</output></span>
+      <label class="dash-glass-range"><span>Saturation <output id="dash-glass-saturation-out">115%</output></span>
         <input type="range" id="dash-glass-saturation" min="0.5" max="2" step="0.05" aria-label="Saturation"></label>
-      <label class="dash-glass-range"><span>Edge light <output id="dash-glass-edge-out">60%</output></span>
+      <label class="dash-glass-range"><span>Edge light <output id="dash-glass-edge-out">35%</output></span>
         <input type="range" id="dash-glass-edge" min="0" max="1" step="0.05" aria-label="Edge light"></label>
       <label class="dash-glass-tint">Glass tint <input type="color" id="dash-glass-tint" value="#ffffff" aria-label="Glass tint"></label>
       <button type="button" class="btn btn-dark" id="dash-glass-reset">Reset appearance</button>
+    </div>
+
+    <!-- Topbar: live search over the history + a real time range. -->
+    <div class="dash-topbar dash-hide-until-profile" id="dash-topbar">
+      <input type="search" class="dash-search" id="dash-search" placeholder="Search your tests… (subject, set, date)" aria-label="Search your test history">
+      <div class="dash-range-seg" id="dash-range" role="group" aria-label="Time range">
+        <button type="button" data-range="0" aria-pressed="true">All time</button>
+        <button type="button" data-range="30" aria-pressed="false">Last 30 days</button>
+        <button type="button" data-range="90" aria-pressed="false">Last 90 days</button>
+      </div>
     </div>
 
     <!-- View tabs: the sidebar is hidden on phones, so these switch
@@ -540,30 +535,33 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
          fourth tile is the real average score. -->
     <div class="dash-overview dash-hide-until-profile" id="dash-overview">
       <div class="dash-ov-tile">
-        <div class="dash-ov-icon" style="background:rgba(124,58,237,.15);color:#a78bfa;">📝</div>
+        <div class="dash-ov-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
         <div class="dash-ov-label">Total Tests</div>
         <div class="dash-ov-value" id="ov-tests">0</div>
         <div class="dash-ov-sub" id="ov-tests-sub">—</div>
       </div>
       <div class="dash-ov-tile">
-        <div class="dash-ov-icon" style="background:rgba(59,130,246,.15);color:#60a5fa;">❓</div>
+        <div class="dash-ov-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <div class="dash-ov-label">Questions Attempted</div>
         <div class="dash-ov-value" id="ov-questions">0</div>
         <div class="dash-ov-sub" id="ov-questions-sub">—</div>
       </div>
       <div class="dash-ov-tile">
-        <div class="dash-ov-icon" style="background:rgba(249,115,22,.15);color:#fb923c;">🔥</div>
+        <div class="dash-ov-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
         <div class="dash-ov-label">Learning Streak</div>
         <div class="dash-ov-value" id="ov-streak">0 Days</div>
         <div class="dash-ov-sub" id="ov-streak-sub">—</div>
       </div>
       <div class="dash-ov-tile">
-        <div class="dash-ov-icon" style="background:rgba(34,197,94,.15);color:#4ade80;">📈</div>
+        <div class="dash-ov-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
         <div class="dash-ov-label">Average Score</div>
         <div class="dash-ov-value" id="ov-avg">—</div>
         <div class="dash-ov-sub" id="ov-avg-sub">—</div>
       </div>
     </div>
+
+    <!-- This week: a quiet summary line under the overview. -->
+    <p class="dash-hide-until-profile" id="dash-week-line">—</p>
 
     <!-- Plan -->
     <div class="card-dark dash-hide-until-profile" id="dash-plan">
@@ -576,7 +574,7 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
          study targets — your average, your sets, your streak. Every
          number is exact, and a new user starts at 0. -->
     <div class="card-dark dash-hide-until-profile" id="dash-goals">
-      <h3>🎯 Study goals</h3>
+      <h3>Study goals</h3>
       <p class="muted">Real targets from your own tests — they move as you do.</p>
       <div id="dash-goals-list"></div>
     </div>
@@ -585,18 +583,18 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
          chips + verdict), a two-card row (accuracy + average by set),
          full-width Score Trend and Time per Question, and a focus
          banner at the end. No 3D illustration — the banner's mark is
-         a 🧠 emoji, in the site's own theme. -->
+         a clean chart icon. -->
     <div class="card-dark dash-hide-until-profile" id="dash-analysis-banner">
       <div class="dash-banner-main">
-        <span class="dash-analysis-badge">📊 Your Analysis</span>
+        <span class="dash-analysis-badge">Your Analysis</span>
         <p class="dash-banner-scope" id="dash-analysis-scope">Showing: all subjects</p>
         <div class="dash-chips" id="dash-chips"></div>
         <p class="dash-banner-note" id="dash-verdict"></p>
       </div>
-      <span class="dash-banner-brain" aria-hidden="true">🧠</span>
+      <span class="dash-banner-brain" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
     </div>
 
-    <h3 class="dash-analysis-heading dash-hide-until-profile" id="dash-analysis-heading">📊 Your Current Level</h3>
+    <h3 class="dash-analysis-heading dash-hide-until-profile" id="dash-analysis-heading">Your Current Level</h3>
 
     <div class="card-dark dash-hide-until-profile" id="dash-level-card">
       <div class="dash-analysis-grid">
@@ -886,7 +884,8 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
     { id: 'dash-focus-card', label: 'Where to put more effort' },
     { id: 'dash-progress', label: 'Progress by subject' },
     { id: 'dash-mock-history-card', label: 'Mock test history' },
-    { id: 'dash-quiz-history-card', label: 'Quiz history' }
+    { id: 'dash-quiz-history-card', label: 'Quiz history' },
+    { id: 'dash-appearance-card', label: 'Appearance' }
   ];
   /* The five analysis cards, in order — used by the layout migration. */
   var ANALYSIS_CARDS = ['dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card'];
@@ -928,6 +927,10 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
           var pg = parsed.order.indexOf('dash-plan');
           parsed.order.splice(pg === -1 ? 1 : pg + 1, 0, 'dash-goals');
         }
+        /* 'dash-appearance-card' is new — put it at the end. */
+        if (parsed.order.indexOf('dash-appearance-card') === -1) {
+          parsed.order.push('dash-appearance-card');
+        }
         return parsed;
       }
     } catch (e) {}
@@ -948,10 +951,10 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
      Saved on this device (guarded storage, same as the layout), so
      your glass stays how you set it. Defaults are the component's
      Frosted preset. */
-  var GLASS_DEFAULTS = { blur: 22, opacity: 0.3, saturation: 1.2, tint: '#ffffff', edge: 0.6 };
+  var GLASS_DEFAULTS = { blur: 20, opacity: 0.55, saturation: 1.15, tint: '#ffffff', edge: 0.35 };
   var GLASS_PRESETS = {
     clear: { blur: 8, opacity: 0.12, saturation: 1.1, edge: 0.8 },
-    frosted: { blur: 22, opacity: 0.3, saturation: 1.2, tint: '#ffffff', edge: 0.6 },
+    frosted: { blur: 20, opacity: 0.55, saturation: 1.15, tint: '#ffffff', edge: 0.35 },
     solid: { blur: 32, opacity: 0.86, saturation: 1, edge: 0.35 }
   };
   var GLASS_KEY = 'cy-dash-glass-v1';
@@ -1019,32 +1022,11 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
     applyGlass();
     saveGlass();
   }
-  function closeGlass() {
-    var panel = $('dash-glass-panel');
-    if (panel) panel.hidden = true;
-    var btn = $('dash-glass-btn');
-    if (btn) btn.setAttribute('aria-expanded', 'false');
-  }
   function initGlass() {
     applyGlass();
-    var btn = $('dash-glass-btn');
-    var panel = $('dash-glass-panel');
-    if (!btn || !panel) return;
-    btn.addEventListener('click', function () {
-      var open = panel.hidden;
-      panel.hidden = !open;
-      btn.setAttribute('aria-expanded', String(open));
-      if (open) {
-        var first = panel.querySelector('button, input');
-        if (first) first.focus();
-      }
-    });
-    var close = $('dash-glass-close');
-    if (close) close.addEventListener('click', function () { closeGlass(); btn.focus(); });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !panel.hidden) { closeGlass(); btn.focus(); }
-    });
-    Array.prototype.slice.call(panel.querySelectorAll('[data-glass-preset]')).forEach(function (b) {
+    var card = $('dash-appearance-card');
+    if (!card) return;
+    Array.prototype.slice.call(card.querySelectorAll('[data-glass-preset]')).forEach(function (b) {
       b.addEventListener('click', function () {
         var p = GLASS_PRESETS[b.getAttribute('data-glass-preset')];
         if (p) updateGlass(p);
@@ -1074,10 +1056,10 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
      Analytics: the analysis banner + five cards. Settings: your
      details + Customise. Learn is a link, not a view. */
   var VIEW_SECTIONS = {
-    dashboard: ['dash-overview', 'dash-plan', 'dash-goals', 'dash-progress'],
+    dashboard: ['dash-overview', 'dash-week-line', 'dash-plan', 'dash-goals', 'dash-progress'],
     mytests: ['dash-mock-history-card', 'dash-quiz-history-card'],
     analytics: ['dash-analysis-banner', 'dash-analysis-heading', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card'],
-    settings: ['dash-details-card', 'dash-customise-row', 'dash-customise']
+    settings: ['dash-details-card', 'dash-customise-row', 'dash-customise', 'dash-appearance-card']
   };
   var currentView = 'dashboard';
   function applyVisibility() {
@@ -1094,8 +1076,6 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
     currentView = name;
     var tb = $('dash-topbar');
     if (tb) tb.hidden = (name === 'settings');
-    /* The topbar hides in Settings, so the glass panel goes with it. */
-    if (name === 'settings') closeGlass();
     Array.prototype.slice.call(document.querySelectorAll('[data-side-view]')).forEach(function (l) {
       l.classList.toggle('active', l.getAttribute('data-side-view') === name);
     });
@@ -1892,9 +1872,9 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
           : slope > 0.5 ? 'Rising +' + slope + ' pts / test'
           : slope < -0.5 ? 'Dipping ' + slope + ' pts / test'
           : 'Steady across your last tests');
-    /* Sidebar "This week": real activity from the last 7 days, so the
-       sidebar's middle is never empty. */
-    var weekEl = $('dash-side-week-text');
+    /* "This week": real activity from the last 7 days, as a quiet
+       line under the overview tiles. */
+    var weekEl = $('dash-week-line');
     if (weekEl) {
       var weekAgo = Date.now() - 7 * 86400000;
       var weekAttempts = allAttempts.filter(function (a) {
@@ -1924,9 +1904,9 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
     mocks.forEach(function (a) { if (a.subject === subj && a.set_number != null) sets[a.set_number] = true; });
     var setCount = Object.keys(sets).length;
     var goals = [
-      { icon: '🎯', name: 'Reach 80% average', cur: avg, target: 80, curText: avg + '%', targetText: 'of 80%' },
-      { icon: '📚', name: 'Complete all 20 sets in ' + (SUBJECT_NAMES[subj] || subj), cur: setCount, target: 20, curText: String(setCount), targetText: 'of 20 sets' },
-      { icon: '🔥', name: '30-day streak', cur: streak, target: 30, curText: String(streak), targetText: 'of 30 days' }
+      { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>', name: 'Reach 80% average', cur: avg, target: 80, curText: avg + '%', targetText: 'of 80%' },
+      { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>', name: 'Complete all 20 sets in ' + (SUBJECT_NAMES[subj] || subj), cur: setCount, target: 20, curText: String(setCount), targetText: 'of 20 sets' },
+      { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>', name: '30-day streak', cur: streak, target: 30, curText: String(streak), targetText: 'of 30 days' }
     ];
     list.innerHTML = '';
     goals.forEach(function (g) {
@@ -1937,7 +1917,7 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
       top.className = 'dash-goal-top';
       var ic = document.createElement('span');
       ic.className = 'dash-goal-icon';
-      ic.textContent = g.icon;
+      ic.innerHTML = g.icon;
       var nm = document.createElement('strong');
       nm.textContent = g.name;
       var pc = document.createElement('span');
@@ -2329,11 +2309,6 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
       showView(view);
     });
   });
-  var sideTheme = $('dash-side-theme');
-  if (sideTheme) sideTheme.addEventListener('click', function () {
-    var navToggle = $('themeToggle');
-    if (navToggle) navToggle.click();
-  });
   var viewProfile = $('dash-view-profile');
   if (viewProfile) viewProfile.addEventListener('click', function () {
     showView('settings');
@@ -2345,10 +2320,15 @@ html[data-theme="light"] .dash-topbar, html[data-theme="light"] .dash-view-tabs,
     if (currentView !== 'mytests') showView('mytests');
     renderHistory();
   });
-  var rangeSel = $('dash-range');
-  if (rangeSel) rangeSel.addEventListener('change', function () {
-    dateRangeDays = parseInt(rangeSel.value, 10) || 0;
-    renderAll();
+  var rangeSeg = $('dash-range');
+  if (rangeSeg) Array.prototype.slice.call(rangeSeg.querySelectorAll('[data-range]')).forEach(function (b) {
+    b.addEventListener('click', function () {
+      dateRangeDays = parseInt(b.getAttribute('data-range'), 10) || 0;
+      Array.prototype.slice.call(rangeSeg.querySelectorAll('[data-range]')).forEach(function (x) {
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+      renderAll();
+    });
   });
 
   loadDashboard();
