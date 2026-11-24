@@ -68,7 +68,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 6px; }
 .dash-chip { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 .dash-chip.active { background: #7c3aed; border-color: #7c3aed; color: #ffffff; }
-#dash-analysis h4 { margin: 20px 0 10px; font-size: 16px; }
+#dash-trend-card h4, #dash-score-card h4 { margin: 20px 0 10px; font-size: 16px; }
 .dash-analysis-grid { display: grid; grid-template-columns: 150px 1fr; gap: 24px; align-items: start; }
 .dash-legend-row { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 6px; }
 .dash-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
@@ -153,18 +153,58 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
    the same single column as before. */
 #dash-content > #dash-overview, #dash-content > #dash-topbar { margin-bottom: 20px; }
 @media (min-width: 1024px) {
-  #dash-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  /* Rows stretch to equal height, so a shorter card fills the space
+     beside its taller neighbour instead of leaving a gap. */
+  #dash-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
   #dash-content > .card-dark, #dash-content > #dash-overview, #dash-content > #dash-topbar { margin-bottom: 0; }
   #dash-content > #dash-onboard-note,
-  #dash-content > .dash-profile,
   #dash-content > #dash-details-card,
   #dash-content > .dash-customise-row,
   #dash-content > #dash-customise,
   #dash-content > #dash-topbar,
   #dash-content > #dash-overview,
-  #dash-content > #dash-analysis,
+  #dash-content > #dash-quiz-history-card,
   #dash-content > #dash-insights { grid-column: 1 / -1; }
 }
+
+/* Fit the dashboard to the space: the content fills the main column
+   instead of stopping at the site's 880px container. The footer
+   keeps its own width — it is outside .dash-main. */
+.dash-main .container { max-width: none; }
+
+/* The reference's border: a purple-tinted ring on every dashboard
+   card, tile and panel, with a soft glow. The travelling beam on top
+   is unchanged. Scoped to the dashboard so the rest of the site
+   keeps its own border. */
+.dash-main .card-dark, .dash-overview .dash-ov-tile, .dash-side,
+.dash-topbar .dash-search, .dash-topbar #dash-range {
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.05), 0 10px 30px rgba(0, 0, 0, 0.28);
+}
+.dash-main .card-dark.dash-insights { border-color: rgba(124, 58, 237, 0.5); }
+html[data-theme="light"] .dash-main .card-dark, html[data-theme="light"] .dash-overview .dash-ov-tile, html[data-theme="light"] .dash-side {
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.05), 0 10px 26px rgba(124, 58, 237, 0.10);
+}
+
+/* Time per Question: the big average-time number. */
+.dash-time-big { font-size: 34px; font-weight: 800; line-height: 1.1; margin: 4px 0 2px; }
+.dash-time-sub { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+
+/* Hero row: the greeting on the left, the profile strip on the
+   right — so the wide hero has no empty half. Stacks on phones. */
+.dash-hero-row { display: grid; grid-template-columns: 1fr; gap: 20px; align-items: center; }
+.dash-hero-row .dash-profile { flex-wrap: wrap; margin: 0; }
+@media (min-width: 1024px) {
+  .dash-hero-row { grid-template-columns: 1fr 1fr; }
+}
+
+/* Sidebar "This week": fills the sidebar's middle with something
+   real — this week's tests, questions and streak — plus a next step. */
+.dash-side-week { padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: rgba(124, 58, 237, 0.08); }
+.dash-side-week h4 { margin: 0 0 6px; font-size: 14px; }
+.dash-side-week p { font-size: 13px; color: var(--muted); margin: 0 0 12px; line-height: 1.5; }
+.dash-side-week .btn { width: 100%; justify-content: center; }
+</style>
 </style>
   <link rel="icon" href="/logo.png">
 </head>
@@ -185,9 +225,14 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   <aside class="dash-side dash-hide-until-profile" id="dash-side" aria-label="Dashboard sections">
     <button type="button" class="dash-side-link active" data-side-target="top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Dashboard</button>
     <button type="button" class="dash-side-link" data-side-target="dash-mock-history-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><polyline points="9 14 11 16 15 12"/></svg>My Tests</button>
-    <button type="button" class="dash-side-link" data-side-target="dash-analysis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</button>
+    <button type="button" class="dash-side-link" data-side-target="dash-level-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</button>
     <a class="dash-side-link" href="/changexed/mock-tests/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Learn</a>
     <button type="button" class="dash-side-link" data-side-target="dash-details-card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Settings</button>
+    <div class="dash-side-week">
+      <h4>This week</h4>
+      <p id="dash-side-week-text">—</p>
+      <a class="btn btn-white" href="/changexed/mock-tests/">Take a Mock Test →</a>
+    </div>
     <div class="dash-side-plan">
       <p id="dash-side-plan-text">Checking your plan…</p>
       <a class="card-link" id="dash-side-plan-link" href="/pricing/">See pricing →</a>
@@ -197,8 +242,23 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   <div class="dash-main">
 
 <div class="page-head"><div class="container">
-  <h1 id="dash-hero-title">Your dashboard</h1>
-  <p>Let's keep pushing your limits and grow together.</p>
+  <div class="dash-hero-row">
+    <div>
+      <h1 id="dash-hero-title">Your dashboard</h1>
+      <p>Let's keep pushing your limits and grow together.</p>
+    </div>
+    <!-- Profile strip: lives in the hero now, so the wide hero has
+         no empty half. -->
+    <div class="card-dark dash-profile">
+      <div class="dash-avatar" id="dash-avatar" aria-hidden="true">?</div>
+      <div class="dash-profile-main">
+        <p id="dash-email" class="muted">—</p>
+        <p class="muted" id="dash-member">Member since —</p>
+      </div>
+      <button class="btn btn-dark" id="dash-view-profile" type="button">View profile →</button>
+      <button class="btn btn-dark" id="dash-signout" type="button">Sign out</button>
+    </div>
+  </div>
 </div></div>
 
 <section class="section" style="padding-top:0"><div class="container">
@@ -224,17 +284,6 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     <div class="card-dark" id="dash-onboard-note" hidden>
       <h3>Welcome — complete your profile first</h3>
       <p class="muted">Tell us a little about yourself so your dashboard is set up for you. It only takes a minute — fill in every field below and tap Save profile.</p>
-    </div>
-
-    <!-- Profile -->
-    <div class="card-dark dash-profile">
-      <div class="dash-avatar" id="dash-avatar" aria-hidden="true">?</div>
-      <div class="dash-profile-main">
-        <p id="dash-email" class="muted">—</p>
-        <p class="muted" id="dash-member">Member since —</p>
-      </div>
-      <button class="btn btn-dark" id="dash-view-profile" type="button">View profile →</button>
-      <button class="btn btn-dark" id="dash-signout" type="button">Sign out</button>
     </div>
 
     <!-- Your details + Edit profile: one card. The details show by
@@ -362,50 +411,63 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       <div class="quiz-actions" id="dash-plan-actions"></div>
     </div>
 
-    <!-- Analysis -->
-    <div class="card-dark dash-hide-until-profile" id="dash-analysis">
+    <!-- Analysis, rebuilt as the reference's cards: Current Level,
+         Average Score, Score Trend, Time per Question, Focus. The
+         empty card shows until the first test is taken. -->
+    <div class="card-dark dash-hide-until-profile" id="dash-analysis-empty-card" hidden>
       <h3>Your analysis</h3>
+      <p class="muted">No tests taken yet. Take your first mock test and your analysis will appear here — your strengths, your weak spots, and exactly where to put more effort.</p>
+    </div>
+
+    <div class="card-dark dash-hide-until-profile" id="dash-level-card">
+      <h3>Your Current Level</h3>
       <p class="muted" id="dash-analysis-scope" style="margin-bottom:12px;">Showing: all subjects</p>
       <div class="dash-chips" id="dash-chips"></div>
-      <div id="dash-analysis-empty" hidden>
-        <p class="muted">No tests taken yet. Take your first mock test and your analysis will appear here — your strengths, your weak spots, and exactly where to put more effort.</p>
+      <p id="dash-verdict" style="font-weight:700;line-height:1.5;"></p>
+      <div class="dash-analysis-grid" id="dash-level-grid">
+        <div>
+          <svg id="dash-gauge" width="150" height="92" viewBox="0 0 200 110" role="img" aria-label="Current level gauge"></svg>
+        </div>
+        <div class="dash-level-num" id="dash-level-stats"></div>
       </div>
-      <div id="dash-analysis-body" hidden>
-        <p id="dash-verdict" style="font-weight:700;line-height:1.5;"></p>
-        <h4>Your current level</h4>
-        <div class="dash-analysis-grid" id="dash-level-grid">
-          <div>
-            <svg id="dash-gauge" width="150" height="92" viewBox="0 0 200 110" role="img" aria-label="Current level gauge"></svg>
-          </div>
-          <div class="dash-level-num" id="dash-level-stats"></div>
+      <div class="dash-analysis-grid" style="margin-top:20px;">
+        <div>
+          <svg id="dash-donut" width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Accuracy breakdown"></svg>
         </div>
-        <div class="dash-analysis-grid">
-          <div>
-            <svg id="dash-donut" width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Accuracy breakdown"></svg>
-            <div id="dash-legend"></div>
-          </div>
-          <div>
-            <h4 id="dash-bars-title" style="margin-top:0;">Average score by subject</h4>
-            <div id="dash-bars"></div>
-          </div>
-        </div>
-        <h4>Score trend</h4>
-        <div id="dash-trend"></div>
-        <p class="muted" id="dash-trend-note" style="font-size:13px;"></p>
-        <div id="dash-mastery-wrap" hidden>
-          <h4 id="dash-mastery-title">Set mastery</h4>
-          <div class="dash-mastery" id="dash-mastery"></div>
-          <div class="dash-mastery-legend" id="dash-mastery-legend"></div>
-        </div>
-        <h4>Weekly activity</h4>
-        <div class="dash-trend" id="dash-weekly"></div>
-        <p class="muted" id="dash-weekly-note" style="font-size:13px;"></p>
-        <h4>Time per question</h4>
-        <div class="dash-trend" id="dash-speed"></div>
-        <p class="muted" id="dash-speed-note" style="font-size:13px;"></p>
-        <h4>Where to put more effort</h4>
-        <ul class="dash-focus" id="dash-focus"></ul>
+        <div id="dash-legend"></div>
       </div>
+    </div>
+
+    <div class="card-dark dash-hide-until-profile" id="dash-score-card">
+      <h3 id="dash-score-title">Average Score</h3>
+      <div id="dash-bars"></div>
+      <div id="dash-mastery-wrap" hidden>
+        <h4 id="dash-mastery-title">Set mastery</h4>
+        <div class="dash-mastery" id="dash-mastery"></div>
+        <div class="dash-mastery-legend" id="dash-mastery-legend"></div>
+      </div>
+    </div>
+
+    <div class="card-dark dash-hide-until-profile" id="dash-trend-card">
+      <h3>Score Trend</h3>
+      <div id="dash-trend"></div>
+      <p class="muted" id="dash-trend-note" style="font-size:13px;"></p>
+      <h4>Weekly activity</h4>
+      <div class="dash-trend" id="dash-weekly"></div>
+      <p class="muted" id="dash-weekly-note" style="font-size:13px;"></p>
+    </div>
+
+    <div class="card-dark dash-hide-until-profile" id="dash-time-card">
+      <h3>Time per Question</h3>
+      <div class="dash-time-big" id="dash-avg-time">—</div>
+      <p class="dash-time-sub" id="dash-avg-time-sub">Average time taken per mock test</p>
+      <div class="dash-trend" id="dash-speed"></div>
+      <p class="muted" id="dash-speed-note" style="font-size:13px;"></p>
+    </div>
+
+    <div class="card-dark dash-hide-until-profile" id="dash-focus-card">
+      <h3>Where to put more effort</h3>
+      <ul class="dash-focus" id="dash-focus"></ul>
     </div>
 
     <!-- Per-subject progress -->
@@ -603,7 +665,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     visibleSubjects = slug ? [slug] : null;
     renderAll();
     try {
-      var el = $('dash-analysis');
+      var el = $('dash-level-card');
       if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (e) {}
   }
@@ -648,13 +710,19 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   var DASH_SECTIONS = [
     { id: 'dash-overview', label: 'Your overview' },
     { id: 'dash-plan', label: 'Your plan' },
-    { id: 'dash-analysis', label: 'Your analysis' },
+    { id: 'dash-level-card', label: 'Your Current Level' },
+    { id: 'dash-score-card', label: 'Average Score' },
+    { id: 'dash-trend-card', label: 'Score Trend' },
+    { id: 'dash-time-card', label: 'Time per Question' },
+    { id: 'dash-focus-card', label: 'Where to put more effort' },
     { id: 'dash-progress', label: 'Progress by subject' },
     { id: 'dash-mock-history-card', label: 'Mock test history' },
     { id: 'dash-quiz-history-card', label: 'Quiz history' },
     { id: 'dash-insights', label: 'Insights & next steps' }
   ];
-  var RESIZABLE = ['dash-details-card', 'dash-plan', 'dash-analysis', 'dash-progress', 'dash-mock-history-card', 'dash-quiz-history-card'];
+  /* The five analysis cards, in order — used by the layout migration. */
+  var ANALYSIS_CARDS = ['dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card'];
+  var RESIZABLE = ['dash-details-card', 'dash-plan', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card', 'dash-progress', 'dash-mock-history-card', 'dash-quiz-history-card'];
   var LAYOUT_KEY = 'cy-dash-layout-v1';
   var layoutMem = null;
   function layoutStore() {
@@ -675,11 +743,14 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
         parsed.hidden = Array.isArray(parsed.hidden) ? parsed.hidden : [];
         parsed.sizes = parsed.sizes || {};
         /* Migrate saved layouts: 'dash-stats' became 'dash-overview'
-           (same slot), and 'dash-insights' is new (appended at the
-           end, where the banner belongs). */
+           (same slot), 'dash-analysis' split into five cards (same
+           slots, in order), and 'dash-insights' is new (appended at
+           the end, where the banner belongs). */
         ['order', 'hidden'].forEach(function (k) {
           var i = parsed[k].indexOf('dash-stats');
           if (i !== -1) parsed[k][i] = 'dash-overview';
+          var j = parsed[k].indexOf('dash-analysis');
+          if (j !== -1) parsed[k].splice.apply(parsed[k], [j, 1].concat(ANALYSIS_CARDS));
         });
         if (parsed.order.indexOf('dash-overview') === -1) parsed.order.unshift('dash-overview');
         if (parsed.order.indexOf('dash-insights') === -1) parsed.order.push('dash-insights');
@@ -890,20 +961,21 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     return Math.round((a.duration_seconds / q) * 10) / 10;
   }
   function renderAnalysis() {
-    var empty = $('dash-analysis-empty');
-    var body = $('dash-analysis-body');
-    if (!empty || !body) return;
+    var emptyCard = $('dash-analysis-empty-card');
+    if (!emptyCard) return;
     var mocks = mockAttempts();
     var quizzes = quizAttempts();
-    if (!mocks.length && !quizzes.length) {
-      empty.hidden = false;
-      body.hidden = true;
+    var hasData = !!(mocks.length || quizzes.length);
+    emptyCard.hidden = hasData;
+    ANALYSIS_CARDS.forEach(function (id) {
+      var c = $(id);
+      if (c) c.hidden = !hasData;
+    });
+    if (!hasData) {
       var ins0 = $('dash-insights-text');
       if (ins0) ins0.textContent = 'Take your first mock test to unlock personalised insights.';
       return;
     }
-    empty.hidden = true;
-    body.hidden = false;
     var single = singleSubject();
     var subjName = single ? (SUBJECT_NAMES[single] || single) : null;
     var ordered = dated(mocks);
@@ -1015,8 +1087,9 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     /* --- Bars: by subject, or by set when one subject is chosen --- */
     var bars = $('dash-bars');
     bars.innerHTML = '';
+    var scoreTitle = $('dash-score-title');
     if (single) {
-      $('dash-bars-title').textContent = 'Average score by set — ' + subjName;
+      if (scoreTitle) scoreTitle.textContent = 'Average Score by Set — ' + subjName;
       var bySet = {};
       mocks.forEach(function (a) { if (a.set_number == null) return; (bySet[a.set_number] = bySet[a.set_number] || []).push(a); });
       Object.keys(bySet).sort(function (x, y) { return x - y; }).forEach(function (n) {
@@ -1025,7 +1098,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       });
       if (!Object.keys(bySet).length) bars.appendChild(emptyNote('No set data yet.'));
     } else {
-      $('dash-bars-title').textContent = 'Average score by subject';
+      if (scoreTitle) scoreTitle.textContent = 'Average Score by Subject';
       var byS = {};
       mocks.forEach(function (a) { (byS[a.subject] = byS[a.subject] || []).push(a); });
       SUBJECT_ORDER.forEach(function (slug) {
@@ -1061,6 +1134,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
             '<text x="' + (PL - 6) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="currentColor" opacity="0.6">' + v + '%</text>';
         }).join('') +
         (avgY != null ? '<line x1="' + PL + '" y1="' + avgY.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + avgY.toFixed(1) + '" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="5 4"><title>Current level: ' + level + '%</title></line>' : '') +
+        '<polygon points="' + pts.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' ') + ' ' + pts[pts.length - 1].x.toFixed(1) + ' ' + (H - PB) + ' ' + pts[0].x.toFixed(1) + ' ' + (H - PB) + '" fill="rgba(124,58,237,0.15)"/>' +
         '<polyline points="' + pts.map(function (q) { return q.x.toFixed(1) + ' ' + q.y.toFixed(1); }).join(' ') + '" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
         pts.map(function (q) {
           return '<circle cx="' + q.x.toFixed(1) + '" cy="' + q.y.toFixed(1) + '" r="4" fill="#7c3aed" stroke="#ffffff" stroke-width="1.5"><title>' +
@@ -1153,9 +1227,11 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     var speedInsight = null;
     var speedBox = $('dash-speed');
     speedBox.innerHTML = '';
+    var avgTimeEl = $('dash-avg-time');
     var withDur = ordered.slice(-8).filter(function (a) { return secPerQ(a) != null; });
     if (!withDur.length) {
       $('dash-speed-note').textContent = 'Time data will appear here once you finish timed tests.';
+      if (avgTimeEl) avgTimeEl.textContent = '—';
     } else {
       var sp = withDur.map(function (a) { return { a: a, s: secPerQ(a) }; });
       var maxS = 1;
@@ -1175,6 +1251,12 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
         speedBox.appendChild(col);
       });
       var med = median(sp.map(function (x) { return x.s; }));
+      /* Average time taken: the mean duration of the mocks in view —
+         the big number at the top of the Time card. */
+      if (avgTimeEl) {
+        var durs = ordered.map(function (a) { return a.duration_seconds; }).filter(function (d) { return d != null; });
+        avgTimeEl.textContent = durs.length ? fmtDur(Math.round(durs.reduce(function (s, d) { return s + d; }, 0) / durs.length)) : '—';
+      }
       var speedNote = 'Median: ' + med + 's per question across your last ' + sp.length + (sp.length === 1 ? ' test' : ' tests') + '.';
       var fast = [], slow = [];
       ordered.forEach(function (a) {
@@ -1453,6 +1535,20 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
           : slope > 0.5 ? 'Rising +' + slope + ' pts / test'
           : slope < -0.5 ? 'Dipping ' + slope + ' pts / test'
           : 'Steady across your last tests');
+    /* Sidebar "This week": real activity from the last 7 days, so the
+       sidebar's middle is never empty. */
+    var weekEl = $('dash-side-week-text');
+    if (weekEl) {
+      var weekAgo = Date.now() - 7 * 86400000;
+      var weekAttempts = allAttempts.filter(function (a) {
+        if (!a.completed_at) return false;
+        var t = new Date(a.completed_at).getTime();
+        return !isNaN(t) && t >= weekAgo;
+      });
+      var weekQ = 0;
+      weekAttempts.forEach(function (a) { weekQ += (a.correct || 0) + (a.wrong || 0) + (a.skipped || 0); });
+      weekEl.textContent = weekAttempts.length + (weekAttempts.length === 1 ? ' test' : ' tests') + ' · ' + weekQ + ' questions · ' + streak + '-day streak';
+    }
   }
   function renderSubjects() {
     var box = $('dash-subjects');
