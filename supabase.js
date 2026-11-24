@@ -13,7 +13,12 @@
 
   var SUPABASE_URL = "https://smwxlqawarlxtotyzcng.supabase.co";
   var SUPABASE_KEY = "sb_publishable_Y7aiInKmSasJ3_LB8PWB3A_kx-irDn2";
-  var CDN = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
+  /* F-12: the Supabase JS library is bundled locally (supabase-js.min.js,
+     v2.45.4, sha256 96277ec00e19df476d7396a8a2586b41ed1033dcf680f5aa79b0c556059792b8)
+     so no third-party script runs in the auth path and no CDN outage can
+     break sign-in. The CDN is only a fallback if the local file fails. */
+  var LOCAL_LIB = "/supabase-js.min.js";
+  var CDN = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js";
 
   /* ---------- Guarded storage shim ----------
      Same pattern as the rest of the site: localStorage when it works,
@@ -69,10 +74,20 @@
       function finish() { if (done) return; done = true; resolve(makeClient()); }
       try {
         var s = document.createElement("script");
-        s.src = CDN;
+        s.src = LOCAL_LIB;
         s.async = true;
         s.onload = finish;
-        s.onerror = finish;
+        s.onerror = function () {
+          /* Local file failed (e.g. an old deploy) — fall back to the pinned CDN. */
+          try {
+            var c = document.createElement("script");
+            c.src = CDN;
+            c.async = true;
+            c.onload = finish;
+            c.onerror = finish;
+            document.head.appendChild(c);
+          } catch (e2) { finish(); }
+        };
         document.head.appendChild(s);
       } catch (e) { finish(); return; }
       /* Never hang the page on a slow or blocked CDN. */
@@ -147,64 +162,144 @@
           .catch(function () { return null; });
       });
     },
-    /* Upsert: creates the row if the trigger has not (yet) made one. */
+    /* Upsert: creates the row if the trigger has not (yet) made one.
+       F-29: whitelist the columns — the caller cannot set id, email, or any
+       other column by passing extra keys (mass assignment). */
     updateProfile: function (userId, email, fields) {
       return loadClient().then(function (c) {
         if (!c) return fail("Could not reach the server — check your connection and try again.");
+        var ALLOWED = ["full_name", "date_of_birth", "qualification", "employment_status", "phone", "city", "target_subject"];
         var row = { id: userId, email: email };
-        Object.keys(fields).forEach(function (k) { row[k] = fields[k]; });
+        ALLOWED.forEach(function (k) {
+          if (fields && Object.prototype.hasOwnProperty.call(fields, k)) row[k] = fields[k];
+        });
         return c.from("profiles").upsert(row, { onConflict: "id" }).select().single()
           .then(function (r) { return r.error ? fail(r.error) : { ok: true, data: r.data }; })
           .catch(fail);
       });
     },
 
-    /* ---------- Plan ---------- */
-    getEntitlement: function (userId) {
+    /* ---------- Plan (per-subject, F-06) ----------
+       The product is 'mocktests:<subject>' (e.g. 'mocktests:psychology'),
+       one entitlement per subject at ₹249. The old single product
+       'mocktests' no longer exists. */
+    getEntitlement: function (userId, subject) {
+      if (!subject) return Promise.resolve(null);
       return loadClient().then(function (c) {
         if (!c) return null;
         return c.from("entitlements").select("*")
-          .eq("user_id", userId).eq("product", "mocktests").eq("status", "active")
+          .eq("user_id", userId).eq("product", "mocktests:" + subject).eq("status", "active")
           .maybeSingle()
           .then(function (r) { return r.error ? null : (r.data || null); })
           .catch(function () { return null; });
       });
     },
-
-    /* ---------- Attempts ----------
-       Fire-and-forget: callers never await this for UI. A failed insert
-       (offline, not signed in, RLS) is swallowed — it must never break
-       a results screen. */
-    recordAttempt: function (row) {
-      return api.getSession().then(function (s) {
-        if (!s || !s.user) return { ok: false, skipped: "signed-out" };
-        return loadClient().then(function (c) {
-          if (!c) return { ok: false, skipped: "no-client" };
-          var r = {
-            user_id: s.user.id,
-            kind: row.kind,
-            subject: row.subject,
-            set_number: row.set_number === undefined ? null : row.set_number,
-            score: row.score,
-            total: row.total,
-            correct: row.correct || 0,
-            wrong: row.wrong || 0,
-            skipped: row.skipped || 0,
-            duration_seconds: row.duration_seconds === undefined ? null : row.duration_seconds
-          };
-          return c.from("test_attempts").insert(r)
-            .then(function (res) { return res.error ? { ok: false, error: res.error.message } : { ok: true }; })
-            .catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
-        });
-      }).catch(function () { return { ok: false, skipped: "error" }; });
+    /* All active entitlements for the user (drives the dashboard plan card,
+       which lists exactly which subjects are unlocked). */
+    getEntitlements: function (userId) {
+      return loadClient().then(function (c) {
+        if (!c) return [];
+        return c.from("entitlements").select("*")
+          .eq("user_id", userId).eq("status", "active")
+          .then(function (r) { return r.error ? [] : (r.data || []); })
+          .catch(function () { return []; });
+      });
     },
+
+    /* ---------- Questions (server-side, F-01) ----------
+       Fetches ONE set from the server (get_question_set) WITHOUT the answer
+       keys. The server enforces the free/paid rule. Returns
+       { ok, questions } or { ok:false, notEntitled:true } / { ok:false, error }. */
+    getQuestionSet: function (subject, setNumber) {
+      return loadClient().then(function (c) {
+        if (!c) return { ok: false, error: "no-client" };
+        return c.rpc("get_question_set", { p_subject: subject, p_set_number: setNumber })
+          .then(function (r) {
+            if (r.error) {
+              var msg = String(r.error.message || "");
+              if (/not entitled/i.test(msg)) return { ok: false, notEntitled: true };
+              return { ok: false, error: msg };
+            }
+            return { ok: true, questions: r.data || [] };
+          })
+          .catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
+      });
+    },
+
+    /* ---------- Server-side grading (F-03) ----------
+       The browser never grades and never inserts a score. Answers go to
+       submit_mock_attempt, which grades against the server-held keys,
+       records a trusted attempt, and returns the score + the full review.
+       A per-exam client key makes re-submission idempotent. */
+    _clientKey: function () {
+      try {
+        if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+      } catch (e) {}
+      return "k-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 1e9).toString(36);
+    },
+    submitMockAttempt: function (subject, setNumber, answers, durationSeconds, clientKey) {
+      return loadClient().then(function (c) {
+        if (!c) return { ok: false, error: "no-client" };
+        return c.rpc("submit_mock_attempt", {
+          p_subject: subject, p_set_number: setNumber,
+          p_answers: answers, p_duration_seconds: durationSeconds,
+          p_client_key: clientKey || api._clientKey()
+        }).then(function (r) {
+          if (r.error) return { ok: false, error: String(r.error.message || r.error) };
+          return { ok: true, result: r.data };
+        }).catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
+      });
+    },
+    /* Quiz rounds: the client sends the DATA indices of the round questions
+       and the chosen answers; the server grades against the stored
+       most-probable set and records a trusted attempt. */
+    submitQuizAttempt: function (mode, indices, chosen, durationSeconds, clientKey) {
+      return loadClient().then(function (c) {
+        if (!c) return { ok: false, error: "no-client" };
+        return c.rpc("submit_quiz_attempt", {
+          p_mode: mode, p_indices: indices, p_chosen: chosen,
+          p_duration_seconds: durationSeconds,
+          p_client_key: clientKey || api._clientKey()
+        }).then(function (r) {
+          if (r.error) return { ok: false, error: String(r.error.message || r.error) };
+          return { ok: true, result: r.data };
+        }).catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
+      });
+    },
+
+    /* ---------- Account deletion (F-15) ----------
+       Deletes the caller's own account server-side (delete_own_account).
+       The client never deletes auth.users. */
+    deleteAccount: function () {
+      return loadClient().then(function (c) {
+        if (!c) return fail("Could not reach the server — check your connection and try again.");
+        return c.rpc("delete_own_account", {})
+          .then(function (r) { return r.error ? fail(r.error) : { ok: true }; })
+          .catch(fail);
+      });
+    },
+
+    /* ---------- Attempts (read) ----------
+       F-28: paginate so the dashboard sees the FULL history, not just the
+       most recent 200 rows. Pages of 200, up to 2000 rows total (a safety
+       cap so a very heavy user cannot stall the dashboard). */
     fetchAttempts: function (userId) {
       return loadClient().then(function (c) {
         if (!c) return [];
-        return c.from("test_attempts").select("*")
-          .eq("user_id", userId).order("completed_at", { ascending: false }).limit(200)
-          .then(function (r) { return r.error ? [] : (r.data || []); })
-          .catch(function () { return []; });
+        var all = [];
+        function page(from) {
+          return c.from("test_attempts").select("*")
+            .eq("user_id", userId).order("completed_at", { ascending: false })
+            .range(from, from + 199)
+            .then(function (r) {
+              if (r.error || !r.data || r.data.length === 0) return all;
+              all = all.concat(r.data);
+              if (r.data.length < 200 || all.length >= 2000) return all;
+              return page(from + 200);
+            })
+            .catch(function () { return all; });
+        }
+        return page(0);
       });
     }
   };
