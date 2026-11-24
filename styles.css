@@ -880,3 +880,89 @@ html[data-theme="light"] .quiz-tag { color: #6d28d9; background: rgba(124, 58, 2
 .legal p { color: var(--muted); margin-bottom: 12px; }
 .legal ul { color: var(--muted); padding-left: 22px; margin-bottom: 12px; }
 .legal li { margin-bottom: 6px; }
+
+/* ---------- Dashboard ----------
+   Profile, plan, stats, history and the edit-profile form. Same glass
+   cards and border beam as the rest of the site; no dock on this page. */
+.dash-profile {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.dash-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #3b82f6);
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 800;
+}
+.dash-profile-main { flex-grow: 1; min-width: 200px; }
+.dash-profile-main h2 { font-size: 24px; margin-bottom: 2px; }
+.dash-profile-main p { margin-bottom: 2px; font-size: 15px; }
+.dash-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+.dash-field-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.dash-field-row:last-child { border-bottom: none; }
+.dash-field-label { color: var(--muted); font-size: 14px; font-weight: 600; }
+.dash-field-value { font-size: 15px; font-weight: 600; text-align: right; }
+.dash-field-value.not-set { color: var(--muted-2); font-weight: 500; }
+.dash-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; margin-bottom: 8px; }
+.dash-field label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.dash-field input, .dash-field select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+}
+.dash-field input::placeholder { color: var(--muted-2); }
+.dash-field input:focus, .dash-field select:focus { outline: 2px solid var(--accent-1); outline-offset: 1px; }
+.dash-field select option { background: #ffffff; color: #000000; }
+.dash-field select option:checked { background: #7c3aed; color: #ffffff; }
+.auth-msg { min-height: 20px; margin: 14px 0 0; color: #f87171; font-size: 14px; text-align: center; }
+.auth-msg.ok { color: #4ade80; }
+.dash-subj-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.dash-subj-row:last-child { border-bottom: none; }
+.dash-subj-name { font-weight: 600; font-size: 15px; }
+.dash-subj-prog { font-size: 14px; text-align: right; }
+.dash-hist-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.dash-hist-row:last-child { border-bottom: none; }
+.dash-hist-title { font-weight: 700; font-size: 15px; }
+.dash-hist-meta { font-size: 13px; margin-top: 2px; }
+.dash-hist-score { flex-shrink: 0; font-size: 18px; font-weight: 800; text-align: right; }
+.dash-hist-pct { font-size: 13px; font-weight: 600; }
+#dash-content > .card-dark, #dash-content > .stats { margin-bottom: 20px; }
+#dash-content > .stats { margin-bottom: 20px; }
+@media (max-width: 640px) {
+  .dash-fields, .dash-form-grid { grid-template-columns: 1fr; }
+  .dash-profile { flex-direction: column; align-items: flex-start; }
+}
+html[data-theme="light"] .dash-field-value.not-set { color: var(--muted-2); }
