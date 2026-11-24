@@ -36,6 +36,11 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-bar-fill.strong, .dash-trend-bar.strong { background: linear-gradient(90deg, #22c55e, #16a34a); }
 .dash-subj-row.clickable { cursor: pointer; }
 .dash-subj-row.selected { background: rgba(124, 58, 237, .12); border-radius: 10px; padding-left: 10px; padding-right: 10px; }
+.dash-subj-right { display: flex; align-items: center; gap: 8px; }
+.dash-subj-remove { background: none; border: none; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px; }
+.dash-subj-remove:hover { color: var(--text); }
+#dash-add-subject-select { padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font: inherit; font-size: 15px; }
+#dash-add-subject-select option { background: #ffffff; color: #000000; }
 .dash-hist-item { border-bottom: 1px solid var(--border); }
 .dash-hist-item:last-child { border-bottom: none; }
 #dash-content .dash-hist-row { border-bottom: none; }
@@ -215,6 +220,10 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       <h3>Progress by subject</h3>
       <div id="dash-subjects"></div>
       <p class="muted" id="dash-subjects-note" style="font-size:13px;margin-top:10px;"></p>
+      <div id="dash-add-subject" style="margin-top:12px;" hidden>
+        <button class="btn btn-dark" id="dash-add-subject-btn" type="button">+ Add subject</button>
+        <select id="dash-add-subject-select" aria-label="Add a subject" hidden></select>
+      </div>
     </div>
 
     <!-- Mock test history -->
@@ -291,14 +300,20 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   }
 
   /* ---------- Analysis + interactivity ----------
-     All attempts live in allAttempts. subjectFilter (null = all) is set
-     from the profile's target subject on load, and changed by tapping a
-     subject chip or a progress row. Everything below re-renders from it,
-     so the other subjects disappear as soon as one is chosen. */
+     All attempts live in allAttempts. visibleSubjects is the set of
+     subjects in view (null = all). The profile's target subject starts
+     the set with just that subject; "Add subject" grows it, the × on a
+     progress row shrinks it, and a chip focuses it to one subject. */
   var allAttempts = [];
-  var subjectFilter = null;
+  var visibleSubjects = null;
+  function isVisible(slug) {
+    return !visibleSubjects || visibleSubjects.indexOf(slug) !== -1;
+  }
+  function singleSubject() {
+    return (visibleSubjects && visibleSubjects.length === 1) ? visibleSubjects[0] : null;
+  }
   function mockAttempts() {
-    return allAttempts.filter(function (a) { return a.kind === 'mock' && (!subjectFilter || a.subject === subjectFilter); });
+    return allAttempts.filter(function (a) { return a.kind === 'mock' && isVisible(a.subject); });
   }
   function quizAttempts() {
     return allAttempts.filter(function (a) { return a.kind === 'quiz'; });
@@ -346,7 +361,9 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     function chip(label, slug) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'dash-chip' + ((slug === subjectFilter) ? ' active' : '');
+      var active = (slug === null && !visibleSubjects) ||
+        (slug !== null && visibleSubjects && visibleSubjects.indexOf(slug) !== -1);
+      b.className = 'dash-chip' + (active ? ' active' : '');
       b.textContent = label;
       b.addEventListener('click', function () { setFilter(slug); });
       box.appendChild(b);
@@ -354,17 +371,59 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     chip('All subjects', null);
     slugs.forEach(function (s) { chip(SUBJECT_NAMES[s] || s, s); });
     var scope = $('dash-analysis-scope');
-    if (scope) scope.textContent = subjectFilter
-      ? 'Showing: ' + (SUBJECT_NAMES[subjectFilter] || subjectFilter) + ' — your target subject'
-      : 'Showing: all subjects';
+    if (scope) {
+      if (!visibleSubjects) {
+        scope.textContent = 'Showing: all subjects';
+      } else if (visibleSubjects.length === 1) {
+        var only = SUBJECT_NAMES[visibleSubjects[0]] || visibleSubjects[0];
+        scope.textContent = 'Showing: ' + only + ((profileRow && profileRow.target_subject === visibleSubjects[0]) ? ' — your target subject' : '');
+      } else {
+        var names = visibleSubjects.map(function (s) { return SUBJECT_NAMES[s] || s; });
+        scope.textContent = 'Showing: ' + names.join(', ');
+      }
+    }
   }
   function setFilter(slug) {
-    subjectFilter = slug || null;
+    visibleSubjects = slug ? [slug] : null;
     renderAll();
     try {
       var el = $('dash-analysis');
       if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (e) {}
+  }
+  function addSubject(slug) {
+    if (!slug || !visibleSubjects) return;
+    if (visibleSubjects.indexOf(slug) === -1) visibleSubjects.push(slug);
+    renderAll();
+  }
+  function removeSubject(slug) {
+    if (!visibleSubjects) visibleSubjects = SUBJECT_ORDER.slice();
+    var i = visibleSubjects.indexOf(slug);
+    if (i !== -1) visibleSubjects.splice(i, 1);
+    if (!visibleSubjects.length) visibleSubjects = null;
+    renderAll();
+  }
+  function renderAddSubject() {
+    var wrap = $('dash-add-subject');
+    var btn = $('dash-add-subject-btn');
+    var sel = $('dash-add-subject-select');
+    if (!wrap || !btn || !sel) return;
+    var missing = SUBJECT_ORDER.filter(function (s) { return !isVisible(s); });
+    var canAdd = !!visibleSubjects && missing.length > 0;
+    wrap.hidden = !canAdd;
+    btn.hidden = !canAdd || !sel.hidden;
+    if (!canAdd) return;
+    sel.innerHTML = '';
+    var ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = 'Choose a subject…';
+    sel.appendChild(ph);
+    missing.forEach(function (s) {
+      var o = document.createElement('option');
+      o.value = s;
+      o.textContent = SUBJECT_NAMES[s] || s;
+      sel.appendChild(o);
+    });
   }
   function renderAll() {
     renderStats();
@@ -372,6 +431,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     renderHistory();
     renderChips();
     renderAnalysis();
+    renderAddSubject();
   }
   function renderAnalysis() {
     var empty = $('dash-analysis-empty');
@@ -386,12 +446,13 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     }
     empty.hidden = true;
     body.hidden = false;
-    var subjName = subjectFilter ? (SUBJECT_NAMES[subjectFilter] || subjectFilter) : null;
+    var single = singleSubject();
+    var subjName = single ? (SUBJECT_NAMES[single] || single) : null;
 
     /* --- Verdict: strongest vs weakest --- */
     var verdict = $('dash-verdict');
     if (mocks.length) {
-      if (subjectFilter) {
+      if (single) {
         var avg = avgPct(mocks);
         verdict.textContent = 'In ' + subjName + ' your average is ' + avg + '% across ' + mocks.length + (mocks.length === 1 ? ' test' : ' tests') + '. ' +
           (avg >= 70 ? 'Strong — keep pushing your best score higher.' : avg >= 50 ? 'Getting there — focus on your weakest sets below.' : 'This needs the most effort — work through your weakest sets below.');
@@ -446,7 +507,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     /* --- Bars: by subject, or by set when one subject is chosen --- */
     var bars = $('dash-bars');
     bars.innerHTML = '';
-    if (subjectFilter) {
+    if (single) {
       $('dash-bars-title').textContent = 'Average score by set — ' + subjName;
       var bySet = {};
       mocks.forEach(function (a) { if (a.set_number == null) return; (bySet[a.set_number] = bySet[a.set_number] || []).push(a); });
@@ -510,7 +571,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
       if (!ds.length) return null;
       return Math.round(ds.reduce(function (s, d) { return s + d; }, 0) / ds.length);
     }
-    if (subjectFilter) {
+    if (single) {
       var bySet2 = {};
       mocks.forEach(function (a) { if (a.set_number == null) return; (bySet2[a.set_number] = bySet2[a.set_number] || []).push(a); });
       var setAvgs = Object.keys(bySet2).map(function (n) { return { n: n, avg: avgPct(bySet2[n]) }; })
@@ -657,7 +718,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     applyProfileGate();
 
     /* A chosen target subject focuses the whole dashboard on it. */
-    if (profileRow && profileRow.target_subject) subjectFilter = profileRow.target_subject;
+    if (profileRow && profileRow.target_subject) visibleSubjects = [profileRow.target_subject];
     renderAll();
   }
   function renderPlan(ent) {
@@ -707,7 +768,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     box.innerHTML = '';
     var mocks = allAttempts.filter(function (a) { return a.kind === 'mock'; });
     SUBJECT_ORDER.forEach(function (slug) {
-      if (subjectFilter && slug !== subjectFilter) return;
+      if (!isVisible(slug)) return;
       var rows = mocks.filter(function (a) { return a.subject === slug; });
       var sets = {};
       var best = 0;
@@ -717,7 +778,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
         if (p != null && p > best) best = p;
       });
       var div = document.createElement('div');
-      div.className = 'dash-subj-row clickable' + (subjectFilter === slug ? ' selected' : '');
+      div.className = 'dash-subj-row clickable' + (singleSubject() === slug ? ' selected' : '');
       var name = document.createElement('span');
       name.className = 'dash-subj-name';
       name.textContent = SUBJECT_NAMES[slug] || slug;
@@ -729,14 +790,27 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
         var n = Object.keys(sets).length;
         prog.textContent = n + ' / 20 sets' + (best ? ' · Best ' + best + '%' : '');
       }
+      var right = document.createElement('span');
+      right.className = 'dash-subj-right';
+      right.appendChild(prog);
+      var rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'dash-subj-remove';
+      rm.textContent = '×';
+      rm.setAttribute('aria-label', 'Remove ' + (SUBJECT_NAMES[slug] || slug) + ' from your dashboard');
+      rm.addEventListener('click', function (e) {
+        e.stopPropagation();
+        removeSubject(slug);
+      });
+      right.appendChild(rm);
       div.appendChild(name);
-      div.appendChild(prog);
-      div.addEventListener('click', function () { setFilter(subjectFilter === slug ? null : slug); });
+      div.appendChild(right);
+      div.addEventListener('click', function () { setFilter(slug); });
       box.appendChild(div);
     });
     var note = $('dash-subjects-note');
-    if (note) note.textContent = subjectFilter
-      ? 'Showing only ' + (SUBJECT_NAMES[subjectFilter] || subjectFilter) + ' — tap it again, or choose All subjects above, to see everything.'
+    if (note) note.textContent = visibleSubjects
+      ? 'Tap × to remove a subject, or add another below.'
       : 'Tap a subject to focus your dashboard on it.';
   }
   function historyRow(a) {
@@ -817,7 +891,10 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   }
   function renderHistory() {
     var title = $('dash-mock-title');
-    if (title) title.textContent = 'Mock test history' + (subjectFilter ? ' — ' + (SUBJECT_NAMES[subjectFilter] || subjectFilter) : '');
+    if (title) {
+      var single = singleSubject();
+      title.textContent = 'Mock test history' + (single ? ' — ' + (SUBJECT_NAMES[single] || single) : (visibleSubjects ? ' — ' + visibleSubjects.length + ' subjects' : ''));
+    }
     var mocks = mockAttempts();
     var quizzes = quizAttempts();
     var mh = $('dash-mock-history');
@@ -960,6 +1037,30 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
     }
   });
   $('dash-form').addEventListener('submit', onSave);
+  $('dash-add-subject-btn').addEventListener('click', function () {
+    var sel = $('dash-add-subject-select');
+    var btn = $('dash-add-subject-btn');
+    if (!sel || !btn) return;
+    sel.hidden = false;
+    btn.hidden = true;
+    try { sel.focus(); } catch (e) {}
+  });
+  $('dash-add-subject-select').addEventListener('change', function () {
+    var sel = $('dash-add-subject-select');
+    if (!sel || !sel.value) return;
+    addSubject(sel.value);
+    sel.value = '';
+    sel.hidden = true;
+    var btn = $('dash-add-subject-btn');
+    if (btn) btn.hidden = false;
+  });
+  $('dash-add-subject-select').addEventListener('blur', function () {
+    var sel = $('dash-add-subject-select');
+    if (!sel || sel.value) return;
+    sel.hidden = true;
+    var btn = $('dash-add-subject-btn');
+    if (btn) btn.hidden = false;
+  });
 
   loadDashboard();
 })();
