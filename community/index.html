@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Community | ChangeYourself.in</title>
-<meta name="description" content="The ChangeYourself learner community is coming soon — a place to ask questions, share progress and learn from each other.">
+<meta name="description" content="Find your UGC NET subject's WhatsApp community on ChangeYourself — Psychology, Commerce, Management, English, Political Science, History, Economics, Computer Science, Sociology and Law.">
 <script>try{var t=localStorage.getItem("cy-theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;}}catch(e){}</script>
 <link rel="stylesheet" href="/styles.css">
   <link rel="icon" href="/logo.png">
@@ -22,11 +22,69 @@
 <section class="hero"><div class="hero-grid" aria-hidden="true"></div><div class="container">
   <span class="badge">Coming soon</span>
   <h1 class="hero-title">Community</h1>
-  <p class="hero-sub">A place for learners to ask questions, share progress and learn from each other. We are building it now.</p>
+  <p class="hero-sub">One WhatsApp community per UGC NET subject — find yours below, ask questions, share progress, and prepare with other aspirants.</p>
   <div class="hero-actions">
-    <a class="btn btn-white" href="https://www.youtube.com/@ChangeXed" target="_blank" rel="noopener">Visit the YouTube Channel <span class="arrow">→</span></a>
+    <a class="btn btn-white" href="#subjects">Find your subject <span class="arrow">↓</span></a>
     <a class="btn btn-dark" href="/changexed/mock-tests/">Try a Mock Test <span class="arrow">→</span></a>
   </div>
+</div></section>
+
+<section class="section" id="subjects"><div class="container">
+  <h2>Find your subject</h2>
+  <p class="section-sub">One community per subject. Tap your subject to join its WhatsApp community.</p>
+  <div class="grid-3">
+    <div class="card-dark">
+      <h3>Psychology</h3>
+      <p>Paper 1 + Paper 2 Psychology · UGC NET</p>
+      <button class="btn btn-white" type="button" disabled data-wa-subject="psychology">WhatsApp link coming soon</button>
+    </div>
+    <div class="card-dark">
+      <h3>Commerce</h3>
+      <p>Paper 1 + Paper 2 Commerce · UGC NET</p>
+      <button class="btn btn-white" type="button" disabled data-wa-subject="commerce">WhatsApp link coming soon</button>
+    </div>
+    <div class="card-dark">
+      <h3>Management</h3>
+      <p>Paper 1 + Paper 2 Management · UGC NET</p>
+      <button class="btn btn-white" type="button" disabled data-wa-subject="management">WhatsApp link coming soon</button>
+    </div>
+    <div class="card-dark">
+      <h3>English</h3>
+      <p>Paper 1 + Paper 2 English · UGC NET</p>
+      <button class="btn btn-white" type="button" disabled data-wa-subject="english">WhatsApp link coming soon</button>
+    </div>
+    <div class="card-dark">
+      <h3>Political Science</h3>
+      <p>Paper 1 + Paper 2 Political Science · UGC NET</p>
+      <button class="btn btn-white" type="button" disabled data-wa-subject="political-science">WhatsApp link coming soon</button>
+    </div>
+    <div class="card-dark">
+      <h3>History</h3>
+      <p>Paper 1 + Paper 2 History · UGC NET</p>
+      <button class="btn btn-white" type="button" disabled data-wa-subject="history">WhatsApp link coming soon</button>
+    </div>
+    <div class="card-dark">
+      <h3>Economics</h3>
+      <p>Paper 1 + Paper 2 Economics · UGC NET</p>
+      <button class="btn btn-white" type="button" disabled data-wa-subject="economics">WhatsApp link coming soon</button>
+    </div>
+    <div class="card-dark">
+      <h3>Computer Science</h3>
+      <p>Paper 1 + Paper 2 Computer Science and Applications · UGC NET</p>
+      <button class="btn btn-white" type="button" disabled data-wa-subject="computer-science">WhatsApp link coming soon</button>
+    </div>
+    <div class="card-dark">
+      <h3>Sociology</h3>
+      <p>Paper 1 + Paper 2 Sociology · UGC NET</p>
+      <button class="btn btn-white" type="button" disabled data-wa-subject="sociology">WhatsApp link coming soon</button>
+    </div>
+    <div class="card-dark">
+      <h3>Law</h3>
+      <p>Paper 1 + Paper 2 Law · UGC NET</p>
+      <button class="btn btn-white" type="button" disabled data-wa-subject="law">WhatsApp link coming soon</button>
+    </div>
+  </div>
+  <p class="fineprint">Links are added as each subject's community opens. If your subject's link isn't live yet, check back soon.</p>
 </div></section>
 
 <section class="section"><div class="container">
@@ -76,6 +134,40 @@
 </div>
 
 <div class="toast" id="toast" role="status"></div>
+<script>
+/* WHATSAPP COMMUNITY LINKS — owner config.
+   Paste each subject's WhatsApp Community invite link below
+   (the link that starts with https://chat.whatsapp.com/...).
+   While a link is empty, that subject's button stays "coming soon". */
+var WHATSAPP_LINKS = {
+  psychology: "",
+  commerce: "",
+  management: "",
+  english: "",
+  "political-science": "",
+  history: "",
+  economics: "",
+  "computer-science": "",
+  sociology: "",
+  law: ""
+};
+(function () {
+  var btns = document.querySelectorAll("[data-wa-subject]");
+  for (var i = 0; i < btns.length; i++) {
+    var b = btns[i];
+    var url = WHATSAPP_LINKS[b.getAttribute("data-wa-subject")];
+    if (url) {
+      var a = document.createElement("a");
+      a.className = "btn btn-white";
+      a.href = url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = "Join on WhatsApp \u2192";
+      b.parentNode.replaceChild(a, b);
+    }
+  }
+})();
+</script>
 <script src="/main.js"></script>
 </body>
 </html>
