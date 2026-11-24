@@ -96,13 +96,16 @@
 </div>
 </div></section>
 
-<footer class="footer"><div class="container"><div class="footer-links"><a href="/">Home</a><a href="/about/">About</a><a href="/pricing/">Pricing</a><a href="/changexed/mock-tests/">Mock Tests</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://www.youtube.com/@ChangeXed" target="_blank" rel="noopener">Contact</a></div><img src="/logo.png" alt="ChangeYourself" class="footer-logo"><p class="footer-tag">ChangeYourself — Learn. Grow. Transform.</p><p class="footer-copy">© 2026 ChangeYourself.in</p></div></footer>
+<footer class="footer"><div class="container"><div class="footer-links"><a href="/">Home</a><a href="/about/">About</a><a href="/pricing/">Pricing</a><a href="/changexed/mock-tests/">Mock Tests</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/refund/">Refund</a><a href="https://www.youtube.com/@ChangeXed" target="_blank" rel="noopener">Contact</a></div><img src="/logo.png" alt="ChangeYourself" class="footer-logo"><p class="footer-tag">ChangeYourself — Learn. Grow. Transform.</p><p class="footer-copy">© 2026 ChangeYourself.in</p></div></footer>
 
 <!-- No dock on this page: it would cover the quiz buttons, same as the mock-test page. -->
 <div class="toast" id="toast" role="status"></div>
 <script src="/main.js"></script>
 <script src="/supabase.js"></script>
 <script src="/auth.js"></script>
+<!-- By design: this quiz is a 10-question untimed practice round (Paper 1 /
+     Paper 2 / Mixed) with no back-navigation, no answer change, and no resume
+     after a refresh — it is practice, not an exam (audit F-48). -->
 <script>
 (function () {
   'use strict';
@@ -226,12 +229,21 @@
     var b = best(mode);
     var isBest = score > b;
     if (isBest) { try { store.set(BEST_KEY[mode], String(score)); } catch (e) {} }
-    /* Save the round to the signed-in user's history. Fire-and-forget:
-       recordAttempt never throws and never blocks the results screen. */
+    /* Save the round to the signed-in user's history, graded server-side.
+       The server re-grades against the stored most-probable questions, so
+       the recorded score is verified, not self-reported. Signed-out users
+       just see their local score (no attempt is recorded). */
     try {
-      if (window.CYSupa && window.CYSupa.recordAttempt) {
+      if (window.CYSupa && window.CYSupa.submitQuizAttempt) {
         var secs = roundStartedAt ? Math.max(0, Math.round((Date.now() - roundStartedAt) / 1000)) : null;
-        window.CYSupa.recordAttempt({ kind: 'quiz', subject: mode === 'p1' ? 'paper1' : (mode === 'p2' ? 'paper2' : 'mixed'), set_number: null, score: score, total: ROUND, correct: score, wrong: answers.filter(function (a) { return !a.correct; }).length, skipped: 0, duration_seconds: secs });
+        var indices = answers.map(function (a) { return DATA.indexOf(a.q); });
+        var chosen = answers.map(function (a) { return a.chosen; });
+        var qmode = mode === 'p1' ? 'paper1' : (mode === 'p2' ? 'paper2' : 'mixed');
+        window.CYSupa.submitQuizAttempt(qmode, indices, chosen, secs).then(function (res) {
+          if (res && res.ok && res.result && typeof res.result.score === 'number') {
+            $('res-score').textContent = res.result.score; // server-verified score
+          }
+        }).catch(function () {});
       }
     } catch (e) {}
     $('res-score').textContent = score;
