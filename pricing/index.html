@@ -4,9 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pricing — ChangeYourself.in</title>
-<meta name="description" content="Simple pricing for ChangeYourself — start free with the UGC NET mock tests and quiz.">
+<meta name="description" content="UGC NET Test Series pricing — ₹249 per subject, one-time, for all 20 mock tests. No subscriptions, no tiers.">
 <script>try{var t=localStorage.getItem("cy-theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;}}catch(e){}</script>
 <link rel="stylesheet" href="/styles.css">
+<style>
+.tiers.single { grid-template-columns: 1fr; max-width: 560px; margin: 0 auto 64px; }
+.price-scale { width: 100%; max-width: 560px; border-collapse: collapse; margin-top: 20px; }
+.price-scale th, .price-scale td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 15px; }
+.price-scale th { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+</style>
   <link rel="icon" href="/logo.png">
 </head>
 <body>
@@ -21,73 +27,43 @@
 
 <div class="page-head"><div class="container">
   <h1>Pricing</h1>
-  <p>Start free. Paid plans are coming soon — no credit card required to start.</p>
+  <p>One simple price — ₹249 per subject. No subscriptions, no tiers. Try Tests 1–3 free, pay only for the subjects you want.</p>
 </div></div>
 
-<div class="container"><div class="tiers">
-  <div class="tier">
-    <h3>Free</h3>
-    <div class="tier-price">₹0</div>
-    <p class="tier-desc">For trying things out.</p>
-    <ul class="tier-features">
-      <li>Career assessment (basic) <span class="tag">Coming soon</span></li>
-      <li>Community access <span class="tag">Coming soon</span></li>
-      <li>3 UGC NET mock tests free</li>
-      <li>Motivational resources</li>
-    </ul>
-    <a class="btn btn-white" href="/changexed/mock-tests/">Get Started Free</a>
-  </div>
+<div class="container"><div class="tiers single">
   <div class="tier popular">
-    <div class="tier-badge">Most Popular</div>
-    <h3>Pro</h3>
-    <div class="tier-price">₹499<span>/mo</span></div>
-    <p class="tier-desc">For serious aspirants.</p>
+    <div class="tier-badge">One simple price</div>
+    <h3>UGC NET Test Series</h3>
+    <div class="tier-price">₹249<span> per subject, one-time</span></div>
+    <p class="tier-desc">All 20 mock tests in one UGC NET subject of your choice. No subscription, no tiers.</p>
     <ul class="tier-features">
-      <li><b>All 20 UGC NET mock tests</b></li>
-      <li>AI Assistant (unlimited) <span class="tag">Coming soon</span></li>
-      <li>Career roadmaps <span class="tag">Coming soon</span></li>
-      <li>Progress tracking <span class="tag">Coming soon</span></li>
+      <li><b>All 20 mock tests</b> in your subject</li>
+      <li>150 questions per test, 3-hour exam format</li>
+      <li>Instant results with an explanation for every question</li>
+      <li>Progress, history and analysis on your dashboard</li>
+      <li>Tests 1–3 free — try before you pay</li>
     </ul>
-    <button class="btn btn-white" id="btn-pro" type="button" disabled>Pro — Coming Soon</button>
-    <p class="pay-note" id="note-pro"></p>
-  </div>
-  <div class="tier">
-    <h3>Premium</h3>
-    <div class="tier-price">₹1,499<span>/mo</span></div>
-    <p class="tier-desc">For full guidance.</p>
-    <ul class="tier-features">
-      <li>Everything in Pro</li>
-      <li>1-on-1 mentorship sessions <span class="tag">Coming soon</span></li>
-      <li>Resume builder &amp; review <span class="tag">Coming soon</span></li>
-      <li>Priority support <span class="tag">Coming soon</span></li>
-    </ul>
-    <button class="btn btn-white" id="btn-premium" type="button" disabled>Premium — Coming Soon</button>
-    <p class="pay-note" id="note-premium"></p>
-  </div>
-  <div class="tier">
-    <h3>Institutional</h3>
-    <div class="tier-price">Custom</div>
-    <p class="tier-desc">For colleges &amp; coaching centres.</p>
-    <ul class="tier-features">
-      <li>Bulk mock-test access for students <span class="tag">Coming soon</span></li>
-      <li>Admin dashboard &amp; reports <span class="tag">Coming soon</span></li>
-      <li>Custom branding <span class="tag">Coming soon</span></li>
-      <li>Dedicated support <span class="tag">Coming soon</span></li>
-    </ul>
-    <a class="btn btn-white" href="#" data-soon="Contact details coming soon.">Contact Us</a>
+    <a class="btn btn-white" id="btn-mocks" href="/changexed/mock-tests/">Try the Free Tests</a>
+    <p class="pay-note" id="note-mocks"></p>
   </div>
 </div></div>
 
 <section class="section"><div class="container">
+  <h2>Adding more subjects</h2>
+  <p>Every extra subject costs ₹249. Pick your subjects in the mock tests — each one unlocks separately, and you only pay for the subjects you choose.</p>
+  <table class="price-scale">
+    <tr><th>Subjects</th><th>You pay (one-time)</th></tr>
+    <tr><td>1 subject</td><td><b>₹249</b></td></tr>
+    <tr><td>2 subjects</td><td><b>₹498</b></td></tr>
+    <tr><td>3 subjects</td><td><b>₹747</b></td></tr>
+    <tr><td>5 subjects</td><td><b>₹1,245</b></td></tr>
+    <tr><td>All 10 subjects</td><td><b>₹2,490</b></td></tr>
+  </table>
+</div></section>
+
+<section class="section"><div class="container">
   <h2>Add-ons</h2>
   <div class="addon-grid">
-    <div class="addon">
-      <h3>UGC NET Test Series &mdash; Full Access</h3>
-      <p>All 20 mock tests, all subjects. Mock Tests 1&ndash;3 are free.</p>
-      <p><b>&#8377;199</b> one-time</p>
-      <a class="btn btn-white" id="btn-mocks" href="/changexed/mock-tests/">Try the Free Tests</a>
-      <p class="pay-note" id="note-mocks"></p>
-    </div>
     <div class="addon">
       <h3>1-on-1 Mentorship Session</h3>
       <p>A focused one-hour session with an experienced mentor.</p>
@@ -105,7 +81,7 @@
   <h2>Frequently Asked Questions</h2>
   <div class="faq-item">
     <h3>Are the mock tests free right now?</h3>
-    <p>Mock Tests 1&ndash;3 are free for everyone. The remaining 17 tests in each subject unlock with the &#8377;199 Mock Tests plan (one-time payment, all subjects). Pro members get all 20 tests included.</p>
+    <p>Mock Tests 1&ndash;3 are free for everyone. The remaining 17 tests in a subject unlock for &#8377;249 (one-time, per subject). Adding another subject costs another &#8377;249.</p>
   </div>
   <div class="faq-item">
     <h3>What is UGC NET?</h3>
@@ -120,7 +96,7 @@
     <p>Yes — the mock tests work fully in a mobile browser, no app install needed.</p>
   </div>
   <div class="faq-item">
-    <h3>How do I pay for Pro?</h3>
+    <h3>How do I pay for the Test Series?</h3>
     <p>Payment links are coming soon. Until then, Mock Tests 1–3 are free — start with a mock test today.</p>
   </div>
 </div></div></section>
@@ -147,35 +123,13 @@
 
 <script>
 /* PAYMENT LINKS — owner config.
-   Paste your Razorpay / Instamojo payment URLs below.
-   While a link is empty, its plan cannot be bought: the Pro/Premium
-   buttons stay disabled as "Coming Soon", and the Mock Tests button
+   Paste your Razorpay / Instamojo payment URL below.
+   While the link is empty, the Test Series cannot be bought: the button
    stays a link to the free tests (Tests 1–3). */
 var PAYMENT_LINKS = {
-  pro: "",
-  premium: "",
   mocktests: ""
 };
 (function () {
-  /* Paid-plan buttons: disabled "Coming Soon" until a payment link exists. */
-  function wireBuy(id, noteId, url, buyLabel, soonLabel, soonNote) {
-    var btn = document.getElementById(id);
-    var note = document.getElementById(noteId);
-    if (!btn) return;
-    if (url) {
-      btn.removeAttribute("disabled");
-      btn.textContent = buyLabel;
-      btn.addEventListener("click", function () { window.location.href = url; });
-    } else {
-      btn.setAttribute("disabled", "");
-      btn.textContent = soonLabel;
-      if (note) note.textContent = soonNote;
-    }
-  }
-  wireBuy("btn-pro", "note-pro", PAYMENT_LINKS.pro,
-    "Upgrade to Pro", "Pro \u2014 Coming Soon", "Pro is not available to buy yet.");
-  wireBuy("btn-premium", "note-premium", PAYMENT_LINKS.premium,
-    "Upgrade to Premium", "Premium \u2014 Coming Soon", "Premium is not available to buy yet.");
   /* Mock Tests plan: the free tests are live, so the button stays a link
      to them until a payment link exists. */
   var mocksBtn = document.getElementById("btn-mocks");
@@ -187,7 +141,7 @@ var PAYMENT_LINKS = {
     } else {
       mocksBtn.setAttribute("href", "/changexed/mock-tests/");
       mocksBtn.textContent = "Try the Free Tests";
-      if (mocksNote) mocksNote.textContent = "The \u20B9199 plan is coming soon \u2014 Mock Tests 1\u20133 are free for now.";
+      if (mocksNote) mocksNote.textContent = "The \u20B9249 per-subject plan is coming soon \u2014 Mock Tests 1\u20133 are free for now.";
     }
   }
 })();
