@@ -20,6 +20,35 @@
   .lb-table th { color: var(--ink-soft); font-size: 0.85rem; }
   .lb-table td.pct { font-weight: 800; }
   .lb-table tr.me td { background: rgba(124, 58, 237, 0.12); }
+  /* Gaming leaderboard — visuals only. Every number is the server
+     value; no tiers, XP, rank changes or live indicators. Podium
+     step heights are fixed by rank, never scaled to scores. */
+  .lb-podium { display: flex; align-items: flex-end; justify-content: center; gap: 10px; margin: 8px 0 20px; }
+  .lb-podium-step { flex: 1; max-width: 180px; min-height: 112px; text-align: center; border: 1px solid var(--line); border-radius: 14px 14px 0 0; padding: 14px 8px 12px; background: var(--surface); display: flex; flex-direction: column; align-items: center; gap: 4px; animation: lbRise .5s ease both; animation-delay: var(--d, 0s); }
+  .lb-podium-step.second { min-height: 132px; border-color: rgba(148, 163, 184, .5); }
+  .lb-podium-step.first { min-height: 164px; border-color: rgba(234, 179, 8, .55); background: linear-gradient(180deg, rgba(234, 179, 8, .14), var(--surface) 70%); box-shadow: 0 0 24px rgba(234, 179, 8, .18); }
+  .lb-podium-step.third { border-color: rgba(180, 83, 9, .5); }
+  .lb-crown { display: block; line-height: 0; animation: lbCrownGlow 2s ease-in-out infinite; }
+  .lb-podium-alias { font-weight: 800; overflow-wrap: anywhere; }
+  .lb-podium-pct { font-weight: 800; font-size: 1.25rem; color: #a78bfa; }
+  .lb-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #3b82f6); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; }
+  .lb-avatar.big { width: 48px; height: 48px; font-size: 1.2rem; }
+  .lb-who { display: inline-flex; gap: 8px; align-items: center; }
+  .lb-medal { display: inline-flex; width: 28px; height: 28px; border-radius: 50%; align-items: center; justify-content: center; font-weight: 800; font-size: .85rem; background: var(--surface); border: 1px solid var(--line); }
+  .lb-medal.m1 { background: rgba(234, 179, 8, .2); border-color: #eab308; color: #facc15; }
+  .lb-medal.m2 { background: rgba(148, 163, 184, .2); border-color: #94a3b8; color: #cbd5e1; }
+  .lb-medal.m3 { background: rgba(180, 83, 9, .25); border-color: #b45309; color: #fdba74; }
+  .lb-bar { height: 6px; border-radius: 999px; background: var(--line); margin-top: 6px; overflow: hidden; }
+  .lb-bar i { display: block; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, #7c3aed, #3b82f6); animation: lbBarGrow .7s ease forwards; animation-delay: var(--d, 0s); }
+  .lb-table tbody tr { animation: lbRowIn .4s ease both; animation-delay: var(--d, 0s); }
+  @keyframes lbRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes lbRowIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes lbBarGrow { from { width: 0; } to { width: var(--w); } }
+  @keyframes lbCrownGlow { 0%, 100% { filter: drop-shadow(0 0 2px rgba(234, 179, 8, .4)); } 50% { filter: drop-shadow(0 0 8px rgba(234, 179, 8, .9)); } }
+  @media (prefers-reduced-motion: reduce) {
+    .lb-podium-step, .lb-table tbody tr, .lb-bar i, .lb-crown { animation: none !important; }
+    .lb-bar i { width: var(--w); }
+  }
   .lb-me-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 12px; }
   .lb-me-cell b { display: block; font-size: 1.4rem; }
   .lb-me-cell span { color: var(--ink-soft); font-size: 0.85rem; }
@@ -113,6 +142,30 @@
   var SUBJECT_NAMES = { psychology: 'Psychology', commerce: 'Commerce', management: 'Management', english: 'English', 'political-science': 'Political Science', history: 'History', economics: 'Economics', 'computer-science': 'Computer Science', sociology: 'Sociology', law: 'Law', 'most-probable': 'Most Probable' };
   var state = { scope: 'overall', subject: 'psychology', period: 'all-time' };
   var myAlias = null;
+  var CROWN = '<svg viewBox="0 0 24 24" width="26" height="26" fill="#eab308" aria-hidden="true"><path d="M2.5 19h19v2h-19v-2zM3 16.5L4.5 8l4.2 3.4L12 5l3.3 6.4L19.5 8 21 16.5H3z"/></svg>';
+  function countUp(root) {
+    /* Animates each [data-count] pct from 0 to its server value; the
+       final text is always the exact server string, never a rounded
+       intermediate. Skipped entirely under reduced motion. */
+    var reduced = false;
+    try { reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    var els = root.querySelectorAll('[data-count]');
+    els.forEach(function (el) {
+      var target = el.getAttribute('data-count');
+      var num = parseFloat(target);
+      if (reduced || !window.requestAnimationFrame || isNaN(num)) { el.textContent = target; return; }
+      var start = null, dur = 600;
+      function tick(ts) {
+        if (start == null) start = ts;
+        var p = Math.min(1, (ts - start) / dur);
+        var v = Math.round(num * p * 10) / 10;
+        el.textContent = (Number.isInteger(v) ? String(v) : v.toFixed(1)) + '%';
+        if (p < 1) window.requestAnimationFrame(tick);
+        else el.textContent = target;
+      }
+      window.requestAnimationFrame(tick);
+    });
+  }
 
   function loadBoard() {
     var board = $('board');
@@ -134,16 +187,40 @@
           ' Take a mock test and opt in to be among the first.</p>';
         return;
       }
-      var html = '<table class="lb-table"><thead><tr><th>#</th><th>Alias</th><th>Best</th><th>Score</th><th>Test</th><th>When</th></tr></thead><tbody>';
-      r.entries.forEach(function (e) {
+      var html = '';
+      /* Top-3 podium: 2nd, 1st, 3rd visually, 1st in the middle and
+         tallest, crown on 1st. Only when the ranking is sufficient
+         and at least 3 entries exist — otherwise no podium at all. */
+      if (r.entries.length >= 3) {
+        var top3 = r.entries.slice(0, 3);
+        var order = [top3[1], top3[0], top3[2]];
+        html += '<div class="lb-podium" aria-label="Top 3">';
+        order.forEach(function (e, i) {
+          var cls = e.rank === 1 ? 'first' : (e.rank === 2 ? 'second' : 'third');
+          html += '<div class="lb-podium-step ' + cls + '" style="--d:' + (i * 90) + 'ms">' +
+            (e.rank === 1 ? '<span class="lb-crown">' + CROWN + '</span>' : '') +
+            '<span class="lb-avatar big">' + esc(e.alias.charAt(0).toUpperCase()) + '</span>' +
+            '<strong class="lb-podium-alias">' + esc(e.alias) + '</strong>' +
+            '<span class="lb-podium-pct" data-count="' + e.pct + '%">' + e.pct + '%</span>' +
+            '<span class="lb-note">' + e.score + ' / ' + e.total + '</span></div>';
+        });
+        html += '</div>';
+      }
+      html += '<table class="lb-table"><thead><tr><th>#</th><th>Alias</th><th>Best</th><th>Score</th><th>Test</th><th>When</th></tr></thead><tbody>';
+      r.entries.forEach(function (e, i) {
         var isMe = myAlias && e.alias === myAlias;
         var when = e.achieved_at ? new Date(e.achieved_at).toLocaleDateString() : '—';
-        html += '<tr' + (isMe ? ' class="me"' : '') + '><td>' + e.rank + '</td><td>' + esc(e.alias) + (isMe ? ' (you)' : '') + '</td>' +
-          '<td class="pct">' + e.pct + '%</td><td>' + e.score + ' / ' + e.total + '</td>' +
+        var rankCell = (e.rank >= 1 && e.rank <= 3)
+          ? '<span class="lb-medal m' + e.rank + '">' + e.rank + '</span>' : String(e.rank);
+        html += '<tr' + (isMe ? ' class="me"' : '') + ' style="--d:' + (i * 60) + 'ms"><td>' + rankCell + '</td>' +
+          '<td><span class="lb-who"><span class="lb-avatar">' + esc(e.alias.charAt(0).toUpperCase()) + '</span>' + esc(e.alias) + (isMe ? ' (you)' : '') + '</span></td>' +
+          '<td class="pct"><span data-count="' + e.pct + '%">' + e.pct + '%</span><div class="lb-bar"><i style="--w:' + e.pct + '%"></i></div></td>' +
+          '<td>' + e.score + ' / ' + e.total + '</td>' +
           '<td>' + esc(SUBJECT_NAMES[e.subject] || e.subject) + ' · Set ' + e.set_number + '</td><td>' + when + '</td></tr>';
       });
       html += '</tbody></table><p class="lb-note" style="margin-top:12px;">' + r.participants + ' participants · best score per person · ties go to whoever reached the score first.</p>';
       board.innerHTML = html;
+      countUp(board);
     }).catch(function () {
       board.innerHTML = '<p class="lb-error">Could not load the leaderboard — check your connection and refresh.</p>';
     });
