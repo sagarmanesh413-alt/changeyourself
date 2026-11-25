@@ -27,7 +27,6 @@
   /* "create" (name + email + subject) or "signin" (email only).
      Create is the default: this modal is the registration screen. */
   var authMode = "create";
-  var chosenSubject = "";
 
   /* ---------- Injected CSS (modal + user menu) ---------- */
   var css = [
@@ -56,15 +55,12 @@
     ".auth-mode{display:flex;gap:8px;margin:0 0 16px;}",
     ".auth-mode button{flex:1;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#a1a1aa;font:inherit;font-size:14px;font-weight:700;cursor:pointer;}",
     ".auth-mode button.on{border-color:#7c3aed;background:rgba(124,58,237,.2);color:#ffffff;}",
-    ".auth-subj-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}",
-    ".auth-subj{padding:10px 8px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.04);color:#ffffff;font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:center;}",
-    ".auth-subj:hover{border-color:rgba(255,255,255,.45);}",
-    ".auth-subj.on{border-color:#7c3aed;background:rgba(124,58,237,.25);}",
+    ".auth-subj-select{width:100%;padding:12px 14px;margin-bottom:14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#ffffff;font:inherit;font-size:15px;cursor:pointer;}",
+    ".auth-subj-select:focus{outline:2px solid #7c3aed;outline-offset:1px;}",
     ".auth-note{color:#a1a1aa;font-size:13px;margin:0 0 14px;}",
     "html[data-theme=\"light\"] .auth-mode button{border-color:rgba(0,0,0,.2);color:#52525b;}",
     "html[data-theme=\"light\"] .auth-mode button.on{border-color:#7c3aed;background:rgba(124,58,237,.12);color:#111111;}",
-    "html[data-theme=\"light\"] .auth-subj{border-color:rgba(0,0,0,.2);background:rgba(0,0,0,.03);color:#111111;}",
-    "html[data-theme=\"light\"] .auth-subj.on{border-color:#7c3aed;background:rgba(124,58,237,.12);}",
+    "html[data-theme=\"light\"] .auth-modal .auth-subj-select{border-color:rgba(0,0,0,.2);background:rgba(0,0,0,.04);color:#111111;}",
     "html[data-theme=\"light\"] .auth-note{color:#52525b;}", 
     ".auth-menu{position:absolute;top:calc(100% + 10px);right:8px;z-index:70;min-width:190px;padding:6px;border-radius:14px;background:#111111;border:1px solid rgba(255,255,255,.14);box-shadow:0 16px 40px rgba(0,0,0,.55);}",
     ".auth-menu[hidden]{display:none;}",
@@ -144,8 +140,8 @@
           '<label for="authEmail">Email</label>' +
           '<input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email">' +
           '<div id="authSubjWrap">' +
-            '<label>Choose your subject (UGC NET)</label>' +
-            '<div class="auth-subj-grid" id="authSubjGrid"></div>' +
+            '<label for="authSubject">Choose your subject (UGC NET)</label>' +
+            '<select class="auth-subj-select" id="authSubject" aria-label="Choose your subject (UGC NET)"></select>' +
           '</div>' +
           '<button class="btn btn-dark" id="authSendCode" type="button">Create account &amp; send code</button>' +
         '</div>' +
@@ -171,7 +167,7 @@
     });
     $("authModeCreate").addEventListener("click", function () { setAuthMode("create"); });
     $("authModeSignin").addEventListener("click", function () { setAuthMode("signin"); });
-    buildSubjGrid();
+    buildSubjSelect();
     setAuthMode(authMode);
     $("authName").addEventListener("keydown", function (e) { if (e.key === "Enter") onSendCode(); });
     $("authEmail").addEventListener("keydown", function (e) { if (e.key === "Enter") onSendCode(); });
@@ -239,26 +235,19 @@
       btn.textContent = "Resend code in " + left + "s";
     }, 1000);
   }
-  function buildSubjGrid() {
-    var grid = $("authSubjGrid");
-    if (!grid) return;
-    grid.innerHTML = "";
+  function buildSubjSelect() {
+    var sel = $("authSubject");
+    if (!sel) return;
+    sel.innerHTML = "";
+    var ph = document.createElement("option");
+    ph.value = "";
+    ph.textContent = "Choose your subject (UGC NET)";
+    sel.appendChild(ph);
     SUBJECTS.forEach(function (s) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "auth-subj";
-      b.textContent = s[1];
-      b.setAttribute("data-subject", s[0]);
-      b.setAttribute("aria-pressed", "false");
-      b.addEventListener("click", function () {
-        chosenSubject = s[0];
-        Array.prototype.slice.call(grid.querySelectorAll(".auth-subj")).forEach(function (x) {
-          var on = x === b;
-          x.classList.toggle("on", on);
-          x.setAttribute("aria-pressed", String(on));
-        });
-      });
-      grid.appendChild(b);
+      var o = document.createElement("option");
+      o.value = s[0];
+      o.textContent = s[1];
+      sel.appendChild(o);
     });
   }
   function sendBtnLabel() { return authMode === "create" ? "Create account & send code" : "Send sign-in code"; }
@@ -290,8 +279,9 @@
     if (authMode === "create") {
       var name = ($("authName").value || "").trim();
       if (!name) { setMsg("Add your name to create your account."); return; }
-      if (!chosenSubject) { setMsg("Pick your subject to create your account."); return; }
-      storePrefill(name, chosenSubject);
+      var subj = ($("authSubject").value || "");
+      if (!subj) { setMsg("Pick your subject to create your account."); return; }
+      storePrefill(name, subj);
     }
     var btn = $("authSendCode");
     btn.disabled = true;
