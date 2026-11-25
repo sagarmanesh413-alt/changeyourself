@@ -296,6 +296,66 @@
         }).catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
       });
     },
+    /* ---------- Anonymous leaderboard (2026-11-25, migration 012) ----------
+       Rankings are server-computed from verified mock attempts only and
+       expose ONLY public aliases — never a name, email, phone or user id.
+       Opt-in is required to appear; opting out removes the user at once. */
+    getLeaderboardRanking: function (scope, subject, period, limit) {
+      return loadClient().then(function (c) {
+        if (!c) return { ok: false, error: "no-client" };
+        return c.rpc("leaderboard_get_ranking", {
+          p_scope: scope, p_subject: subject || null, p_period: period, p_limit: limit || 50
+        }).then(function (r) {
+          if (r.error) return { ok: false, error: String(r.error.message || r.error) };
+          return { ok: true, ranking: r.data };
+        }).catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
+      });
+    },
+    getMyLeaderboardRank: function (scope, subject, period) {
+      return loadClient().then(function (c) {
+        if (!c) return { ok: false, error: "no-client" };
+        return c.rpc("leaderboard_get_me", {
+          p_scope: scope, p_subject: subject || null, p_period: period
+        }).then(function (r) {
+          if (r.error) {
+            var msg = String(r.error.message || "");
+            if (/sign-in required/i.test(msg)) return { ok: false, signInRequired: true };
+            return { ok: false, error: msg };
+          }
+          return { ok: true, me: r.data };
+        }).catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
+      });
+    },
+    leaderboardOptIn: function (alias) {
+      return loadClient().then(function (c) {
+        if (!c) return { ok: false, error: "no-client" };
+        return c.rpc("leaderboard_opt_in", { p_alias: alias || null })
+          .then(function (r) {
+            if (r.error) return { ok: false, error: String(r.error.message || r.error) };
+            return { ok: true, result: r.data };
+          }).catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
+      });
+    },
+    leaderboardOptOut: function () {
+      return loadClient().then(function (c) {
+        if (!c) return { ok: false, error: "no-client" };
+        return c.rpc("leaderboard_opt_out", {})
+          .then(function (r) {
+            if (r.error) return { ok: false, error: String(r.error.message || r.error) };
+            return { ok: true, result: r.data };
+          }).catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
+      });
+    },
+    leaderboardSetAlias: function (alias) {
+      return loadClient().then(function (c) {
+        if (!c) return { ok: false, error: "no-client" };
+        return c.rpc("leaderboard_set_alias", { p_alias: alias })
+          .then(function (r) {
+            if (r.error) return { ok: false, error: String(r.error.message || r.error) };
+            return { ok: true, result: r.data };
+          }).catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
+      });
+    },
     /* Quiz rounds: the client sends the DATA indices of the round questions
        and the chosen answers; the server grades against the stored
        most-probable set and records a trusted attempt. */
