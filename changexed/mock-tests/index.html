@@ -152,8 +152,7 @@
       @keyframes beam-spin { to { --beam-angle: 360deg; } }
       .set-card::after, .q-card::after, .palette::after, .rev-card::after,
       .score-cell::after, .modal::after, .format-cell::after, .paper-tab::after,
-      .start-btn:not(.lock-btn)::after, .submit-btn::after,
-      .exam-actions .next-btn::after, .modal .row .confirm::after,
+      .start-btn:not(.lock-btn)::after,
       .result-actions .retry::after {
         content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
         border-radius: inherit; padding: 1px;
@@ -173,8 +172,7 @@
       @media (prefers-reduced-motion: reduce) {
         .set-card::after, .q-card::after, .palette::after, .rev-card::after,
         .score-cell::after, .modal::after, .format-cell::after, .paper-tab::after,
-        .start-btn:not(.lock-btn)::after, .submit-btn::after,
-        .exam-actions .next-btn::after, .modal .row .confirm::after,
+        .start-btn:not(.lock-btn)::after,
         .result-actions .retry::after { animation: none; }
       }
       .set-card .top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
@@ -211,10 +209,11 @@
       }
       .timer.low { background: var(--red); color: #fff; }
       .submit-btn {
-        background: #ffffff; color: #000000; border: 0; border-radius: 9px;
-        padding: 8px 18px; font-weight: 800; min-height: 2.5rem;
+        background: #7C3AED; color: #FFFFFF; border: 0; border-radius: 9px;
+        padding: 8px 18px; font-weight: 700; min-height: 2.5rem;
       }
-      .submit-btn:hover { background: #ececec; }
+      .submit-btn:hover { background: #6D28D9; }
+      .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
       .focus-btn {
         background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.35);
         border-radius: 9px; padding: 8px 14px; font-weight: 700; min-height: 2.5rem; cursor: pointer;
@@ -299,6 +298,7 @@
       .q-card {
         background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
         padding: 20px 18px; box-shadow: var(--shadow);
+        scroll-margin-top: 140px; /* fixed nav (76px) + sticky exam bar */
       }
       .q-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
       .chip {
@@ -330,22 +330,25 @@
         background: var(--surface); color: var(--ink); flex: 1 1 auto;
       }
       .exam-actions .mark-btn.on { background: var(--mark); border-color: var(--mark); color: #fff; }
-      .exam-actions .next-btn { background: #ffffff; border-color: #ffffff; color: #000000; flex: 1.4 1 auto; }
-      .exam-actions .next-btn:hover { background: #ececec; }
+      .exam-actions .next-btn { background: #7C3AED; border-color: #7C3AED; color: #FFFFFF; font-weight: 700; flex: 1.4 1 auto; }
+      .exam-actions .next-btn:hover { background: #6D28D9; border-color: #6D28D9; }
+      .exam-actions .next-btn:disabled { opacity: 0.55; cursor: not-allowed; }
       .exam-actions .clear-btn { color: var(--red); }
 
       /* ---------- Modal ---------- */
       .modal-back {
-        display: none; position: fixed; inset: 0; z-index: 50;
-        background: rgba(8, 12, 28, 0.62); align-items: center; justify-content: center; padding: 18px;
+        display: none; position: fixed; inset: 0; z-index: 9999;
+        background: rgba(0, 0, 0, 0.78);
+        -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+        padding: 16px; box-sizing: border-box;
       }
-      .modal-back.open { display: flex; }
+      .modal-back.open { display: grid; place-items: center; }
       .modal {
-        background: rgba(255, 255, 255, 0.06); color: var(--ink);
+        background: #0F172A; color: var(--ink);
         border: 1px solid rgba(255, 255, 255, 0.12);
-        -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
         border-radius: var(--radius); padding: 24px 20px;
-        max-width: 430px; width: 100%; box-shadow: var(--shadow);
+        max-width: 400px; width: 100%; box-shadow: var(--shadow);
+        box-sizing: border-box;
       }
       .modal h3 { font-size: 1.2rem; margin-bottom: 6px; }
       .modal p { color: var(--ink-soft); margin: 6px 0 14px; }
@@ -356,8 +359,9 @@
       }
       .modal .row { display: flex; gap: 10px; }
       .modal .row button { flex: 1; border-radius: 10px; font-weight: 800; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 10px; }
-      .modal .row .confirm { background: #ffffff; border-color: #ffffff; color: #000000; }
-      .modal .row .confirm:hover { background: #ececec; }
+      .modal .row .confirm { background: #7C3AED; border-color: #7C3AED; color: #FFFFFF; }
+      .modal .row .confirm:hover { background: #6D28D9; border-color: #6D28D9; }
+      .modal .row .confirm:disabled { opacity: 0.55; cursor: not-allowed; }
 
       /* ---------- Results ---------- */
       .result-hero {
@@ -452,7 +456,6 @@ body { padding-top: 76px; }
 .cy-toast.show { display: block; }
 /* Keep the exam's sticky bar and modals clear of the fixed site nav. */
 .exam-bar { top: 76px; }
-.modal-back { z-index: 70; }
 @media (max-width: 640px) { .nav { gap: 0; padding: 6px 7px; top: calc(10px + env(safe-area-inset-top, 0px)); } .nav a.nav-link { padding: 6px 9px; font-size: 13px; } .login-btn { padding: 7px 12px; font-size: 13px; } }
 /* Phones: tighter exam bar, question card and result hero so the
    exam fits small screens without crowding. */
@@ -557,14 +560,14 @@ body { padding-top: 76px; }
   /* Subject dropdown stays black text on light with purple hover (do not regress). */
   html[data-theme="light"] .exam-bar { background: #ffffff; color: #111111; }
   html[data-theme="light"] .timer { background: rgba(0, 0, 0, 0.08); }
-  html[data-theme="light"] .submit-btn { background: #000000; color: #ffffff; }
-  html[data-theme="light"] .submit-btn:hover { background: #262626; }
+  html[data-theme="light"] .submit-btn { background: #7C3AED; color: #ffffff; }
+  html[data-theme="light"] .submit-btn:hover { background: #6D28D9; }
   html[data-theme="light"] .chip.src { color: #6d28d9; }
-  html[data-theme="light"] .exam-actions .next-btn { background: #000000; border-color: #000000; color: #ffffff; }
-  html[data-theme="light"] .exam-actions .next-btn:hover { background: #262626; }
-  html[data-theme="light"] .modal { background: #ffffff; border-color: rgba(0, 0, 0, 0.12); }
-  html[data-theme="light"] .modal .row .confirm { background: #000000; border-color: #000000; color: #ffffff; }
-  html[data-theme="light"] .modal .row .confirm:hover { background: #262626; }
+  html[data-theme="light"] .exam-actions .next-btn { background: #7C3AED; border-color: #7C3AED; color: #ffffff; }
+  html[data-theme="light"] .exam-actions .next-btn:hover { background: #6D28D9; border-color: #6D28D9; }
+  html[data-theme="light"] .modal { background: #0F172A; border-color: rgba(255, 255, 255, 0.12); }
+  html[data-theme="light"] .modal .row .confirm { background: #7C3AED; border-color: #7C3AED; color: #ffffff; }
+  html[data-theme="light"] .modal .row .confirm:hover { background: #6D28D9; border-color: #6D28D9; }
   html[data-theme="light"] .result-hero { background: #ffffff; color: #111111; }
   html[data-theme="light"] #res-set-name { color: #4c1d95; }
   html[data-theme="light"] .result-actions .retry { background: #000000; border-color: #000000; color: #ffffff; }
@@ -1398,6 +1401,10 @@ void main(){
         try { window.scrollTo({ top: 0, behavior: 'smooth' }); }
         catch (e) { try { window.scrollTo(0, 0); } catch (e2) {} }
       }
+      function safeScrollTopInstant() {
+        try { window.scrollTo({ top: 0, behavior: 'instant' }); }
+        catch (e) { try { window.scrollTo(0, 0); } catch (e2) {} }
+      }
       function safeScrollToEl(el) {
         if (!el) return;
         try { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
@@ -1896,13 +1903,13 @@ void main(){
         if (!exam) return;
         exam.cur = Math.max(0, Math.min(TOTAL_Q - 1, i));
         renderQuestion();
-        /* SCROLL FIX (2026-11-25): do NOT scroll the document on question
-           change. The old safeScrollToEl($('q-card')) call yanked the page
-           to the top of the question card on every Prev/Next/palette tap,
-           so users had to scroll back to the question each time. The
-           question card is already in view; the palette lives in a sticky
-           sidebar (desktop) or is hidden until toggled (mobile), so nothing
-           needs to move. */
+        /* SCROLL FIX (2026-11-25, revised): scroll to the top on question
+           change. Without it, a long question leaves the page scrolled
+           partway down and the fixed nav + sticky exam bar clip the next
+           question's header. Option selection still does NOT scroll
+           (selectOption updates in place), and no scrollIntoView is used
+           anywhere — only this instant reset to top on navigation. */
+        safeScrollTopInstant();
       }
 
       /* ---------- Submit / results ---------- */
