@@ -220,6 +220,27 @@
         border-radius: 9px; padding: 8px 14px; font-weight: 700; min-height: 2.5rem; cursor: pointer;
       }
       .focus-btn[aria-pressed="true"] { background: var(--purple); border-color: var(--purple); }
+      /* Offline mode (2026-11-25): amber pill in the exam bar while a test
+         is running from a downloaded package; download buttons on set
+         cards; the downloaded-tests section on the home screen. */
+      .offline-pill {
+        background: #b45309; color: #fff; border-radius: 999px; padding: 6px 12px;
+        font-weight: 700; font-size: 0.8rem; white-space: nowrap;
+      }
+      .dl-btn {
+        background: transparent; color: var(--ink); border: 1px solid var(--line);
+        border-radius: 9px; padding: 8px 14px; font-weight: 700; min-height: 2.5rem;
+        cursor: pointer; margin-top: 8px; width: 100%;
+      }
+      .dl-btn:disabled { opacity: 0.55; cursor: default; }
+      .offline-section { margin-top: 28px; }
+      .offline-card {
+        border: 1px solid var(--line); border-radius: 14px; padding: 14px;
+        margin-top: 10px; background: var(--surface);
+      }
+      .offline-card .meta { color: var(--ink-soft); font-size: 0.85rem; margin-top: 4px; }
+      .offline-card .row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+      .offline-card .row .dl-btn { width: auto; margin-top: 0; flex: 1 1 auto; }
       /* Focus mode (2026-11-25): distraction-free exam. Hides the site nav,
          the palette and the paper tabs; keeps the timer, question, options
          and exam controls. The decorative card beam is off while focused. */
@@ -629,6 +650,7 @@ body { padding-top: 76px; }
   </style>
     <script src="/supabase.js"></script>
     <script src="/auth.js"></script>
+    <script src="/offline.js"></script>
 </head>
   <body>
 <nav class="nav">
@@ -1170,6 +1192,15 @@ void main(){
         <div class="subject-picker"><label for="subject-select">Choose your subject</label><select id="subject-select"><option value="" selected disabled>Choose your subject</option><option value="psychology">Psychology</option><option value="commerce">Commerce</option><option value="management">Management</option><option value="english">English</option><option value="political-science">Political Science</option><option value="history">History</option><option value="economics">Economics</option><option value="computer-science">Computer Science and Applications</option><option value="sociology">Sociology</option><option value="law">Law</option><option value="most-probable">Most Probable Questions</option></select></div>
         <h2 class="section-title" id="set-section-title">Choose a subject to see its mock tests</h2>
         <div class="set-grid" id="set-grid"></div>
+        <section class="offline-section" id="offline-section">
+          <h2 class="section-title">Offline tests</h2>
+          <p class="home-note">Download a test while you're online, then take it anywhere — even with no connection. Your answers sync and get their verified score once you're back online. Offline results are never shown as verified scores, and they don't count toward the leaderboard until the server grades them.</p>
+          <div id="offline-list"></div>
+          <div class="offline-card" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button type="button" class="dl-btn" id="offline-sync-btn" style="width:auto;margin-top:0;">Sync pending attempts</button>
+            <span class="home-note" id="offline-storage" style="margin:0;"></span>
+          </div>
+        </section>
         <p class="home-note">Your best score for each set is saved on this device. During a test you can jump between questions with the palette, mark questions for review, and switch between Paper 1 and Paper 2 at any time — just like the real exam.</p>
       </div>
     </main>
@@ -1179,6 +1210,7 @@ void main(){
       <div class="wrap">
         <div class="exam-bar">
           <span class="set-name" id="exam-set-name">Mock Test 1</span>
+          <span class="offline-pill" id="offline-pill" hidden>Offline · answers will sync later</span>
           <span class="timer" id="timer" aria-label="Time remaining">3:00:00</span>
           <button type="button" class="focus-btn" id="btn-focus" aria-pressed="false" title="Focus mode: hide navigation and distractions">Focus</button>
           <button type="button" class="submit-btn" id="submit-open">Submit</button>
@@ -1466,6 +1498,7 @@ void main(){
             (b ? '<div class="best">Best score: <b>' + b.score + ' / ' + (cfg.totalQ * 2) + '</b> (' + b.pct + '%)</div>'
                : '<div class="best" style="color:var(--ink-soft)">No attempt yet \u2014 best score will appear here.</div>') +
             '<button type="button" class="start-btn' + (locked ? ' lock-btn' : '') + '" data-set="' + n + '">' + (locked ? 'Unlock Mock Test ' + n + ' \u2014 \u20b9' + PRICE_PER_SUBJECT : (b ? 'Retake Mock Test ' + n : 'Start Mock Test ' + n)) + '</button>' +
+            '<button type="button" class="dl-btn" data-dl-set="' + n + '" data-dl-subject="' + currentSubject + '">Download for offline</button>' +
             '</article>';
         }
         $('set-grid').innerHTML = html;
@@ -1477,6 +1510,126 @@ void main(){
         if (resumeBtn) resumeBtn.addEventListener('click', function () { var s = loadSavedExam(); if (s) resumeSavedExam(s); });
         var discardBtn = $('discard-exam-btn');
         if (discardBtn) discardBtn.addEventListener('click', function () { clearSavedExam(); renderHome(); });
+        wireDownloadButtons();
+        renderOfflineSection();
+      }
+
+      /* ---------- Offline downloads + sync (2026-11-25) ----------
+         Download buttons live on the set cards; the downloaded-tests
+         section lists what is on this device with its expiry and sync
+         state. The server is the authority for every download (sign-in +
+         entitlement are checked by get_offline_package), and for every
+         sync (submit_offline_mock_attempt re-checks the entitlement and
+         the package version before grading). */
+      function wireDownloadButtons() {
+        var dlBtns = $('set-grid').querySelectorAll('[data-dl-set]');
+        for (var i = 0; i < dlBtns.length; i++) {
+          dlBtns[i].addEventListener('click', function () { downloadSet(this); });
+        }
+      }
+      function downloadSet(btn) {
+        var n = parseInt(btn.getAttribute('data-dl-set'), 10);
+        var subject = btn.getAttribute('data-dl-subject');
+        if (btn.getAttribute('data-downloading') === '1') {
+          /* Second tap while downloading cancels the save (the in-flight
+             request finishes in the background, but nothing is stored). */
+          window.CYOffline.cancelDownload();
+          btn.removeAttribute('data-downloading');
+          btn.textContent = 'Download cancelled.';
+          setTimeout(function () { btn.textContent = 'Download for offline'; }, 3000);
+          return;
+        }
+        if (!window.CYOffline) { btn.textContent = 'Offline downloads are not available on this device.'; btn.disabled = true; return; }
+        btn.setAttribute('data-downloading', '1');
+        btn.textContent = 'Downloading… tap again to cancel';
+        window.CYOffline.downloadPackage(subject, n).then(function (pkg) {
+          btn.removeAttribute('data-downloading');
+          btn.textContent = 'Downloaded \u2713 \u00b7 ' + fmtBytes(pkg.size_bytes) + ' \u00b7 expires ' + new Date(pkg.expires_at).toLocaleDateString();
+          renderOfflineSection();
+        }).catch(function (e) {
+          btn.removeAttribute('data-downloading');
+          btn.textContent = (e && e.message) ? e.message : 'Download failed — try again.';
+          setTimeout(function () { btn.textContent = 'Download for offline'; }, 4000);
+        });
+      }
+      function renderOfflineSection() {
+        var list = $('offline-list');
+        if (!list) return;
+        if (!window.CYOffline || !window.CYOffline.supported()) {
+          list.innerHTML = '<p class="home-note">Offline downloads are not available on this device or browser.</p>';
+          return;
+        }
+        list.innerHTML = '<p class="home-note">Loading downloaded tests\u2026</p>';
+        window.CYOffline.listPackages().then(function (pkgs) {
+          return window.CYOffline.listAttempts().then(function (attempts) { return { pkgs: pkgs, attempts: attempts }; });
+        }).then(function (data) {
+          var pkgs = data.pkgs, attempts = data.attempts;
+          var pending = attempts.filter(function (a) { return a.status === 'pending' || a.status === 'in-progress'; });
+          var failed = attempts.filter(function (a) { return a.status === 'failed'; });
+          var html = '';
+          if (!pkgs.length) html += '<p class="home-note">No tests downloaded yet. Use the download button on a mock test card above.</p>';
+          pkgs.forEach(function (p) {
+            var expired = window.CYOffline.packageExpired(p);
+            var pend = pending.filter(function (a) { return a.subject === p.subject && a.set_number === p.set_number; }).length;
+            html += '<article class="offline-card"><div class="top"><h3>Mock Test ' + p.set_number + ' \u00b7 ' + esc(SUBJECT_NAMES[p.subject] || p.subject) + '</h3>' +
+              '<span class="badge ' + (expired ? 'locked' : 'fresh') + '">' + (expired ? 'Expired' : 'Ready offline') + '</span></div>' +
+              '<div class="meta">' + p.total_q + ' questions \u00b7 ' + p.time_min + ' min \u00b7 ' + fmtBytes(p.size_bytes) + ' \u00b7 downloaded ' + new Date(p.downloaded_at).toLocaleDateString() + ' \u00b7 expires ' + new Date(p.expires_at).toLocaleDateString() + '</div>' +
+              (pend ? '<div class="meta">\u26a0 ' + pend + ' attempt' + (pend > 1 ? 's' : '') + ' waiting to sync.</div>' : '') +
+              '<div class="row"><button type="button" class="dl-btn" data-off-start="' + p.set_number + '" data-off-subject="' + p.subject + '"' + (expired ? ' disabled' : '') + '>Start offline</button>' +
+              '<button type="button" class="dl-btn" data-off-redl="' + p.set_number + '" data-off-subject="' + p.subject + '">Redownload</button>' +
+              '<button type="button" class="dl-btn" data-off-remove="' + p.set_number + '" data-off-subject="' + p.subject + '">Remove</button></div></article>';
+          });
+          failed.forEach(function (a) {
+            html += '<article class="offline-card"><div class="top"><h3>Mock Test ' + a.set_number + ' \u00b7 ' + esc(SUBJECT_NAMES[a.subject] || a.subject) + '</h3><span class="badge locked">Sync failed</span></div>' +
+              '<div class="meta">' + esc(a.fail_reason || 'Could not sync this attempt.') + ' Your answers are still saved on this device.</div></article>';
+          });
+          if (pending.length && window.CYOffline.isOnline()) {
+            html += '<p class="home-note">' + pending.length + ' attempt' + (pending.length > 1 ? 's' : '') + ' waiting to sync \u2014 tap \u201cSync pending attempts\u201d below.</p>';
+          } else if (pending.length) {
+            html += '<p class="home-note">' + pending.length + ' attempt' + (pending.length > 1 ? 's' : '') + ' waiting to sync \u2014 they will sync automatically when you are back online.</p>';
+          }
+          list.innerHTML = html;
+          var starts = list.querySelectorAll('[data-off-start]');
+          for (var i = 0; i < starts.length; i++) starts[i].addEventListener('click', function () {
+            currentSubject = this.getAttribute('data-off-subject');
+            startOfflineSet(parseInt(this.getAttribute('data-off-start'), 10));
+          });
+          var redls = list.querySelectorAll('[data-off-redl]');
+          for (var j = 0; j < redls.length; j++) redls[j].addEventListener('click', function () {
+            var b = this; b.disabled = true; b.textContent = 'Downloading\u2026';
+            window.CYOffline.downloadPackage(b.getAttribute('data-off-subject'), parseInt(b.getAttribute('data-off-redl'), 10)).then(function () { renderOfflineSection(); renderHome(); }).catch(function (e) { b.disabled = false; b.textContent = (e && e.message) || 'Download failed.'; });
+          });
+          var rems = list.querySelectorAll('[data-off-remove]');
+          for (var k = 0; k < rems.length; k++) rems[k].addEventListener('click', function () {
+            var b = this;
+            window.CYOffline.removePackage(b.getAttribute('data-off-subject'), parseInt(b.getAttribute('data-off-remove'), 10)).then(function () { renderOfflineSection(); renderHome(); });
+          });
+          updateDownloadLabels(pkgs);
+          return window.CYOffline.storageUsage();
+        }).then(function (u) {
+          var el = $('offline-storage');
+          if (el && u) el.textContent = 'Downloaded tests use ' + fmtBytes(u.packagesBytes) + (u.quota ? ' of about ' + fmtBytes(u.quota) + ' available.' : '.');
+        }).catch(function () { list.innerHTML = '<p class="home-note">Could not read downloaded tests.</p>'; });
+      }
+      function updateDownloadLabels(pkgs) {
+        var btns = $('set-grid').querySelectorAll('[data-dl-set]');
+        for (var i = 0; i < btns.length; i++) {
+          var b = btns[i];
+          var n = parseInt(b.getAttribute('data-dl-set'), 10);
+          var subj = b.getAttribute('data-dl-subject');
+          for (var j = 0; j < pkgs.length; j++) {
+            if (pkgs[j].subject === subj && pkgs[j].set_number === n) {
+              b.textContent = window.CYOffline.packageExpired(pkgs[j]) ? 'Downloaded \u2014 expired, tap to redownload' : 'Downloaded \u2713 \u00b7 ' + new Date(pkgs[j].downloaded_at).toLocaleDateString();
+              break;
+            }
+          }
+        }
+      }
+      function fmtBytes(n) {
+        if (n === null || n === undefined) return '\u2014';
+        if (n < 1024) return n + ' B';
+        if (n < 1048576) return (n / 1024).toFixed(0) + ' KB';
+        return (n / 1048576).toFixed(1) + ' MB';
       }
 
       /* ---------- Set loading (server-side, one set at a time) ----------
@@ -1490,10 +1643,22 @@ void main(){
         window.CYSupa.getQuestionSet(subject, n).then(function (res) {
           if (res && res.ok && res.questions && res.questions.length) { cb(res.questions); return; }
           if (res && res.notEntitled) { window.__unlockSubject = subject; showUnlock(n); return; }
-          showLoadError(n, cb);
-        }).catch(function () { showLoadError(n, cb); });
+          tryOfflinePackage(subject, n, cb);
+        }).catch(function () { tryOfflinePackage(subject, n, cb); });
       }
 
+      /* If the server cannot be reached, try a downloaded package before
+         showing the load error — the user may be offline with this test
+         downloaded. The callback receives the package as its second
+         argument so the exam is marked offline. */
+      function tryOfflinePackage(subject, n, cb) {
+        if (!window.CYOffline) { showLoadError(n, cb); return; }
+        window.CYOffline.getPackage(subject, n).then(function (pkg) {
+          if (pkg && pkg.questions && pkg.questions.length && !window.CYOffline.packageExpired(pkg)) {
+            cb(pkg.questions, pkg);
+          } else { showLoadError(n, cb); }
+        }).catch(function () { showLoadError(n, cb); });
+      }
       function showLoadError(n, cb) {
         $('load-overlay').style.display = 'block';
         $('load-msg').className = 'err-note';
@@ -1512,11 +1677,14 @@ void main(){
         var cfg = subjectConfig(currentSubject);
         if (!cfg.free && n > 3) { window.__unlockSubject = currentSubject; showUnlock(n); return; }
         if (!currentSubject) return;
+        /* Offline (2026-11-25): if the device reports no connection, run
+           the test from a downloaded package instead of the server. */
+        if (window.CYOffline && !window.CYOffline.isOnline()) { startOfflineSet(n); return; }
         TOTAL_Q = cfg.totalQ; TOTAL_TIME = cfg.timeMin * 60;
         var loadKey = currentSubject + ':' + n;
         if (loadingSet === loadKey) return;
         loadingSet = loadKey;
-        loadSetData(currentSubject, n, function (qs) {
+        loadSetData(currentSubject, n, function (qs, pkg) {
           loadingSet = '';
           if (!qs || qs.length !== TOTAL_Q) { showLoadError(n, function () { startSet(n); }); return; }
           examStartedAt = Date.now();
@@ -1527,8 +1695,12 @@ void main(){
             marked: new Array(TOTAL_Q).fill(false),
             cur: 0, finished: false,
             endAt: Date.now() + TOTAL_TIME * 1000,
-            timerId: null
+            timerId: null,
+            offline: !!pkg, packageMd5: (pkg && pkg.package_md5) || null,
+            clientKey: (window.CYSupa && window.CYSupa._clientKey) ? window.CYSupa._clientKey() : ('k-' + Date.now().toString(36)),
+            startedAt: Date.now()
           };
+          $('offline-pill').hidden = !pkg;
           $('exam-set-name').textContent = 'Mock Test ' + n + ' \u00b7 ' + SUBJECT_NAMES[exam.subject];
           $('tab-p2').innerHTML = 'Paper 2<small>Questions 51\u2013' + TOTAL_Q + ' \u00b7 ' + esc(SUBJECT_NAMES[exam.subject]) + '</small>';
           buildPalette();
@@ -1536,6 +1708,61 @@ void main(){
           renderQuestion();
           startTimer();
         });
+      }
+
+      /* Start a test from a downloaded offline package. The package holds
+         questions only — no answer keys — so nothing is graded locally.
+         The exam runs on the device clock (timeLeft re-anchors to the
+         original deadline, so a clock jump cannot extend it), answers
+         autosave to IndexedDB, and the attempt syncs for server grading
+         when the connection returns. */
+      function startOfflineSet(n) {
+        var cfg = subjectConfig(currentSubject);
+        if (!window.CYOffline) { showLoadError(n, function () { startSet(n); }); return; }
+        window.CYOffline.getPackage(currentSubject, n).then(function (pkg) {
+          if (!pkg || !pkg.questions || pkg.questions.length !== cfg.totalQ) {
+            showOfflineMissing(n); return;
+          }
+          if (window.CYOffline.packageExpired(pkg)) {
+            showOfflineExpired(n); return;
+          }
+          TOTAL_Q = cfg.totalQ; TOTAL_TIME = cfg.timeMin * 60;
+          examStartedAt = Date.now();
+          examLimit = TOTAL_TIME;
+          exam = {
+            subject: currentSubject, setNum: n, qs: pkg.questions, maxMarks: cfg.totalQ * 2, p1Count: cfg.p1Count,
+            answers: new Array(TOTAL_Q).fill(-1),
+            marked: new Array(TOTAL_Q).fill(false),
+            cur: 0, finished: false,
+            endAt: Date.now() + TOTAL_TIME * 1000,
+            timerId: null,
+            offline: true, packageMd5: pkg.package_md5,
+            clientKey: window.CYOffline.uuid(),
+            startedAt: Date.now()
+          };
+          $('offline-pill').hidden = false;
+          $('exam-set-name').textContent = 'Mock Test ' + n + ' \u00b7 ' + SUBJECT_NAMES[exam.subject];
+          $('tab-p2').innerHTML = 'Paper 2<small>Questions 51\u2013' + TOTAL_Q + ' \u00b7 ' + esc(SUBJECT_NAMES[exam.subject]) + '</small>';
+          buildPalette();
+          showScreen('exam');
+          renderQuestion();
+          startTimer();
+          saveOfflineAttempt();
+        }).catch(function () { showOfflineMissing(n); });
+      }
+      function showOfflineMissing(n) {
+        $('load-overlay').style.display = 'block';
+        $('load-msg').className = 'err-note';
+        $('load-msg').innerHTML = 'You are offline and Mock Test ' + n + ' is not downloaded on this device. Connect to the internet and download it first, then you can take it offline.' +
+          '<br><br><button type="button" id="load-back" style="background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 26px;font-weight:700;">Back</button>';
+        $('load-back').addEventListener('click', function () { $('load-overlay').style.display = 'none'; showScreen('home'); });
+      }
+      function showOfflineExpired(n) {
+        $('load-overlay').style.display = 'block';
+        $('load-msg').className = 'err-note';
+        $('load-msg').innerHTML = 'The downloaded copy of Mock Test ' + n + ' has expired. Connect to the internet and download it again to take it offline.' +
+          '<br><br><button type="button" id="load-back" style="background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 26px;font-weight:700;">Back</button>';
+        $('load-back').addEventListener('click', function () { $('load-overlay').style.display = 'none'; showScreen('home'); });
       }
 
       function startTimer() {
@@ -1693,8 +1920,26 @@ void main(){
           store.set(SAVED_EXAM_KEY, JSON.stringify({
             subject: exam.subject, setNum: exam.setNum, answers: exam.answers,
             marked: exam.marked, cur: exam.cur, endAt: exam.endAt,
-            totalQ: TOTAL_Q, maxMarks: exam.maxMarks, p1Count: exam.p1Count
+            totalQ: TOTAL_Q, maxMarks: exam.maxMarks, p1Count: exam.p1Count,
+            clientKey: exam.clientKey, offline: !!exam.offline, packageMd5: exam.packageMd5 || null
           }));
+        } catch (e) {}
+        saveOfflineAttempt();
+      }
+      /* Autosave an offline attempt to IndexedDB (answers + progress), so
+         a refresh or a closed tab never loses it. Online exams keep the
+         existing localStorage save only. */
+      function saveOfflineAttempt() {
+        if (!exam || exam.finished || !exam.offline || !window.CYOffline) return;
+        try {
+          window.CYOffline.saveAttempt({
+            client_key: exam.clientKey, subject: exam.subject, set_number: exam.setNum,
+            package_version: 1, package_md5: exam.packageMd5,
+            answers: exam.answers.slice(), marked: exam.marked.slice(),
+            started_at: exam.startedAt || Date.now(),
+            duration_seconds: TOTAL_TIME - timeLeft(),
+            status: 'in-progress'
+          }).catch(function () {});
         } catch (e) {}
       }
       function clearSavedExam() { try { store.remove(SAVED_EXAM_KEY); } catch (e) {} }
@@ -1712,7 +1957,7 @@ void main(){
         if (!saved) return;
         currentSubject = saved.subject;
         TOTAL_Q = saved.totalQ; TOTAL_TIME = Math.max(1, Math.round((saved.endAt - Date.now()) / 1000));
-        loadSetData(saved.subject, saved.setNum, function (qs) {
+        loadSetData(saved.subject, saved.setNum, function (qs, pkg) {
           if (!qs || qs.length !== TOTAL_Q) { clearSavedExam(); renderHome(); showScreen('home'); return; }
           examStartedAt = Date.now();
           examLimit = Math.max(1, Math.round((saved.endAt - Date.now()) / 1000));
@@ -1720,8 +1965,12 @@ void main(){
             subject: saved.subject, setNum: saved.setNum, qs: qs, maxMarks: saved.maxMarks, p1Count: saved.p1Count,
             answers: saved.answers, marked: saved.marked || new Array(TOTAL_Q).fill(false),
             cur: saved.cur || 0, finished: false,
-            endAt: saved.endAt, timerId: null
+            endAt: saved.endAt, timerId: null,
+            offline: !!(pkg || saved.offline), packageMd5: (pkg && pkg.package_md5) || saved.packageMd5 || null,
+            clientKey: saved.clientKey || (window.CYOffline ? window.CYOffline.uuid() : ('k-' + Date.now().toString(36))),
+            startedAt: Date.now()
           };
+          $('offline-pill').hidden = !(pkg || saved.offline);
           $('exam-set-name').textContent = 'Mock Test ' + saved.setNum + ' \u00b7 ' + SUBJECT_NAMES[exam.subject];
           $('tab-p2').innerHTML = 'Paper 2<small>Questions 51\u2013' + TOTAL_Q + ' \u00b7 ' + esc(SUBJECT_NAMES[exam.subject]) + '</small>';
           buildPalette();
@@ -1756,8 +2005,13 @@ void main(){
         var answers = exam.answers.slice();
         var subject = exam.subject, setNum = exam.setNum;
         var maxMarks = exam.maxMarks, p1Count = exam.p1Count, totalQ = TOTAL_Q;
+        /* Offline (2026-11-25): no local grading — the attempt is saved as
+           pending and syncs for server grading when the connection
+           returns. The client key is stable across resume, so a retry
+           never creates a duplicate attempt. */
+        if (exam.offline) { finishOfflineExam(auto, taken, answers); return; }
         if (!window.CYSupa || !window.CYSupa.submitMockAttempt) { showGradeError(auto); return; }
-        window.CYSupa.submitMockAttempt(subject, setNum, answers, taken).then(function (res) {
+        window.CYSupa.submitMockAttempt(subject, setNum, answers, taken, exam.clientKey).then(function (res) {
           if (!res || !res.ok || !res.result) { showGradeError(auto); return; }
           var r = res.result;
           exam.finished = true;
@@ -1767,6 +2021,53 @@ void main(){
           renderResults();
           showScreen('results');
         }).catch(function () { showGradeError(auto); });
+      }
+      /* Offline submit: no score is computed locally (there are no keys on
+         the device). The attempt is saved as pending and syncs for server
+         grading when the connection returns. The results screen says
+         plainly that the score is pending verification. */
+      function finishOfflineExam(auto, taken, answers) {
+        var subject = exam.subject, setNum = exam.setNum;
+        var c = counts();
+        exam.finished = true;
+        clearSavedExam();
+        var done = function () {
+          lastResult = { subject: subject, setNum: setNum, qs: exam.qs, answers: answers, total: null, p1: null, p2: null, pct: null, maxMarks: exam.maxMarks, p1Max: exam.p1Count * 2, p2Max: exam.maxMarks - exam.p1Count * 2, totalQ: TOTAL_Q, taken: taken, correct: null, wrong: null, skipped: c.not, auto: !!auto, pendingSync: true };
+          renderPendingResults();
+          showScreen('results');
+        };
+        if (window.CYOffline) {
+          window.CYOffline.saveAttempt({
+            client_key: exam.clientKey, subject: subject, set_number: setNum,
+            package_version: 1, package_md5: exam.packageMd5,
+            answers: answers.slice(), marked: exam.marked.slice(),
+            started_at: exam.startedAt || Date.now(), duration_seconds: taken, status: 'pending'
+          }).then(function () {
+            /* If we are back online, sync immediately; otherwise it stays pending. */
+            if (window.CYOffline.isOnline()) return window.CYOffline.syncPendingAttempts().catch(function () {});
+            return null;
+          }).then(done).catch(done);
+        } else { done(); }
+      }
+      /* Pending-sync results: no score, no review — the verified score and
+         the full review appear on the dashboard after the server grades
+         the synced attempt. Never show a locally computed score. */
+      function renderPendingResults() {
+        var r = lastResult;
+        $('filter-row').style.display = 'none';
+        $('res-set-name').textContent = 'Mock Test ' + r.setNum + ' \u00b7 ' + SUBJECT_NAMES[r.subject] + (r.auto ? ' \u00b7 Time up \u2014 auto-submitted' : ' \u00b7 Offline attempt');
+        $('res-score').textContent = '\u2014';
+        $('res-max').textContent = '';
+        $('review-title').textContent = 'Review available after sync';
+        $('res-pct').textContent = 'Pending';
+        $('res-msg').textContent = 'Your answers are saved on this device and will be graded by the server once you are back online. Nothing on this screen is a verified score yet — your verified score and the full review will appear on your dashboard after the sync.';
+        $('res-p1').textContent = '\u2014';
+        $('res-p2').textContent = '\u2014';
+        $('res-time').textContent = fmtDur(r.taken);
+        $('res-correct').textContent = '\u2014';
+        $('res-wrong').textContent = '\u2014';
+        $('res-skipped').textContent = r.skipped;
+        $('review-list').innerHTML = '<p class="load-note">The answer review (with the correct answers and explanations) is only available after the server grades this attempt. Sync your attempts from the home screen, then check your dashboard.</p>';
       }
       function showGradeError(auto) {
         $('load-overlay').style.display = 'block';
@@ -1788,6 +2089,7 @@ void main(){
 
       function renderResults() {
         var r = lastResult;
+        $('filter-row').style.display = '';
         $('res-set-name').textContent = 'Mock Test ' + r.setNum + ' · ' + SUBJECT_NAMES[r.subject] + (r.auto ? ' · Time up — auto-submitted' : ' · Result');
         $('res-score').textContent = r.total;
         $('res-max').textContent = ' / ' + r.maxMarks;
@@ -1951,6 +2253,25 @@ void main(){
           }
         }
       } catch (e) {}
+      /* Offline (2026-11-25): cache the app shell for offline opening,
+         sync pending attempts whenever the connection returns, and wire
+         the manual sync button. */
+      if (window.CYOffline) {
+        window.CYOffline.registerServiceWorker();
+        window.addEventListener('online', function () {
+          window.CYOffline.syncPendingAttempts().then(function () { renderOfflineSection(); }).catch(function () {});
+        });
+        var syncBtn = $('offline-sync-btn');
+        if (syncBtn) syncBtn.addEventListener('click', function () {
+          syncBtn.disabled = true; syncBtn.textContent = 'Syncing\u2026';
+          window.CYOffline.syncPendingAttempts().then(function (r) {
+            syncBtn.disabled = false;
+            syncBtn.textContent = (r && r.ok) ? ('Synced ' + r.synced + ' \u2713 \u00b7 ' + r.failed + ' failed \u00b7 ' + r.stillPending + ' still pending') : 'Sync pending attempts';
+            renderOfflineSection(); renderHome();
+            setTimeout(function () { syncBtn.textContent = 'Sync pending attempts'; }, 5000);
+          }).catch(function () { syncBtn.disabled = false; syncBtn.textContent = 'Sync pending attempts'; });
+        });
+      }
       renderHome();
       window.__booted = true;
       if (window.__bootTimer) { clearTimeout(window.__bootTimer); window.__bootTimer = null; }
