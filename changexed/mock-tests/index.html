@@ -1355,6 +1355,10 @@ void main(){
           set: function (k, v) {
             mem[k] = v;
             try { if (ls) ls.setItem(k, v); } catch (e) {}
+          },
+          remove: function (k) {
+            try { delete mem[k]; } catch (e) {}
+            try { if (ls) ls.removeItem(k); } catch (e) {}
           }
         };
       })();
@@ -1511,7 +1515,7 @@ void main(){
             '</article>';
         }
         $('set-grid').innerHTML = html;
-        var btns = $('set-grid').querySelectorAll('.start-btn');
+        var btns = $('set-grid').querySelectorAll('.start-btn[data-set]');
         for (var i = 0; i < btns.length; i++) {
           btns[i].addEventListener('click', function () { startSet(parseInt(this.getAttribute('data-set'), 10)); });
         }
