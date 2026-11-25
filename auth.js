@@ -340,7 +340,16 @@
       else if (e.key === "Escape") { e.preventDefault(); close(); try { btn.focus(); } catch (err) {} }
     });
     document.addEventListener("click", function (e) { if (!wrap.contains(e.target)) close(); });
-    window.addEventListener("scroll", function (e) { if (!list.hidden && !(e.target && list.contains(e.target))) close(); }, true);
+    // Close when the modal/backdrop scrolls (the card moves), but NOT
+    // when the scroll comes from inside this list or from the page
+    // behind the modal (the modal is fixed, so it did not move).
+    // A chained wheel scroll past the list's edge used to close it.
+    window.addEventListener("scroll", function (e) {
+      if (list.hidden) return;
+      var t = e.target;
+      if (!t || t === document || t === window) return;
+      if (t.contains && t.contains(wrap) && !list.contains(t)) close();
+    }, true);
     wrap.addEventListener("focusout", function (e) {
       if (e.relatedTarget && !wrap.contains(e.relatedTarget)) close();
     });
