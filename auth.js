@@ -10,6 +10,24 @@
   window.__CYAuthLoaded = true;
 
   var GOOGLE_LABEL = "Continue with Google";
+  /* The 10 UGC NET subjects (same slugs as the dashboard). The subject
+     picker only ever offers these, so the server-side CHECK in
+     migration 008 can never see an invalid value from this UI. */
+  var SUBJECTS = [
+    ["psychology", "Psychology"], ["commerce", "Commerce"],
+    ["management", "Management"], ["english", "English"],
+    ["political-science", "Political Science"], ["history", "History"],
+    ["economics", "Economics"],
+    ["computer-science", "Computer Science and Applications"],
+    ["sociology", "Sociology"], ["law", "Law"]
+  ];
+  /* Handoff to the dashboard onboarding step: the name/subject typed
+     here are only saved AFTER the email code is verified. */
+  var PREFILL_KEY = "cy-signup-prefill-v1";
+  /* "create" (name + email + subject) or "signin" (email only).
+     Create is the default: this modal is the registration screen. */
+  var authMode = "create";
+  var chosenSubject = "";
 
   /* ---------- Injected CSS (modal + user menu) ---------- */
   var css = [
@@ -35,6 +53,19 @@
     ".auth-msg{min-height:20px;margin:14px 0 0;color:#f87171;font-size:14px;text-align:center;}",
     ".auth-msg.ok{color:#4ade80;}",
     ".auth-link{display:block;margin:12px auto 0;padding:0;background:none;border:none;color:#a78bfa;font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-decoration:underline;}",
+    ".auth-mode{display:flex;gap:8px;margin:0 0 16px;}",
+    ".auth-mode button{flex:1;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#a1a1aa;font:inherit;font-size:14px;font-weight:700;cursor:pointer;}",
+    ".auth-mode button.on{border-color:#7c3aed;background:rgba(124,58,237,.2);color:#ffffff;}",
+    ".auth-subj-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}",
+    ".auth-subj{padding:10px 8px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.04);color:#ffffff;font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:center;}",
+    ".auth-subj:hover{border-color:rgba(255,255,255,.45);}",
+    ".auth-subj.on{border-color:#7c3aed;background:rgba(124,58,237,.25);}",
+    ".auth-note{color:#a1a1aa;font-size:13px;margin:0 0 14px;}",
+    "html[data-theme=\"light\"] .auth-mode button{border-color:rgba(0,0,0,.2);color:#52525b;}",
+    "html[data-theme=\"light\"] .auth-mode button.on{border-color:#7c3aed;background:rgba(124,58,237,.12);color:#111111;}",
+    "html[data-theme=\"light\"] .auth-subj{border-color:rgba(0,0,0,.2);background:rgba(0,0,0,.03);color:#111111;}",
+    "html[data-theme=\"light\"] .auth-subj.on{border-color:#7c3aed;background:rgba(124,58,237,.12);}",
+    "html[data-theme=\"light\"] .auth-note{color:#52525b;}", 
     ".auth-menu{position:absolute;top:calc(100% + 10px);right:8px;z-index:70;min-width:190px;padding:6px;border-radius:14px;background:#111111;border:1px solid rgba(255,255,255,.14);box-shadow:0 16px 40px rgba(0,0,0,.55);}",
     ".auth-menu[hidden]{display:none;}",
     ".auth-menu a,.auth-menu button{display:flex;width:100%;padding:10px 12px;border:none;border-radius:9px;background:none;color:#ffffff;font:inherit;font-size:14px;font-weight:600;text-align:left;text-decoration:none;cursor:pointer;}",
@@ -94,17 +125,29 @@
     back.innerHTML =
       '<div class="auth-modal" role="dialog" aria-modal="true" aria-label="Sign in">' +
         '<button class="auth-close" id="authClose" type="button" aria-label="Close">\u00d7</button>' +
-        '<h2>Sign in to ChangeYourself</h2>' +
-        '<p>Your mock-test history, quiz rounds and profile are saved to your account.</p>' +
+        '<h2 id="authTitle">Create your account</h2>' +
+        '<p id="authSub">Pick your subject and we will send a 6-digit code to verify your email.</p>' +
+        '<div class="auth-mode" role="group" aria-label="Sign-in mode">' +
+          '<button type="button" id="authModeCreate" class="on">Create account</button>' +
+          '<button type="button" id="authModeSignin">Sign in</button>' +
+        '</div>' +
         '<button class="auth-google" id="authGoogle" type="button">' +
           '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.27c0-.85-.08-1.66-.22-2.45H12v4.64h6.45a5.52 5.52 0 0 1-2.39 3.62v3h3.87c2.26-2.09 3.57-5.16 3.57-8.81z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.91l-3.87-3c-1.07.72-2.44 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.29v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.89 12c0-.79.14-1.56.38-2.28v-3.1H1.29a12 12 0 0 0 0 10.76l3.98-3.1z"/><path fill="#EA4335" d="M12 4.76c1.76 0 3.34.6 4.58 1.79l3.44-3.44A11.98 11.98 0 0 0 12 0 12 12 0 0 0 1.29 6.62l3.98 3.1C6.22 6.87 8.87 4.76 12 4.76z"/></svg>' +
           '<span>' + GOOGLE_LABEL + '</span>' +
         '</button>' +
         '<div class="auth-sep"><span>or use email</span></div>' +
         '<div id="authOtpStep1">' +
+          '<div id="authCreateFields">' +
+            '<label for="authName">Full name</label>' +
+            '<input type="text" id="authName" placeholder="Your name" autocomplete="name">' +
+          '</div>' +
           '<label for="authEmail">Email</label>' +
           '<input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email">' +
-          '<button class="btn btn-dark" id="authSendCode" type="button">Send sign-in code</button>' +
+          '<div id="authSubjWrap">' +
+            '<label>Choose your subject (UGC NET)</label>' +
+            '<div class="auth-subj-grid" id="authSubjGrid"></div>' +
+          '</div>' +
+          '<button class="btn btn-dark" id="authSendCode" type="button">Create account &amp; send code</button>' +
         '</div>' +
         '<div id="authOtpStep2" hidden>' +
           '<p>We sent a 6-digit code to <b id="authEmailEcho"></b>.</p>' +
@@ -126,6 +169,11 @@
       $("authOtpStep1").hidden = false;
       setMsg("");
     });
+    $("authModeCreate").addEventListener("click", function () { setAuthMode("create"); });
+    $("authModeSignin").addEventListener("click", function () { setAuthMode("signin"); });
+    buildSubjGrid();
+    setAuthMode(authMode);
+    $("authName").addEventListener("keydown", function (e) { if (e.key === "Enter") onSendCode(); });
     $("authEmail").addEventListener("keydown", function (e) { if (e.key === "Enter") onSendCode(); });
     $("authCode").addEventListener("keydown", function (e) { if (e.key === "Enter") onVerify(); });
   }
@@ -185,16 +233,66 @@
         clearInterval(sendCooldownTimer);
         sendCooldownTimer = null;
         btn.disabled = false;
-        btn.textContent = "Send sign-in code";
+        btn.textContent = sendBtnLabel();
         return;
       }
       btn.textContent = "Resend code in " + left + "s";
     }, 1000);
   }
+  function buildSubjGrid() {
+    var grid = $("authSubjGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+    SUBJECTS.forEach(function (s) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "auth-subj";
+      b.textContent = s[1];
+      b.setAttribute("data-subject", s[0]);
+      b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", function () {
+        chosenSubject = s[0];
+        Array.prototype.slice.call(grid.querySelectorAll(".auth-subj")).forEach(function (x) {
+          var on = x === b;
+          x.classList.toggle("on", on);
+          x.setAttribute("aria-pressed", String(on));
+        });
+      });
+      grid.appendChild(b);
+    });
+  }
+  function sendBtnLabel() { return authMode === "create" ? "Create account & send code" : "Send sign-in code"; }
+  function setAuthMode(m) {
+    authMode = m;
+    var create = m === "create";
+    var t = $("authTitle"), sub = $("authSub");
+    if (t) t.textContent = create ? "Create your account" : "Sign in to ChangeYourself";
+    if (sub) sub.textContent = create
+      ? "Pick your subject and we will send a 6-digit code to verify your email."
+      : "Your mock-test history, quiz rounds and profile are saved to your account.";
+    var mc = $("authModeCreate"), ms = $("authModeSignin");
+    if (mc) mc.classList.toggle("on", create);
+    if (ms) ms.classList.toggle("on", !create);
+    var cf = $("authCreateFields"), sw = $("authSubjWrap");
+    if (cf) cf.hidden = !create;
+    if (sw) sw.hidden = !create;
+    var btn = $("authSendCode");
+    if (btn && !btn.disabled) btn.textContent = sendBtnLabel();
+    setMsg("");
+  }
+  function storePrefill(name, subject) {
+    try { window.sessionStorage.setItem(PREFILL_KEY, JSON.stringify({ name: name, subject: subject })); } catch (e) {}
+  }
   function onSendCode() {
     if (!needSupa()) return;
     var email = ($("authEmail").value || "").trim();
     if (!email || email.indexOf("@") < 1) { setMsg("Enter a valid email address."); return; }
+    if (authMode === "create") {
+      var name = ($("authName").value || "").trim();
+      if (!name) { setMsg("Add your name to create your account."); return; }
+      if (!chosenSubject) { setMsg("Pick your subject to create your account."); return; }
+      storePrefill(name, chosenSubject);
+    }
     var btn = $("authSendCode");
     btn.disabled = true;
     setMsg("");
@@ -222,7 +320,24 @@
       if (!r.ok) { setMsg(r.error || "That code did not work. Try again."); return; }
       closeModal();
       showToast("Signed in. Welcome back.");
-      refreshNav(true);
+      /* New accounts — or accounts still missing a required field —
+         land on the dashboard, where the one-step onboarding collects
+         only what is missing. Returning users with a complete profile
+         stay where they are (never yanked out of a test). */
+      try {
+        var user = (r && r.user) || null;
+        var go = function (u) {
+          if (!u || typeof window.CYSupa.getProfile !== "function") { refreshNav(true); return; }
+          window.CYSupa.getProfile(u.id).then(function (p) {
+            var missing = !p || !p.full_name || !p.target_subject;
+            if (missing) { try { window.location.href = "/dashboard/"; } catch (e) { refreshNav(true); } return; }
+            refreshNav(true);
+          }).catch(function () { refreshNav(true); });
+        };
+        if (user) go(user);
+        else if (window.CYSupa.getUser) window.CYSupa.getUser().then(go).catch(function () { refreshNav(true); });
+        else refreshNav(true);
+      } catch (e) { refreshNav(true); }
     });
   }
 
