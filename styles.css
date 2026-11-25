@@ -18,6 +18,10 @@
 }
 
 html { scroll-behavior: smooth; }
+/* A-04: anchor jumps (#platform, #faq, #btn-mocks, …) stop above the
+   fixed bottom dock instead of landing underneath it. The dock zone
+   is ~70px tall (54px pill + 16px offset); 110px leaves breathing room. */
+html { scroll-padding-bottom: 110px; }
 html, body { overflow-x: hidden; }
 
 body {
@@ -327,7 +331,14 @@ img { max-width: 100%; }
 .cta .fineprint { margin-top: 18px; color: var(--muted-2); font-size: 14px; }
 .cta .trust { margin-top: 8px; color: var(--muted); font-size: 14px; font-weight: 600; }
 
-/* ---------- Footer ---------- */
+/* ---------- Footer ----------
+   A-04 dock clearance: the 130px bottom padding is the dock
+   guarantee — the fixed dock occupies the bottom ~70px of the
+   viewport (54px pill + 16px offset), so at full scroll every
+   footer link and line of copy sits clear above it. Measured
+   clear at full scroll on home, career-assessment, community,
+   pricing and about, desktop and phone (dashtest/audit-fixes-check.js).
+   Do not shrink this padding below ~100px without re-measuring. */
 .footer {
   padding: 44px 0 130px;
   border-top: 1px solid var(--border);
