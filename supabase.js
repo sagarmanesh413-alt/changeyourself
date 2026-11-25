@@ -250,6 +250,52 @@
         }).catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
       });
     },
+    /* ---------- Offline packages (2026-11-25) ----------
+       get_offline_package returns a downloadable package for one mock
+       test — questions WITHOUT answer keys or explanations. The server
+       requires sign-in and enforces the subject entitlement; a free
+       set (1–3) is downloadable by any signed-in user. The package
+       carries package_md5 so a stale package is caught at sync time. */
+    getOfflinePackage: function (subject, setNumber) {
+      return loadClient().then(function (c) {
+        if (!c) return { ok: false, error: "no-client" };
+        return c.rpc("get_offline_package", { p_subject: subject, p_set_number: setNumber })
+          .then(function (r) {
+            if (r.error) {
+              var msg = String(r.error.message || "");
+              if (/sign-in required/i.test(msg)) return { ok: false, signInRequired: true };
+              if (/not entitled/i.test(msg)) return { ok: false, notEntitled: true };
+              return { ok: false, error: msg };
+            }
+            return { ok: true, package: r.data };
+          })
+          .catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
+      });
+    },
+    /* Sync an offline attempt: the server first checks the package
+       version (a stale package is rejected, never graded against
+       different questions), then delegates to submit_mock_attempt —
+       same entitlement check, same server-side grading, same
+       idempotency via the client key. */
+    submitOfflineMockAttempt: function (subject, setNumber, answers, durationSeconds, clientKey, packageMd5) {
+      return loadClient().then(function (c) {
+        if (!c) return { ok: false, error: "no-client" };
+        return c.rpc("submit_offline_mock_attempt", {
+          p_subject: subject, p_set_number: setNumber,
+          p_answers: answers, p_duration_seconds: durationSeconds,
+          p_client_key: clientKey || api._clientKey(), p_package_md5: packageMd5 || null
+        }).then(function (r) {
+          if (r.error) {
+            var msg = String(r.error.message || "");
+            if (/package outdated/i.test(msg)) return { ok: false, outdated: true, error: msg };
+            if (/sign-in required/i.test(msg)) return { ok: false, signInRequired: true };
+            if (/not entitled/i.test(msg)) return { ok: false, notEntitled: true };
+            return { ok: false, error: msg };
+          }
+          return { ok: true, result: r.data };
+        }).catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
+      });
+    },
     /* Quiz rounds: the client sends the DATA indices of the round questions
        and the chosen answers; the server grades against the stored
        most-probable set and records a trusted attempt. */
