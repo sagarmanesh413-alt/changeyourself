@@ -438,6 +438,29 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 .dash-goal-top > span:last-child { font-size: 13px; color: var(--muted); }
 .dash-goal-track { height: 8px; background: var(--border); margin: 12px 0 8px; border-radius: 999px; overflow: hidden; }
 .dash-goal-track i { height: 100%; display: block; background: linear-gradient(90deg, #7c3aed, #3b82f6); border-radius: 999px; }
+/* Retention (step 8): achievements, weekly summary, recommendations,
+   and the practice reminder. Earned badges are purple; locked ones
+   are grey with their rule shown — no badge is ever faked. */
+.dash-badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.dash-badge { border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; gap: 10px; align-items: flex-start; }
+.dash-badge.earned { border-color: rgba(124, 58, 237, .5); background: rgba(124, 58, 237, .08); }
+.dash-badge-icon { width: 34px; height: 34px; border-radius: 10px; background: rgba(124, 58, 237, .12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dash-badge-icon svg { width: 18px; height: 18px; }
+.dash-badge.earned .dash-badge-icon { background: rgba(124, 58, 237, .25); }
+.dash-badge strong { display: block; font-size: 14px; }
+.dash-badge p { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.dash-badge .dash-badge-date { color: #a78bfa; }
+.dash-summary-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.dash-summary-stat { flex: 1; min-width: 110px; }
+.dash-summary-stat b { display: block; font-size: 22px; }
+.dash-summary-stat span { font-size: 12px; color: var(--muted); }
+.dash-rec-list { margin: 0; padding-left: 18px; }
+.dash-rec-list li { margin-bottom: 8px; font-size: 14px; }
+.dash-reminder-banner { border-left: 3px solid #a78bfa; background: rgba(124, 58, 237, .08); display: flex; gap: 16px; align-items: center; justify-content: space-between; }
+.dash-reminder-banner p { margin: 0; font-size: 14px; }
+.dash-reminder-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+.dash-toggle-row { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.dash-toggle-row input { margin-top: 3px; width: 18px; height: 18px; accent-color: #7c3aed; flex-shrink: 0; }
 .dash-goal p { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); margin: 0; }
 .dash-goal p strong { font-weight: 600; color: var(--text); }
 
@@ -689,6 +712,16 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       <button type="button" class="btn btn-dark" id="dash-glass-reset">Reset appearance</button>
     </div>
 
+    <!-- Practice reminders: off by default, and only ever a quiet
+         nudge on this dashboard — no emails, no push notifications.
+         Turn it on and the dashboard shows a note when you have not
+         taken a test in 2 days. -->
+    <div class="card-dark dash-hide-until-profile" id="dash-reminders-card">
+      <h2>Practice reminders</h2>
+      <label class="dash-toggle-row"><input type="checkbox" id="dash-reminders-toggle">
+        <span>Remind me to practise<br><span class="muted" style="font-size:13px;">When this is on and you haven't taken a test in 2 days, your dashboard shows a quiet note — nothing else. No emails, no push notifications, and you can switch it off any time.</span></span></label>
+    </div>
+
     <!-- Delete account (danger zone): two-step type-to-confirm. The
          actual deletion runs server-side via CYSupa.deleteAccount()
          (an Edge Function with the service-role key) — the browser
@@ -744,6 +777,17 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     <!-- Your overview: the reference's four metric cards — Total Mock
          Tests, Quiz Rounds, Average Score, Best Score — each with a
          sparkline and a change pill only when the data supports one. -->
+    <!-- Practice reminder banner: shown only when reminders are on,
+         your profile is complete, and you have not taken a test in
+         2 days. Dismissing it snoozes it until tomorrow. -->
+    <div class="card-dark dash-hide-until-profile dash-reminder-banner" id="dash-reminder-banner" hidden>
+      <p id="dash-reminder-text"></p>
+      <div class="dash-reminder-actions">
+        <a class="btn btn-white" href="/changexed/quiz/">Take a quiz →</a>
+        <button class="btn btn-dark" id="dash-reminder-dismiss" type="button">Not now</button>
+      </div>
+    </div>
+
     <div class="dash-overview dash-hide-until-profile" id="dash-overview">
       <div class="dash-ov-tile">
         <div class="dash-ov-top">
@@ -885,6 +929,32 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
         <ul class="dash-focus" id="dash-focus"></ul>
       </div>
       <a class="btn btn-white" href="/changexed/mock-tests/">Take a Mock Test →</a>
+    </div>
+
+    <!-- Achievements: earned only from server-verified mock attempts.
+         Locked badges show their rule — nothing is faked. -->
+    <div class="card-dark dash-hide-until-profile" id="dash-badges-card">
+      <h2>Achievements</h2>
+      <p class="muted">Earned from your own mock tests — locked ones show exactly what it takes.</p>
+      <div class="dash-badges" id="dash-badges-list"></div>
+    </div>
+
+    <!-- Weekly summary: this week in words, against last week.
+         A week with no mocks shows "—", never an invented number. -->
+    <div class="card-dark dash-hide-until-profile" id="dash-weekly-summary-card">
+      <h2>This week, in words</h2>
+      <p class="muted" id="dash-weekly-summary-sub">All subjects.</p>
+      <div class="dash-summary-row" id="dash-weekly-summary"></div>
+    </div>
+
+    <!-- Recommendations: from your own verified performance only.
+         Shown only when a subject has at least 2 mocks; otherwise
+         the card says so honestly. -->
+    <div class="card-dark dash-hide-until-profile" id="dash-recommendations-card">
+      <h2>What to work on next</h2>
+      <p class="muted">From your own mock results — no generic advice.</p>
+      <ul class="dash-rec-list" id="dash-recommendations-list"></ul>
+      <p class="muted" id="dash-recommendations-note" style="font-size:13px;"></p>
     </div>
 
     <!-- Per-subject progress -->
@@ -1124,6 +1194,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
      memory when the webview blocks it). Order, hidden sections and card
      heights are remembered; Reset restores the defaults. */
   var DASH_SECTIONS = [
+    { id: 'dash-reminder-banner', label: 'Practice reminder' },
     { id: 'dash-overview', label: 'Your overview' },
     { id: 'dash-plan', label: 'Your plan' },
     { id: 'dash-goals', label: 'Study goals' },
@@ -1133,16 +1204,20 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     { id: 'dash-weekly-card', label: 'Weekly Activity' },
     { id: 'dash-time-card', label: 'Time per Question' },
     { id: 'dash-focus-card', label: 'Insights & Next Steps' },
+    { id: 'dash-badges-card', label: 'Achievements' },
+    { id: 'dash-weekly-summary-card', label: 'This week, in words' },
+    { id: 'dash-recommendations-card', label: 'What to work on next' },
     { id: 'dash-progress', label: 'Progress by subject' },
     { id: 'dash-recent-card', label: 'Recent Activity' },
     { id: 'dash-mock-history-card', label: 'Mock test history' },
     { id: 'dash-quiz-history-card', label: 'Quiz history' },
     { id: 'dash-appearance-card', label: 'Appearance' },
+    { id: 'dash-reminders-card', label: 'Practice reminders' },
     { id: 'dash-delete-card', label: 'Delete account' }
   ];
   /* The five analysis cards, in order — used by the layout migration. */
   var ANALYSIS_CARDS = ['dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card'];
-  var RESIZABLE = ['dash-details-card', 'dash-plan', 'dash-goals', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card', 'dash-progress', 'dash-mock-history-card', 'dash-quiz-history-card'];
+  var RESIZABLE = ['dash-details-card', 'dash-plan', 'dash-goals', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-time-card', 'dash-focus-card', 'dash-badges-card', 'dash-weekly-summary-card', 'dash-recommendations-card', 'dash-progress', 'dash-mock-history-card', 'dash-quiz-history-card'];
   var LAYOUT_KEY = 'cy-dash-layout-v1';
   var layoutMem = null;
   function layoutStore() {
@@ -1187,6 +1262,23 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
         /* 'dash-delete-card' is new — put it at the end. */
         if (parsed.order.indexOf('dash-delete-card') === -1) {
           parsed.order.push('dash-delete-card');
+        }
+        /* Retention cards are new — put them after the focus card in
+           saved layouts, in order. */
+        [['dash-badges-card', 'dash-focus-card'], ['dash-weekly-summary-card', 'dash-badges-card'], ['dash-recommendations-card', 'dash-weekly-summary-card']].forEach(function (pair) {
+          if (parsed.order.indexOf(pair[0]) === -1) {
+            var at = parsed.order.indexOf(pair[1]);
+            parsed.order.splice(at === -1 ? parsed.order.length : at + 1, 0, pair[0]);
+          }
+        });
+        /* 'dash-reminders-card' is new — put it after the appearance card. */
+        if (parsed.order.indexOf('dash-reminders-card') === -1) {
+          var ap = parsed.order.indexOf('dash-appearance-card');
+          parsed.order.splice(ap === -1 ? parsed.order.length : ap + 1, 0, 'dash-reminders-card');
+        }
+        /* The reminder banner is new — it goes first in saved layouts. */
+        if (parsed.order.indexOf('dash-reminder-banner') === -1) {
+          parsed.order.unshift('dash-reminder-banner');
         }
         return parsed;
       }
@@ -1313,10 +1405,10 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
      Analytics: the analysis banner + five cards. Settings: your
      details + Customise. Learn is a link, not a view. */
   var VIEW_SECTIONS = {
-    dashboard: ['dash-overview', 'dash-week-line', 'dash-plan', 'dash-goals', 'dash-progress', 'dash-recent-card'],
+    dashboard: ['dash-reminder-banner', 'dash-overview', 'dash-week-line', 'dash-plan', 'dash-goals', 'dash-progress', 'dash-recent-card'],
     mytests: ['dash-mock-history-card', 'dash-quiz-history-card'],
-    analytics: ['dash-analysis-banner', 'dash-analysis-heading', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-weekly-card', 'dash-time-card', 'dash-focus-card'],
-    settings: ['dash-details-card', 'dash-customise-row', 'dash-customise', 'dash-appearance-card', 'dash-delete-card']
+    analytics: ['dash-analysis-banner', 'dash-analysis-heading', 'dash-level-card', 'dash-score-card', 'dash-trend-card', 'dash-weekly-card', 'dash-time-card', 'dash-focus-card', 'dash-badges-card', 'dash-weekly-summary-card', 'dash-recommendations-card'],
+    settings: ['dash-details-card', 'dash-customise-row', 'dash-customise', 'dash-appearance-card', 'dash-reminders-card', 'dash-delete-card']
   };
   var currentView = 'dashboard';
   function applyVisibility() {
@@ -1464,6 +1556,10 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     renderWeekly();
     renderRecent();
     renderGoals();
+    renderBadges();
+    renderWeeklySummary();
+    renderRecommendations();
+    renderReminderBanner();
     renderAddSubject();
   }
   /* ---------- Analysis v2: the algorithm ----------
@@ -2475,6 +2571,254 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     });
   }
 
+  /* ---------- Retention (step 8): achievements, weekly summary,
+       recommendations and practice reminders. Everything here is
+       computed from the user's own server-verified attempts — a
+       badge, a number or a recommendation is shown only when the
+       data behind it exists; otherwise the card says so honestly.
+       No streak, badge or summary is ever invented, and reminders
+       are opt-in, on-device only, and never push or email. */
+  function streakMilestone(n) {
+    /* The first date the user completed an n-day streak (current or
+       past). Null if they never have — a badge stays locked rather
+       than guessing. */
+    var days = {};
+    allAttempts.forEach(function (a) {
+      if (!a.completed_at) return;
+      var d = new Date(a.completed_at);
+      if (isNaN(d.getTime())) return;
+      days[d.toDateString()] = true;
+    });
+    var list = Object.keys(days).map(function (k) { return new Date(k).getTime(); }).sort(function (a, b) { return a - b; });
+    var cur = 0, prev = null;
+    for (var i = 0; i < list.length; i++) {
+      if (prev != null && list[i] - prev === 86400000) cur++; else cur = 1;
+      if (cur === n) return new Date(list[i]).toISOString();
+      prev = list[i];
+    }
+    return null;
+  }
+  function computeBadges(mocks) {
+    var list = dated(mocks);
+    var badges = [];
+    function earnedAt(pred) {
+      for (var i = 0; i < list.length; i++) if (pred(list[i])) return list[i].completed_at;
+      return null;
+    }
+    badges.push({ id: 'first-mock', name: 'First mock completed', desc: 'Finish your first full mock test.', earned: list.length >= 1, earnedAt: list.length ? list[0].completed_at : null });
+    badges.push({ id: 'five-mocks', name: '5 mocks completed', desc: 'Finish 5 full mock tests.', earned: list.length >= 5, earnedAt: list.length >= 5 ? list[4].completed_at : null });
+    badges.push({ id: 'ten-mocks', name: '10 mocks completed', desc: 'Finish 10 full mock tests.', earned: list.length >= 10, earnedAt: list.length >= 10 ? list[9].completed_at : null });
+    var first80 = earnedAt(function (a) { var p = pct(a); return p != null && p >= 80; });
+    badges.push({ id: 'first-80', name: 'First 80%+ score', desc: 'Score 80% or more on a full mock test.', earned: !!first80, earnedAt: first80 });
+    var best = null, firstBeat = null;
+    list.forEach(function (a, i) {
+      var p = pct(a);
+      if (p == null) return;
+      if (best != null && i > 0 && p > best && !firstBeat) firstBeat = a.completed_at;
+      if (best == null || p > best) best = p;
+    });
+    badges.push({ id: 'beat-best', name: 'Beat your personal best', desc: 'Score higher than every mock before it.', earned: !!firstBeat, earnedAt: firstBeat });
+    [3, 7, 30].forEach(function (n) {
+      var at = streakMilestone(n);
+      badges.push({ id: 'streak-' + n, name: n + '-day streak', desc: 'Practise on ' + n + ' days in a row.', earned: !!at, earnedAt: at });
+    });
+    var perSubject = {};
+    list.forEach(function (a) {
+      if (a.set_number == null) return;
+      if (!perSubject[a.subject]) perSubject[a.subject] = {};
+      var prev = perSubject[a.subject][a.set_number];
+      if (!prev || new Date(a.completed_at) > new Date(prev)) perSubject[a.subject][a.set_number] = a.completed_at;
+    });
+    var completeAt = null;
+    Object.keys(perSubject).forEach(function (s) {
+      var sets = Object.keys(perSubject[s]);
+      if (sets.length >= 20) {
+        var doneAt = sets.map(function (n) { return new Date(perSubject[s][n]).getTime(); }).sort(function (a, b) { return a - b; }).pop();
+        if (completeAt == null || doneAt < completeAt) completeAt = doneAt;
+      }
+    });
+    badges.push({ id: 'subject-complete', name: 'Subject complete', desc: 'Finish all 20 sets in one subject.', earned: !!completeAt, earnedAt: completeAt ? new Date(completeAt).toISOString() : null });
+    return badges;
+  }
+  function renderBadges() {
+    var list = $('dash-badges-list');
+    if (!list) return;
+    var badges = computeBadges(mockAttempts());
+    list.innerHTML = '';
+    badges.forEach(function (b) {
+      var div = document.createElement('div');
+      div.className = 'dash-badge' + (b.earned ? ' earned' : '');
+      div.setAttribute('data-badge', b.id);
+      var ic = document.createElement('span');
+      ic.className = 'dash-badge-icon';
+      ic.innerHTML = b.earned
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>';
+      var tx = document.createElement('div');
+      var nm = document.createElement('strong');
+      nm.textContent = b.name;
+      var ds = document.createElement('p');
+      ds.textContent = b.desc;
+      tx.appendChild(nm);
+      tx.appendChild(ds);
+      if (b.earned && b.earnedAt) {
+        var dt = document.createElement('p');
+        dt.className = 'dash-badge-date';
+        dt.textContent = 'Earned ' + shortDate(new Date(b.earnedAt).getTime());
+        tx.appendChild(dt);
+      }
+      div.appendChild(ic);
+      div.appendChild(tx);
+      list.appendChild(div);
+    });
+  }
+  function weekWindow(offsetWeeks) {
+    var now = new Date();
+    var dow = (now.getDay() + 6) % 7;
+    var monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow - offsetWeeks * 7);
+    monday.setHours(0, 0, 0, 0);
+    return { start: monday.getTime(), end: monday.getTime() + 7 * 86400000 };
+  }
+  function weeklySummary() {
+    function inWin(a, w) {
+      var t = a.completed_at ? new Date(a.completed_at).getTime() : NaN;
+      return !isNaN(t) && t >= w.start && t < w.end;
+    }
+    var tw = weekWindow(0), lw = weekWindow(1);
+    var thisMocks = allAttempts.filter(function (a) { return a.kind === 'mock' && inWin(a, tw); });
+    var lastMocks = allAttempts.filter(function (a) { return a.kind === 'mock' && inWin(a, lw); });
+    var thisAll = allAttempts.filter(function (a) { return inWin(a, tw); });
+    var lastAll = allAttempts.filter(function (a) { return inWin(a, lw); });
+    var thisAvg = avgPct(thisMocks), lastAvg = avgPct(lastMocks);
+    var thisBest = null;
+    thisMocks.forEach(function (a) { var p = pct(a); if (p != null && (thisBest == null || p > thisBest)) thisBest = p; });
+    return {
+      thisCount: thisAll.length, lastCount: lastAll.length,
+      thisAvg: thisAvg, lastAvg: lastAvg, thisBest: thisBest,
+      delta: (thisAvg != null && lastAvg != null) ? Math.round((thisAvg - lastAvg) * 10) / 10 : null
+    };
+  }
+  function renderWeeklySummary() {
+    var box = $('dash-weekly-summary');
+    if (!box) return;
+    var s = weeklySummary();
+    box.innerHTML = '';
+    function stat(val, label) {
+      var d = document.createElement('div');
+      d.className = 'dash-summary-stat';
+      var b = document.createElement('b');
+      b.textContent = val;
+      var sp = document.createElement('span');
+      sp.textContent = label;
+      d.appendChild(b); d.appendChild(sp);
+      box.appendChild(d);
+    }
+    stat(String(s.thisCount), s.thisCount === 1 ? 'test this week' : 'tests this week');
+    stat(s.thisAvg != null ? s.thisAvg + '%' : '—', 'average this week');
+    stat(s.thisBest != null ? s.thisBest + '%' : '—', 'best this week');
+    stat(s.delta != null ? (s.delta > 0 ? '+' : '') + s.delta + ' pts' : '—', 'vs last week');
+    var sub = $('dash-weekly-summary-sub');
+    if (sub) sub.textContent = 'All subjects · ' + s.lastCount + (s.lastCount === 1 ? ' test' : ' tests') + ' last week' + (s.lastAvg != null ? ' · ' + s.lastAvg + '% average' : '') + '.';
+  }
+  function computeRecommendations(mocks) {
+    var bySubject = {};
+    mocks.forEach(function (a) {
+      if (!bySubject[a.subject]) bySubject[a.subject] = [];
+      bySubject[a.subject].push(a);
+    });
+    var subs = Object.keys(bySubject).filter(function (s) { return bySubject[s].length >= 2; });
+    if (!subs.length) return { needsMoreData: true, items: [] };
+    var weakest = null, weakestAvg = null;
+    subs.forEach(function (s) {
+      var avg = avgPct(bySubject[s]);
+      if (avg != null && (weakestAvg == null || avg < weakestAvg)) { weakestAvg = avg; weakest = s; }
+    });
+    var items = [];
+    var sets = {};
+    bySubject[weakest].forEach(function (a) { if (a.set_number != null) sets[a.set_number] = true; });
+    var setCount = Object.keys(sets).length;
+    var latestBySet = {};
+    bySubject[weakest].forEach(function (a) {
+      if (a.set_number == null) return;
+      if (!latestBySet[a.set_number] || new Date(a.completed_at) > new Date(latestBySet[a.set_number].completed_at)) latestBySet[a.set_number] = a;
+    });
+    var worstSet = null, worstPct = null;
+    Object.keys(latestBySet).forEach(function (n) {
+      var p = pct(latestBySet[n]);
+      if (p != null && (worstPct == null || p < worstPct)) { worstPct = p; worstSet = n; }
+    });
+    var subjName = SUBJECT_NAMES[weakest] || weakest;
+    if (setCount < 20) items.push('Continue ' + subjName + ' — ' + setCount + ' of 20 sets done. Your average there is ' + weakestAvg + '%.');
+    if (worstSet != null) items.push('Your lowest set in ' + subjName + ' is Set ' + worstSet + ' (' + worstPct + '%). Retake it and read every explanation.');
+    var slope = linSlope(pctList(dated(mocks)).slice(-10));
+    if (slope != null && slope >= 1) items.push('Your scores are climbing — +' + slope + ' points per test over your last 10 mocks. Keep the routine going.');
+    else if (slope != null && slope <= -1) items.push('Your last 10 mocks are trending down (' + slope + ' points per test). Slow down on one set and review the explanations before the next.');
+    return { needsMoreData: false, weakest: weakest, weakestAvg: weakestAvg, items: items.slice(0, 3) };
+  }
+  function renderRecommendations() {
+    var list = $('dash-recommendations-list');
+    var note = $('dash-recommendations-note');
+    if (!list) return;
+    var rec = computeRecommendations(mockAttempts());
+    list.innerHTML = '';
+    if (rec.needsMoreData) {
+      if (note) note.textContent = 'Take 2 mock tests in one subject and recommendations appear here — they only ever come from your own results.';
+      return;
+    }
+    rec.items.forEach(function (t) {
+      var li = document.createElement('li');
+      li.textContent = t;
+      list.appendChild(li);
+    });
+    if (note) note.textContent = 'Weakest subject by average, from ' + (SUBJECT_NAMES[rec.weakest] || rec.weakest) + ' (' + rec.weakestAvg + '%).';
+  }
+  /* ---------- Practice reminders (opt-in, on-device only) ----------
+     The toggle lives in Settings and is saved on this device. When it
+     is on, the dashboard shows a quiet banner if the user has not
+     taken a test in 2 days. Dismissing snoozes it until tomorrow.
+     There are no emails, no push notifications and no background
+     checks — the banner is rendered only when the dashboard is open. */
+  var REMINDERS_KEY = 'cy-dash-reminders-v1';
+  var remindersMem = null;
+  function remindersStore() { try { if (window.localStorage) return window.localStorage; } catch (e) {} return null; }
+  function loadReminders() {
+    var raw = null; var st = remindersStore();
+    if (st) { try { raw = st.getItem(REMINDERS_KEY); } catch (e) {} }
+    if (raw == null) raw = remindersMem;
+    try { var p = raw ? JSON.parse(raw) : null; if (p && typeof p.on === 'boolean') return p; } catch (e) {}
+    return { on: false, snoozedUntil: 0 };
+  }
+  function saveReminders(v) {
+    var raw = ''; try { raw = JSON.stringify(v); } catch (e) {}
+    remindersMem = raw; var st = remindersStore();
+    if (st) { try { st.setItem(REMINDERS_KEY, raw); } catch (e) {} }
+  }
+  function lastAttemptAt() {
+    var t = 0;
+    allAttempts.forEach(function (a) {
+      if (!a.completed_at) return;
+      var ms = new Date(a.completed_at).getTime();
+      if (!isNaN(ms) && ms > t) t = ms;
+    });
+    return t || null;
+  }
+  function renderReminderBanner() {
+    var banner = $('dash-reminder-banner');
+    if (!banner) return;
+    var prefs = loadReminders();
+    var show = false, text = '';
+    if (prefs.on && profileComplete(profileRow) && Date.now() > (prefs.snoozedUntil || 0)) {
+      var last = lastAttemptAt();
+      if (last == null) { show = true; text = 'You have not taken a test yet. A quick 10-question quiz is a good first step.'; }
+      else {
+        var days = Math.floor((Date.now() - last) / 86400000);
+        if (days >= 2) { show = true; text = 'It has been ' + days + ' days since your last test. A quick quiz keeps the streak warm.'; }
+      }
+    }
+    if (show) $('dash-reminder-text').textContent = text;
+    banner.hidden = !show;
+  }
+
   /* ---------- Weekly Activity: Mon–Sun bars for the current week
        (mock tests and quiz rounds stacked in two tones, with today
        highlighted). This is a measure of how much you practised, so
@@ -2954,6 +3298,29 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     var p = $('dash-customise');
     if (p) p.hidden = !p.hidden;
   });
+  /* Practice reminders: the toggle is device-local, off by default. */
+  (function () {
+    var tgl = $('dash-reminders-toggle');
+    if (tgl) {
+      tgl.checked = loadReminders().on;
+      tgl.addEventListener('change', function () {
+        var prefs = loadReminders();
+        prefs.on = !!tgl.checked;
+        prefs.snoozedUntil = 0;
+        saveReminders(prefs);
+        renderReminderBanner();
+      });
+    }
+    var dis = $('dash-reminder-dismiss');
+    if (dis) dis.addEventListener('click', function () {
+      var prefs = loadReminders();
+      var tomorrow = new Date();
+      tomorrow.setHours(24, 0, 0, 0);
+      prefs.snoozedUntil = tomorrow.getTime();
+      saveReminders(prefs);
+      renderReminderBanner();
+    });
+  })();
   $('dash-reset-layout-btn').addEventListener('click', function () {
     dashLayout = defaultLayout();
     saveLayout();
