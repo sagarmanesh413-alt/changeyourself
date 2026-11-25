@@ -554,9 +554,9 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
    still missing (name and/or subject). Everything else is optional
    and lives in Settings. The subject picker buttons come from
    auth.js (.auth-subj-dd). */
-.ob-back { position: fixed; inset: 0; z-index: 250; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(0, 0, 0, 0.72); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.ob-back { position: fixed; inset: 0; z-index: 250; display: flex; align-items: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; background: rgba(0, 0, 0, 0.72); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 .ob-back[hidden] { display: none; }
-.ob-card { width: min(480px, 100%); padding: 28px; border-radius: 20px; background: #0F172A; border: 1px solid rgba(255, 255, 255, 0.12); color: #f1f5f9; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
+.ob-card { width: min(480px, 100%); margin: auto; padding: 20px; border-radius: 20px; background: #0F172A; border: 1px solid rgba(255, 255, 255, 0.12); color: #f1f5f9; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
 .ob-title { font-size: 1.35rem; font-weight: 700; margin: 0 0 8px; color: #fff; }
 .ob-card p { font-size: 0.95rem; line-height: 1.55; color: #cbd5e1; margin: 0 0 16px; }
 .ob-card p b { color: #fff; }
