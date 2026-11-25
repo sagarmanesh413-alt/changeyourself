@@ -168,7 +168,7 @@
     updateProfile: function (userId, email, fields) {
       return loadClient().then(function (c) {
         if (!c) return fail("Could not reach the server — check your connection and try again.");
-        var ALLOWED = ["full_name", "date_of_birth", "qualification", "employment_status", "phone", "city", "target_subject"];
+        var ALLOWED = ["full_name", "date_of_birth", "qualification", "employment_status", "phone", "city", "target_subject", "tour_completed"];
         var row = { id: userId, email: email };
         ALLOWED.forEach(function (k) {
           if (fields && Object.prototype.hasOwnProperty.call(fields, k)) row[k] = fields[k];
