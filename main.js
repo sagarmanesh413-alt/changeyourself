@@ -185,6 +185,19 @@
     }
   }
 
+  /* A-03 safety net: nothing may stay hidden forever. If the
+     observer never fires for a target — a missed intersection, a
+     layout shift, an error later in this file — reveal it anyway
+     after a bounded wait. The animation still plays for anyone
+     who scrolls within the first 3 seconds; after that, content
+     is simply visible. (No-JS is already safe: the hidden state
+     only applies under html.js, which this script adds.) */
+  setTimeout(function () {
+    for (var si = 0; si < revealTargets.length; si++) {
+      if (!revealTargets[si].classList.contains("visible")) revealNow(revealTargets[si]);
+    }
+  }, 3000);
+
   /* Hero parallax: background layers move slower than the content.
      Passive scroll listener + rAF, transform only, clamped so the
      content moves at most ~33px. Only runs while a hero is on
