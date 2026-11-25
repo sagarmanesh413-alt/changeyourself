@@ -207,6 +207,7 @@
       .timer {
         margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 800;
         background: rgba(255,255,255,0.12); border-radius: 8px; padding: 6px 12px; font-size: 1.05rem;
+        min-width: 7.5ch; text-align: center; /* fixed width: timer ticks must never shift the bar */
       }
       .timer.low { background: var(--red); color: #fff; }
       .submit-btn {
@@ -214,6 +215,24 @@
         padding: 8px 18px; font-weight: 800; min-height: 2.5rem;
       }
       .submit-btn:hover { background: #ececec; }
+      .focus-btn {
+        background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.35);
+        border-radius: 9px; padding: 8px 14px; font-weight: 700; min-height: 2.5rem; cursor: pointer;
+      }
+      .focus-btn[aria-pressed="true"] { background: var(--purple); border-color: var(--purple); }
+      /* Focus mode (2026-11-25): distraction-free exam. Hides the site nav,
+         the palette and the paper tabs; keeps the timer, question, options
+         and exam controls. The decorative card beam is off while focused. */
+      body.focus-mode .nav { display: none; }
+      body.focus-mode .palette, body.focus-mode .palette-toggle { display: none !important; }
+      body.focus-mode .paper-tabs { display: none; }
+      body.focus-mode .q-card::after { display: none; }
+      /* Visible keyboard focus on exam controls. */
+      .opt:focus-visible, .pal-btn:focus-visible, .paper-tab:focus-visible,
+      .exam-actions button:focus-visible, .palette-toggle:focus-visible,
+      .exam-bar button:focus-visible, .focus-btn:focus-visible {
+        outline: 2px solid var(--purple); outline-offset: 2px;
+      }
       .paper-tabs { display: flex; gap: 8px; margin: 16px 0 12px; }
       .paper-tab {
         flex: 1; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
@@ -1161,6 +1180,7 @@ void main(){
         <div class="exam-bar">
           <span class="set-name" id="exam-set-name">Mock Test 1</span>
           <span class="timer" id="timer" aria-label="Time remaining">3:00:00</span>
+          <button type="button" class="focus-btn" id="btn-focus" aria-pressed="false" title="Focus mode: hide navigation and distractions">Focus</button>
           <button type="button" class="submit-btn" id="submit-open">Submit</button>
         </div>
 
@@ -1591,6 +1611,32 @@ void main(){
         return 'Unit ' + q.unit + ' \u00b7 ' + (units[q.unit] || '');
       }
 
+      /* Select an option on the current question, updating the UI in place.
+         SCROLL FIX (2026-11-25): never rebuild the option buttons here — the
+         old renderQuestion() call rebuilt them from innerHTML, destroying the
+         focused button and making the browser scroll. Only the option classes
+         and the palette counts change on selection. */
+      function selectOption(k) {
+        if (!exam || k < 0 || k > 3) return;
+        exam.answers[exam.cur] = k;
+        saveExamState();
+        var all = $('q-opts').querySelectorAll('.opt');
+        for (var i = 0; i < all.length; i++) {
+          all[i].className = 'opt' + (parseInt(all[i].getAttribute('data-opt'), 10) === k ? ' sel' : '');
+        }
+        refreshPalette();
+      }
+      /* Toggle "mark for review" on the current question, updating in place
+         (same scroll-fix reasoning as selectOption). Also saves the state,
+         so marks survive a refresh — the old handler did not save. */
+      function toggleMark() {
+        if (!exam) return;
+        exam.marked[exam.cur] = !exam.marked[exam.cur];
+        saveExamState();
+        $('btn-mark').className = 'mark-btn' + (exam.marked[exam.cur] ? ' on' : '');
+        $('btn-mark').textContent = exam.marked[exam.cur] ? 'Marked ✓ — tap to unmark' : 'Mark for Review';
+        refreshPalette();
+      }
       function renderQuestion() {
         if (!exam) return;
         var i = exam.cur, q = exam.qs[i];
@@ -1608,9 +1654,7 @@ void main(){
         var opts = $('q-opts').querySelectorAll('.opt');
         for (var j = 0; j < opts.length; j++) {
           opts[j].addEventListener('click', function () {
-            exam.answers[exam.cur] = parseInt(this.getAttribute('data-opt'), 10);
-            saveExamState();
-            renderQuestion();
+            selectOption(parseInt(this.getAttribute('data-opt'), 10));
           });
         }
         $('btn-mark').className = 'mark-btn' + (exam.marked[i] ? ' on' : '');
@@ -1623,7 +1667,13 @@ void main(){
         if (!exam) return;
         exam.cur = Math.max(0, Math.min(TOTAL_Q - 1, i));
         renderQuestion();
-        safeScrollToEl($('q-card'));
+        /* SCROLL FIX (2026-11-25): do NOT scroll the document on question
+           change. The old safeScrollToEl($('q-card')) call yanked the page
+           to the top of the question card on every Prev/Next/palette tap,
+           so users had to scroll back to the question each time. The
+           question card is already in view; the palette lives in a sticky
+           sidebar (desktop) or is hidden until toggled (mobile), so nothing
+           needs to move. */
       }
 
       /* ---------- Submit / results ---------- */
@@ -1796,6 +1846,42 @@ void main(){
       $('tab-p2').addEventListener('click', function () { goTo(50); });
       $('btn-prev').addEventListener('click', function () { if (exam && exam.cur > 0) goTo(exam.cur - 1); });
       $('btn-next').addEventListener('click', function () { if (exam && exam.cur < TOTAL_Q - 1) goTo(exam.cur + 1); });
+      /* Keyboard navigation (2026-11-25): 1–4 / A–D select an option,
+         ArrowLeft / ArrowRight move between questions, M marks for review.
+         Only while an exam is running and no modal is open; never while
+         typing in a field, and never while focus is in the site nav. */
+      document.addEventListener('keydown', function (e) {
+        if (!exam || exam.finished) return;
+        /* A modal is open if any modal-back carries the 'open' class
+           (openModal lives in a separate IIFE below, so check the DOM). */
+        if (document.querySelector('.modal-back.open')) return;
+        var ae = document.activeElement;
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'SELECT' || ae.tagName === 'TEXTAREA')) return;
+        if (ae && ae.closest && ae.closest('.nav')) return;
+        var k = e.key;
+        /* Single-character keys only: 'ArrowRight'/'ArrowLeft' start with 'a'
+           and would otherwise match the A–D option range below. */
+        if (k && k.length === 1 && k >= '1' && k <= '4') { selectOption(parseInt(k, 10) - 1); return; }
+        var lower = (k || '').toLowerCase();
+        if (lower.length === 1 && lower >= 'a' && lower <= 'd') { selectOption(lower.charCodeAt(0) - 97); return; }
+        if (k === 'ArrowLeft' && exam.cur > 0) { e.preventDefault(); goTo(exam.cur - 1); return; }
+        if (k === 'ArrowRight' && exam.cur < TOTAL_Q - 1) { e.preventDefault(); goTo(exam.cur + 1); return; }
+        if (lower === 'm') { toggleMark(); }
+      });
+      /* Focus mode (2026-11-25): hide the nav, palette and paper tabs so
+         only the timer, question, options and exam controls remain. The
+         timer and Submit stay visible at all times. Session-only. */
+      var focusBtn = $('btn-focus');
+      function setFocusMode(on) {
+        try { document.body.classList.toggle('focus-mode', !!on); } catch (e) {}
+        if (focusBtn) {
+          focusBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+          focusBtn.textContent = on ? 'Exit focus' : 'Focus';
+        }
+      }
+      if (focusBtn) focusBtn.addEventListener('click', function () {
+        setFocusMode(!document.body.classList.contains('focus-mode'));
+      });
       $('btn-clear').addEventListener('click', function () { if (exam) { exam.answers[exam.cur] = -1; saveExamState(); renderQuestion(); } });
       /* Quit test: confirm, then discard the in-progress attempt (the saved
          answers are kept on the device, so the test can be resumed later). */
@@ -1817,7 +1903,7 @@ void main(){
       window.addEventListener('beforeunload', function (e) {
         if (exam && !exam.finished) { e.preventDefault(); e.returnValue = ''; }
       });
-      $('btn-mark').addEventListener('click', function () { if (exam) { exam.marked[exam.cur] = !exam.marked[exam.cur]; renderQuestion(); } });
+      $('btn-mark').addEventListener('click', function () { toggleMark(); });
       $('submit-open').addEventListener('click', openSubmit);
       $('submit-cancel').addEventListener('click', closeSubmit);
       $('submit-confirm').addEventListener('click', function () { finishExam(false); });
@@ -1900,10 +1986,15 @@ void main(){
     }
     return null;
   }
+  /* Focus without moving the viewport (modal focus trap). */
+  function focusNoScroll(el) {
+    if (!el) return;
+    try { el.focus({ preventScroll: true }); } catch (e) { try { el.focus(); } catch (e2) {} }
+  }
   function trapFocus(modal) {
     try {
       var btns = modal.querySelectorAll('button');
-      if (btns.length) btns[0].focus();
+      if (btns.length) focusNoScroll(btns[0]);
     } catch (e) {}
   }
   document.addEventListener('keydown', function (e) {
@@ -1914,8 +2005,8 @@ void main(){
       var btns = m.querySelectorAll('button');
       if (!btns.length) return;
       var first = btns[0], last = btns[btns.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); focusNoScroll(last); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); focusNoScroll(first); }
     }
   });
   var closeBtn = document.getElementById('unlock-close');
