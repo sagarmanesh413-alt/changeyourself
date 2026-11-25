@@ -549,6 +549,24 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
   .tour-highlight { transition: none; }
 }
 
+/* ---------- Minimal onboarding (2026-11-25) ----------
+   One small step after sign-up: only the required fields that are
+   still missing (name and/or subject). Everything else is optional
+   and lives in Settings. The subject picker buttons come from
+   auth.js (.auth-subj-grid / .auth-subj). */
+.ob-back { position: fixed; inset: 0; z-index: 250; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(0, 0, 0, 0.72); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.ob-back[hidden] { display: none; }
+.ob-card { width: min(480px, 100%); padding: 28px; border-radius: 20px; background: #0F172A; border: 1px solid rgba(255, 255, 255, 0.12); color: #f1f5f9; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
+.ob-title { font-size: 1.35rem; font-weight: 700; margin: 0 0 8px; color: #fff; }
+.ob-card p { font-size: 0.95rem; line-height: 1.55; color: #cbd5e1; margin: 0 0 16px; }
+.ob-card p b { color: #fff; }
+.ob-card label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: #f1f5f9; }
+.ob-card input[type="text"] { width: 100%; padding: 12px 14px; margin-bottom: 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.06); color: #fff; font: inherit; font-size: 15px; }
+.ob-card input[type="text"]:focus { outline: 2px solid #7c3aed; outline-offset: 1px; }
+.ob-card .btn { width: 100%; justify-content: center; }
+.ob-signout { display: block; margin: 12px auto 0; padding: 0; background: none; border: none; color: #94a3b8; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: underline; }
+.ob-signout:hover { color: #fff; }
+
 </style>
 </style>
   <link rel="icon" href="/logo.png">
@@ -630,10 +648,12 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
   <!-- Signed in -->
   <div id="dash-content" hidden>
 
-    <!-- First sign-in: shown until the profile is complete -->
+    <!-- Optional profile hint: shown once the required setup is done
+         but optional details are still empty. Dismissible, never forced. -->
     <div class="card-dark" id="dash-onboard-note" hidden>
-      <h2>Welcome — complete your profile first</h2>
-      <p class="muted">Tell us a little about yourself so your dashboard is set up for you. It only takes a minute — fill in every field below and tap Save profile.</p>
+      <h2>Your profile is set up</h2>
+      <p class="muted">Add your date of birth, phone, qualification and more in Settings when you like — everything there is optional.</p>
+      <button class="btn btn-dark" id="dash-onboard-note-dismiss" type="button">Got it</button>
     </div>
 
     <!-- Your details + Edit profile: one card. The details show by
@@ -645,7 +665,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       </div>
       <div id="dash-details-view">
         <div class="dash-fields" id="dash-fields"></div>
-        <p class="muted" style="margin-top:14px;font-size:14px;">Only you can see these details.</p>
+        <p class="muted" style="margin-top:14px;font-size:14px;">Only you can see these details. Only your name and subject are required — the rest is optional.</p>
       </div>
       <form id="dash-form" novalidate hidden>
         <div class="dash-form-grid">
@@ -695,7 +715,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
             </select>
           </div>
         </div>
-        <p class="muted" style="font-size:13px;margin:2px 0 12px;">All fields are required to keep your dashboard unlocked.</p>
+        <p class="muted" style="font-size:13px;margin:2px 0 12px;">Only your name and subject are required — the rest is optional.</p>
         <div class="quiz-actions">
           <button class="btn btn-white" id="dash-save" type="submit">Save profile</button>
           <button class="btn btn-dark" id="dash-cancel" type="button">Cancel</button>
@@ -1049,6 +1069,26 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
   <div><button type="button" class="tour-skip" id="tour-skip">Skip the tour</button></div>
 </div>
 
+<!-- Minimal onboarding (2026-11-25): one small step after sign-up —
+     only the required fields still missing (name and/or subject). -->
+<div class="ob-back" id="dash-ob-back" hidden>
+  <div class="ob-card" role="dialog" aria-modal="true" aria-labelledby="dash-ob-title">
+    <div class="ob-title" id="dash-ob-title">Let's get you set up</div>
+    <p>Signed in as <b id="dash-ob-email"></b>. One quick step, then you're in.</p>
+    <div id="dash-ob-name-wrap" hidden>
+      <label for="dash-ob-name">Full name</label>
+      <input type="text" id="dash-ob-name" autocomplete="name" placeholder="Your name">
+    </div>
+    <div id="dash-ob-subj-wrap" hidden>
+      <label>Choose your subject (UGC NET)</label>
+      <div class="auth-subj-grid" id="dash-ob-subj-grid"></div>
+    </div>
+    <p class="auth-msg" id="dash-ob-msg" role="status"></p>
+    <button class="btn btn-white" id="dash-ob-save" type="button">Continue to my dashboard</button>
+    <button class="ob-signout" id="dash-ob-signout" type="button">Sign out</button>
+  </div>
+</div>
+
 <script src="/main.js"></script>
 <script src="/supabase.js"></script>
 <script src="/auth.js"></script>
@@ -1069,6 +1109,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 
   var sessionUser = null;
   var profileRow = null;
+  var nameBackfilled = false;
 
   function $(id) { return document.getElementById(id); }
   function esc(s) {
@@ -2275,7 +2316,13 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
      row is what the form saves). While it is incomplete, the dashboard
      hides the plan, stats, progress and history, shows the welcome
      note, and brings the form into view. */
-  var REQUIRED_PROFILE_FIELDS = ['full_name', 'date_of_birth', 'qualification', 'employment_status', 'phone', 'city', 'target_subject'];
+  /* Required for registration: full name + target subject. The email
+     comes from the verified auth identity, so the gate never checks
+     it. Everything else (DOB, qualification, work, phone, city) is
+     optional and never blocks the dashboard. */
+  var REQUIRED_PROFILE_FIELDS = ['full_name', 'target_subject'];
+  var OPTIONAL_PROFILE_FIELDS = ['date_of_birth', 'qualification', 'employment_status', 'phone', 'city'];
+  var OB_HINT_KEY = 'cy-profile-hint-v1';
   function profileComplete(row) {
     if (!row) return false;
     return REQUIRED_PROFILE_FIELDS.every(function (k) {
@@ -2298,21 +2345,43 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     try { onboarding = document.body.classList.contains('dash-onboarding'); } catch (e) {}
     if (cancel) cancel.hidden = onboarding;
   }
+  function optionalFieldsMissing() {
+    if (!profileRow) return false;
+    return OPTIONAL_PROFILE_FIELDS.some(function (k) {
+      var v = profileRow[k];
+      return v === null || v === undefined || String(v).trim() === '';
+    });
+  }
+  function onboardHintDismissed() {
+    try { return window.localStorage.getItem(OB_HINT_KEY) === '1'; } catch (e) { return false; }
+  }
   function applyProfileGate() {
     var done = profileComplete(profileRow);
     try { document.body.classList.toggle('dash-onboarding', !done); } catch (e) {}
+    /* The gate is now one small onboarding step (name and/or subject),
+       shown as a modal — never the 7-field form, never forced into
+       Settings. The note is only the optional-fields hint. */
+    if (!done) showOnboardingModal(); else hideOnboardingModal();
     var note = $('dash-onboard-note');
-    if (note) note.hidden = done;
-    /* The details card follows the gate: an incomplete profile opens
-       the form in place; a complete profile shows the details. An
-       incomplete profile lands on the Settings view, where the form
-       lives. */
-    setProfileMode(!done);
-    if (!done) showView('settings');
+    if (note) note.hidden = !done || !optionalFieldsMissing() || onboardHintDismissed();
   }
   function renderProfile() {
     var md = (sessionUser && sessionUser.user_metadata) || {};
     var name = (profileRow && profileRow.full_name) || md.full_name || md.name || '';
+    /* A name in the verified session (Google) is the source of truth
+       for the required name field — if the profile row lacks it, save
+       it once (best-effort) so the gate, nav and leaderboard see it.
+       The row is updated in place first so the gate sees it at once. */
+    var mdName = md.full_name || md.name || '';
+    if (profileRow && !profileRow.full_name && mdName && !nameBackfilled) {
+      nameBackfilled = true;
+      profileRow.full_name = mdName;
+      try {
+        if (window.CYSupa && typeof window.CYSupa.updateProfile === 'function') {
+          window.CYSupa.updateProfile(sessionUser.id, sessionUser.email, { full_name: mdName }).catch(function () {});
+        }
+      } catch (e) {}
+    }
     var email = (sessionUser && sessionUser.email) || (profileRow && profileRow.email) || '';
     var memberSince = fmtDate((profileRow && profileRow.created_at) || (sessionUser && sessionUser.created_at));
     /* The name lives in the page header (in a purple gradient, like
@@ -3187,25 +3256,15 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       var digits = phone.replace(/[\s\-()]/g, '');
       if (!/^\+?[0-9]{10,15}$/.test(digits)) { msg.textContent = 'Enter a valid phone number (10–15 digits, optional + country code).'; return; }
     }
-    /* All 7 fields are permanently required — onboarding and later
-       edits alike. Letting a field be cleared would save it as null
-       and the profile gate would silently re-lock the dashboard, so
-       the form refuses an empty field instead of saving it. */
+    /* Only the name and subject are required — everything else is
+       optional and may be left empty or cleared (saved as null).
+       Clearing an optional field never re-locks the dashboard. */
     {
-      var labels = { 'f-name': 'Full name', 'f-dob': 'Date of birth', 'f-qual': 'Qualification', 'f-work': 'Work status', 'f-phone': 'Phone', 'f-city': 'City', 'f-subject': 'Target subject' };
-      var missing = [];
-      var firstMissing = null;
-      Object.keys(labels).forEach(function (id) {
-        var el = $(id);
-        var v = el ? String(el.value || '').trim() : '';
-        if (!v) {
-          missing.push(labels[id]);
-          if (!firstMissing && el) firstMissing = el;
-        }
-      });
-      if (missing.length) {
-        msg.textContent = 'Please fill in all the fields to continue: ' + missing.join(', ') + '.';
-        if (firstMissing) { try { firstMissing.focus(); } catch (e) {} }
+      var needName = !$('f-name').value.trim();
+      var needSubject = !$('f-subject').value;
+      if (needName || needSubject) {
+        msg.textContent = 'Add your name and pick a subject to save your profile.';
+        if (needName) { try { $('f-name').focus(); } catch (e) {} }
         return;
       }
     }
@@ -3792,6 +3851,125 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       });
       var replay = tourEl('dash-tour-replay');
       if (replay) replay.addEventListener('click', function () { startTour(true); });
+    } catch (e) {}
+  })();
+
+  /* ---------- Minimal onboarding (2026-11-25) ----------
+     One small step after sign-up: only the required fields still
+     missing (name and/or subject). The email is the verified auth
+     identity, shown read-only. Prefill typed in the registration
+     modal arrives via sessionStorage (cy-signup-prefill-v1) and is
+     cleared after a successful save. The modal cannot be dismissed
+     except by signing out — the subject is required — but it is one
+     step, not a form. */
+  var OB_PREFILL_KEY = 'cy-signup-prefill-v1';
+  var obSubject = '';
+  function obReadPrefill() {
+    try {
+      var raw = window.sessionStorage.getItem(OB_PREFILL_KEY);
+      if (!raw) return null;
+      var p = JSON.parse(raw);
+      return p && typeof p === 'object' ? p : null;
+    } catch (e) { return null; }
+  }
+  function obClearPrefill() { try { window.sessionStorage.removeItem(OB_PREFILL_KEY); } catch (e) {} }
+  function obMissing() {
+    var md = (sessionUser && sessionUser.user_metadata) || {};
+    var hasName = (profileRow && profileRow.full_name) || md.full_name || md.name;
+    var hasSubject = profileRow && profileRow.target_subject;
+    return { name: !hasName, subject: !hasSubject };
+  }
+  function obBuildSubjects() {
+    var grid = $('dash-ob-subj-grid');
+    if (!grid || grid.childNodes.length) return;
+    SUBJECT_ORDER.filter(function (s) { return s !== 'most-probable'; }).forEach(function (slug) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'auth-subj';
+      b.textContent = SUBJECT_NAMES[slug] || slug;
+      b.setAttribute('data-subject', slug);
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', function () { obSelectSubject(slug); });
+      grid.appendChild(b);
+    });
+  }
+  function obSelectSubject(slug) {
+    obSubject = slug || '';
+    var grid = $('dash-ob-subj-grid');
+    if (!grid) return;
+    Array.prototype.slice.call(grid.querySelectorAll('.auth-subj')).forEach(function (x) {
+      var on = x.getAttribute('data-subject') === slug;
+      x.classList.toggle('on', on);
+      x.setAttribute('aria-pressed', String(on));
+    });
+  }
+  function showOnboardingModal() {
+    var back = $('dash-ob-back');
+    if (!back) return;
+    var m = obMissing();
+    if (!m.name && !m.subject) { hideOnboardingModal(); return; }
+    obBuildSubjects();
+    var pre = obReadPrefill();
+    var md = (sessionUser && sessionUser.user_metadata) || {};
+    var nameInput = $('dash-ob-name'), nameWrap = $('dash-ob-name-wrap');
+    if (nameWrap) nameWrap.hidden = !m.name;
+    if (nameInput) nameInput.value = (pre && pre.name) || (profileRow && profileRow.full_name) || md.full_name || md.name || '';
+    var subjWrap = $('dash-ob-subj-wrap');
+    if (subjWrap) subjWrap.hidden = !m.subject;
+    if (m.subject) obSelectSubject((pre && pre.subject) || (profileRow && profileRow.target_subject) || '');
+    var emailEl = $('dash-ob-email');
+    if (emailEl) emailEl.textContent = (sessionUser && sessionUser.email) || (profileRow && profileRow.email) || '';
+    var msg = $('dash-ob-msg');
+    if (msg) { msg.textContent = ''; msg.className = 'auth-msg'; }
+    back.hidden = false;
+    try { if (m.name && nameInput) nameInput.focus(); } catch (e) {}
+  }
+  function hideOnboardingModal() { var back = $('dash-ob-back'); if (back) back.hidden = true; }
+  function obSave() {
+    if (!sessionUser || !window.CYSupa) return;
+    var m = obMissing();
+    var msg = $('dash-ob-msg');
+    var fields = {};
+    if (m.name) {
+      var nm = ($('dash-ob-name').value || '').trim();
+      if (!nm) { if (msg) msg.textContent = 'Add your name to continue.'; return; }
+      fields.full_name = nm;
+    }
+    if (m.subject) {
+      if (!obSubject) { if (msg) msg.textContent = 'Pick your subject to continue.'; return; }
+      fields.target_subject = obSubject;
+    }
+    var btn = $('dash-ob-save');
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+    window.CYSupa.updateProfile(sessionUser.id, sessionUser.email, fields).then(function (r) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Continue to my dashboard'; }
+      if (!r.ok) { if (msg) msg.textContent = r.error || 'Could not save. Try again.'; return; }
+      obClearPrefill();
+      profileRow = r.data || profileRow;
+      if (fields.full_name) profileRow.full_name = fields.full_name;
+      if (fields.target_subject) profileRow.target_subject = fields.target_subject;
+      hideOnboardingModal();
+      renderProfile();
+      showToast('Welcome to ChangeYourself.');
+    });
+  }
+  (function obWire() {
+    try {
+      var save = $('dash-ob-save');
+      if (save) save.addEventListener('click', obSave);
+      var nameInput = $('dash-ob-name');
+      if (nameInput) nameInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') obSave(); });
+      var out = $('dash-ob-signout');
+      if (out) out.addEventListener('click', function () {
+        if (window.CYSupa) { window.CYSupa.signOut().then(function () { window.location.reload(); }); }
+        else { window.location.reload(); }
+      });
+      var dis = $('dash-onboard-note-dismiss');
+      if (dis) dis.addEventListener('click', function () {
+        try { window.localStorage.setItem(OB_HINT_KEY, '1'); } catch (e) {}
+        var note = $('dash-onboard-note');
+        if (note) note.hidden = true;
+      });
     } catch (e) {}
   })();
 
