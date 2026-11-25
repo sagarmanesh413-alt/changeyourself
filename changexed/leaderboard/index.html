@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leaderboard — ChangeXed Mock Tests | ChangeYourself.in</title>
+<meta name="description" content="The anonymous ChangeXed leaderboard: best verified UGC NET mock-test scores, ranked by percentage. Opt in to appear — only your public alias is ever shown.">
+<script>try{var t=localStorage.getItem("cy-theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;}}catch(e){}</script>
+<link rel="stylesheet" href="/styles.css">
+<link rel="icon" href="/logo.png">
+<style>
+  .lb-wrap { max-width: 860px; margin: 0 auto; padding: 0 20px 40px; }
+  .lb-card { border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin: 16px 0; background: var(--surface); }
+  .lb-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .lb-tab { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 8px 16px; font-weight: 700; cursor: pointer; min-height: 2.5rem; }
+  .lb-tab.on { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .lb-tab:focus-visible, .lb-card input:focus-visible, .lb-card button:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+  .lb-table { width: 100%; border-collapse: collapse; }
+  .lb-table th, .lb-table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+  .lb-table th { color: var(--ink-soft); font-size: 0.85rem; }
+  .lb-table td.pct { font-weight: 800; }
+  .lb-table tr.me td { background: rgba(124, 58, 237, 0.12); }
+  .lb-me-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 12px; }
+  .lb-me-cell b { display: block; font-size: 1.4rem; }
+  .lb-me-cell span { color: var(--ink-soft); font-size: 0.85rem; }
+  .lb-card input[type="text"] { width: 100%; max-width: 320px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; }
+  .lb-card .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .lb-btn { background: var(--purple); color: #fff; border: 0; border-radius: 10px; padding: 10px 18px; font-weight: 700; cursor: pointer; min-height: 2.5rem; }
+  .lb-btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .lb-note { color: var(--ink-soft); font-size: 0.9rem; }
+  .lb-error { color: #f87171; font-weight: 700; }
+  @media (max-width: 560px) { .lb-table th:nth-child(4), .lb-table td:nth-child(4), .lb-table th:nth-child(6), .lb-table td:nth-child(6) { display: none; } }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="logo" href="/" aria-label="ChangeYourself home"><img src="/logo.png" alt="ChangeYourself"></a>
+  <a class="nav-link" href="/about/">About</a>
+  <a class="nav-link" href="/pricing/">Pricing</a>
+  <a class="nav-link" href="/changexed/">ChangeXed</a>
+  <button class="login-btn" id="loginBtn" type="button">Login</button>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+</nav>
+
+<section class="hero"><div class="hero-grid" aria-hidden="true"></div><div class="container">
+  <h1 class="hero-title">Leaderboard</h1>
+  <p class="hero-sub">The best verified mock-test scores, ranked by percentage. Anonymous by design — only a public alias is ever shown, and only if you choose to opt in.</p>
+</div></section>
+
+<main class="lb-wrap">
+  <section class="lb-card" id="me-card">
+    <h2 class="section-title" style="margin-top:0;">Your position</h2>
+    <div id="me-body"><p class="lb-note">Loading…</p></div>
+  </section>
+
+  <section>
+    <div class="lb-tabs" role="tablist" aria-label="Ranking scope">
+      <button type="button" class="lb-tab on" data-scope="overall">Overall</button>
+      <button type="button" class="lb-tab" data-scope="subject">By subject</button>
+    </div>
+    <div class="lb-tabs" id="subject-row" hidden>
+      <select id="lb-subject" aria-label="Subject" style="padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;">
+        <option value="psychology">Psychology</option>
+        <option value="commerce">Commerce</option>
+        <option value="management">Management</option>
+        <option value="english">English</option>
+        <option value="political-science">Political Science</option>
+        <option value="history">History</option>
+        <option value="economics">Economics</option>
+        <option value="computer-science">Computer Science and Applications</option>
+        <option value="sociology">Sociology</option>
+        <option value="law">Law</option>
+        <option value="most-probable">Most Probable Questions</option>
+      </select>
+    </div>
+    <div class="lb-tabs" role="tablist" aria-label="Ranking period">
+      <button type="button" class="lb-tab" data-period="weekly">This week</button>
+      <button type="button" class="lb-tab" data-period="monthly">This month</button>
+      <button type="button" class="lb-tab on" data-period="all-time">All time</button>
+    </div>
+    <div class="lb-card" id="board-card">
+      <div id="board"><p class="lb-note">Loading the leaderboard…</p></div>
+    </div>
+  </section>
+
+  <section class="lb-card">
+    <h2 class="section-title" style="margin-top:0;">How this ranking works</h2>
+    <p class="lb-note">Only full mock tests count, and only ones the server graded — a score can never be typed in or faked. Each person appears once, with their best percentage in the period (percentage, not raw marks, so a 100-question test is comparable with a 150-question one). Ties go to whoever reached the score first. The 10-question quiz rounds don't count — they aren't comparable to a full mock. Offline attempts count only after they sync and the server verifies them.</p>
+    <p class="lb-note">Rankings appear once at least 3 people have opted in and taken a mock test in that period — until then, the table stays empty rather than showing a misleading ranking. Your name, email and profile are never shown; the only public identity is the alias you choose (or a generated one like “M*** #4821”). You can change your alias or opt out at any time — opting out removes you from every ranking immediately.</p>
+  </section>
+</main>
+
+<footer class="footer"><div class="container"><div class="footer-links"><a href="/">Home</a><a href="/about/">About</a><a href="/pricing/">Pricing</a><a href="/changexed/mock-tests/">Mock Tests</a><a href="/changexed/leaderboard/">Leaderboard</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/refund/">Refund</a><a href="https://www.youtube.com/@ChangeXed" target="_blank" rel="noopener">Contact</a></div><img src="/logo.png" alt="ChangeYourself" class="footer-logo"><p class="footer-tag">ChangeYourself — Learn. Grow. Transform.</p><p class="footer-copy">© 2026 ChangeYourself.in</p></div></footer>
+
+<div class="dock">
+  <a href="/" title="Home" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></a>
+  <a href="/career-assessment/" title="Career Assessment" aria-label="Career Assessment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></a>
+  <a href="/changexed/mock-tests/" title="Mock Tests" aria-label="Mock Tests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><polyline points="9 14 11 16 15 12"/></svg></a>
+  <a href="/ai-assistant/" title="AI Assistant" aria-label="AI Assistant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></a>
+  <a href="/community/" title="Community" aria-label="Community"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></a>
+  <a href="/career-tools/" title="Career Tools" aria-label="Career Tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></a>
+  <a href="/resources/" title="Resources" aria-label="Resources"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></a>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="/main.js"></script>
+<script src="/supabase.js"></script>
+<script src="/auth.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var SUBJECT_NAMES = { psychology: 'Psychology', commerce: 'Commerce', management: 'Management', english: 'English', 'political-science': 'Political Science', history: 'History', economics: 'Economics', 'computer-science': 'Computer Science', sociology: 'Sociology', law: 'Law', 'most-probable': 'Most Probable' };
+  var state = { scope: 'overall', subject: 'psychology', period: 'all-time' };
+  var myAlias = null;
+
+  function loadBoard() {
+    var board = $('board');
+    if (!window.CYSupa || !window.CYSupa.getLeaderboardRanking) {
+      board.innerHTML = '<p class="lb-error">Could not load the leaderboard — check your connection and refresh.</p>';
+      return;
+    }
+    board.innerHTML = '<p class="lb-note">Loading the leaderboard…</p>';
+    window.CYSupa.getLeaderboardRanking(state.scope, state.scope === 'subject' ? state.subject : null, state.period, 50).then(function (res) {
+      if (!res || !res.ok || !res.ranking) {
+        board.innerHTML = '<p class="lb-error">Could not load the leaderboard — ' + esc((res && res.error) || 'try again.') + '</p>';
+        return;
+      }
+      var r = res.ranking;
+      if (!r.sufficient) {
+        board.innerHTML = '<p class="lb-note">Not enough participants yet — rankings appear once at least 3 people have opted in and taken a mock test in this ' +
+          (state.period === 'all-time' ? 'category' : 'period') + '. ' +
+          (r.participants ? r.participants + (r.participants === 1 ? ' person has' : ' people have') + ' opted in so far.' : 'Nobody has opted in yet.') +
+          ' Take a mock test and opt in to be among the first.</p>';
+        return;
+      }
+      var html = '<table class="lb-table"><thead><tr><th>#</th><th>Alias</th><th>Best</th><th>Score</th><th>Test</th><th>When</th></tr></thead><tbody>';
+      r.entries.forEach(function (e) {
+        var isMe = myAlias && e.alias === myAlias;
+        var when = e.achieved_at ? new Date(e.achieved_at).toLocaleDateString() : '—';
+        html += '<tr' + (isMe ? ' class="me"' : '') + '><td>' + e.rank + '</td><td>' + esc(e.alias) + (isMe ? ' (you)' : '') + '</td>' +
+          '<td class="pct">' + e.pct + '%</td><td>' + e.score + ' / ' + e.total + '</td>' +
+          '<td>' + esc(SUBJECT_NAMES[e.subject] || e.subject) + ' · Set ' + e.set_number + '</td><td>' + when + '</td></tr>';
+      });
+      html += '</tbody></table><p class="lb-note" style="margin-top:12px;">' + r.participants + ' participants · best score per person · ties go to whoever reached the score first.</p>';
+      board.innerHTML = html;
+    }).catch(function () {
+      board.innerHTML = '<p class="lb-error">Could not load the leaderboard — check your connection and refresh.</p>';
+    });
+  }
+
+  function loadMe() {
+    var body = $('me-body');
+    if (!window.CYSupa || !window.CYSupa.getSession) { body.innerHTML = '<p class="lb-note">Sign in to see your rank.</p>'; return; }
+    window.CYSupa.getSession().then(function (session) {
+      if (!session || !session.user) {
+        body.innerHTML = '<p class="lb-note">You are not signed in. <a href="/changexed/mock-tests/">Sign in</a> to see your rank and opt in to the leaderboard.</p>';
+        return;
+      }
+      window.CYSupa.getMyLeaderboardRank(state.scope, state.scope === 'subject' ? state.subject : null, state.period).then(function (res) {
+        if (!res || !res.ok || !res.me) {
+          body.innerHTML = '<p class="lb-note">Could not load your position right now.</p>';
+          return;
+        }
+        var me = res.me;
+        if (!me.opted_in) {
+          myAlias = null;
+          loadBoard(); // re-render so any "you" highlight is cleared
+          body.innerHTML = '<p class="lb-note">You are not on the leaderboard. Opt in to appear under a public alias — your name and email are never shown.</p>' +
+            '<div class="row"><input type="text" id="lb-alias" placeholder="Pick an alias (optional — leave blank for a generated one)" maxlength="20" aria-label="Public alias">' +
+            '<button type="button" class="lb-btn" id="lb-optin">Opt in</button></div>' +
+            '<p class="lb-note" id="lb-optin-msg"></p>';
+          $('lb-optin').addEventListener('click', function () {
+            var alias = $('lb-alias').value.trim() || null;
+            $('lb-optin-msg').textContent = 'Joining…';
+            window.CYSupa.leaderboardOptIn(alias).then(function (r) {
+              if (r && r.ok) { loadMe(); loadBoard(); }
+              else $('lb-optin-msg').textContent = (r && r.error) || 'Could not opt in — try again.';
+            });
+          });
+          return;
+        }
+        myAlias = me.alias;
+        loadBoard(); // re-render so your own row is highlighted
+        var cells = '';
+        cells += '<div class="lb-me-cell"><b>#' + (me.rank != null ? me.rank : '—') + '</b><span>Your rank</span></div>';
+        cells += '<div class="lb-me-cell"><b>' + (me.top_pct != null ? 'Top ' + me.top_pct + '%' : '—') + '</b><span>Of ' + me.participants + ' participants</span></div>';
+        cells += '<div class="lb-me-cell"><b>' + (me.my_pct != null ? me.my_pct + '%' : '—') + '</b><span>Your best in this period</span></div>';
+        cells += '<div class="lb-me-cell"><b>' + (me.personal_best_pct != null ? me.personal_best_pct + '%' : '—') + '</b><span>Personal best</span></div>';
+        cells += '<div class="lb-me-cell"><b>' + (me.distance_to_next != null ? '+' + me.distance_to_next + ' pts' : '—') + '</b><span>To the next rank</span></div>';
+        body.innerHTML = '<p><strong>' + esc(me.alias) + '</strong> · <span class="lb-note">your public alias — nothing else about you is shown.</span></p>' +
+          (me.rank == null ? '<p class="lb-note">No ranked attempt in this period yet — take a mock test to appear.</p>' : '') +
+          '<div class="lb-me-grid">' + cells + '</div>' +
+          '<div class="row"><input type="text" id="lb-alias" placeholder="New alias" maxlength="20" aria-label="New public alias">' +
+          '<button type="button" class="lb-btn" id="lb-change-alias">Change alias</button>' +
+          '<button type="button" class="lb-btn ghost" id="lb-optout">Opt out</button></div>' +
+          '<p class="lb-note" id="lb-me-msg"></p>';
+        $('lb-change-alias').addEventListener('click', function () {
+          var alias = $('lb-alias').value.trim();
+          if (!alias) { $('lb-me-msg').textContent = 'Type a new alias first.'; return; }
+          window.CYSupa.leaderboardSetAlias(alias).then(function (r) {
+            if (r && r.ok) { loadMe(); loadBoard(); }
+            else $('lb-me-msg').textContent = (r && r.error) || 'Could not change the alias — try again.';
+          });
+        });
+        $('lb-optout').addEventListener('click', function () {
+          if (!confirm('Opt out of the leaderboard? You will disappear from every ranking immediately. Your alias is kept, so you can opt back in later.')) return;
+          window.CYSupa.leaderboardOptOut().then(function () { loadMe(); loadBoard(); });
+        });
+      });
+    });
+  }
+
+  function refresh() { loadBoard(); loadMe(); }
+
+  document.querySelectorAll('[data-scope]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-scope]').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      state.scope = b.getAttribute('data-scope');
+      $('subject-row').hidden = state.scope !== 'subject';
+      refresh();
+    });
+  });
+  document.querySelectorAll('[data-period]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-period]').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      state.period = b.getAttribute('data-period');
+      refresh();
+    });
+  });
+  $('lb-subject').addEventListener('change', function () { state.subject = this.value; refresh(); });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
