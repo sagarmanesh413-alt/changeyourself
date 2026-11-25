@@ -57,6 +57,7 @@
     ".auth-mode button.on{border-color:#7c3aed;background:rgba(124,58,237,.2);color:#ffffff;}",
     ".auth-subj-select{width:100%;padding:12px 14px;margin-bottom:14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#ffffff;font:inherit;font-size:15px;cursor:pointer;color-scheme:dark;}",
     ".auth-subj-select:focus{outline:2px solid #7c3aed;outline-offset:1px;}",
+    ".auth-subj-select option{color:#111111;background:#ffffff;}",
     ".auth-note{color:#a1a1aa;font-size:13px;margin:0 0 14px;}",
     "html[data-theme=\"light\"] .auth-mode button{border-color:rgba(0,0,0,.2);color:#52525b;}",
     "html[data-theme=\"light\"] .auth-mode button.on{border-color:#7c3aed;background:rgba(124,58,237,.12);color:#111111;}",
