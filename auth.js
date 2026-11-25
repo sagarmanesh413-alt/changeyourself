@@ -55,13 +55,22 @@
     ".auth-mode{display:flex;gap:8px;margin:0 0 16px;}",
     ".auth-mode button{flex:1;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#a1a1aa;font:inherit;font-size:14px;font-weight:700;cursor:pointer;}",
     ".auth-mode button.on{border-color:#7c3aed;background:rgba(124,58,237,.2);color:#ffffff;}",
-    ".auth-subj-select{width:100%;padding:12px 14px;margin-bottom:14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#ffffff;font:inherit;font-size:15px;cursor:pointer;color-scheme:dark;}",
-    ".auth-subj-select:focus{outline:2px solid #7c3aed;outline-offset:1px;}",
-    ".auth-subj-select option{color:#111111;background:#ffffff;}",
+    ".auth-subj-dd{position:relative;width:100%;margin-bottom:14px;}",
+    ".auth-subj-dd-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#ffffff;font:inherit;font-size:15px;text-align:left;cursor:pointer;}",
+    ".auth-subj-dd-btn:focus{outline:2px solid #7c3aed;outline-offset:1px;}",
+    ".auth-subj-dd-chev{color:#a78bfa;font-size:13px;}",
+    ".auth-subj-dd-list{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:60;max-height:220px;overflow:auto;padding:6px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:#0F172A;box-shadow:0 16px 40px rgba(0,0,0,.55);}",
+    ".auth-subj-dd-list[hidden]{display:none;}",
+    ".auth-subj-dd-opt{display:block;width:100%;padding:10px 12px;border:none;border-radius:8px;background:none;color:#ffffff;font:inherit;font-size:15px;text-align:left;cursor:pointer;}",
+    ".auth-subj-dd-opt:hover,.auth-subj-dd-opt:focus{background:rgba(124,58,237,.25);outline:none;}",
+    ".auth-subj-dd-opt.on{background:rgba(124,58,237,.35);font-weight:700;}",
     ".auth-note{color:#a1a1aa;font-size:13px;margin:0 0 14px;}",
     "html[data-theme=\"light\"] .auth-mode button{border-color:rgba(0,0,0,.2);color:#52525b;}",
     "html[data-theme=\"light\"] .auth-mode button.on{border-color:#7c3aed;background:rgba(124,58,237,.12);color:#111111;}",
-    "html[data-theme=\"light\"] .auth-modal .auth-subj-select{border-color:rgba(0,0,0,.2);background:rgba(0,0,0,.04);color:#111111;color-scheme:light;}",
+    "html[data-theme=\"light\"] .auth-modal .auth-subj-dd-btn{border-color:rgba(0,0,0,.2);background:rgba(0,0,0,.04);color:#111111;}",
+    "html[data-theme=\"light\"] .auth-modal .auth-subj-dd-list{background:#ffffff;border-color:rgba(0,0,0,.15);}",
+    "html[data-theme=\"light\"] .auth-modal .auth-subj-dd-opt{color:#111111;}",
+    "html[data-theme=\"light\"] .auth-modal .auth-subj-dd-opt:hover,html[data-theme=\"light\"] .auth-modal .auth-subj-dd-opt:focus{background:rgba(124,58,237,.12);}",
     "html[data-theme=\"light\"] .auth-note{color:#52525b;}", 
     ".auth-menu{position:absolute;top:calc(100% + 10px);right:8px;z-index:70;min-width:190px;padding:6px;border-radius:14px;background:#111111;border:1px solid rgba(255,255,255,.14);box-shadow:0 16px 40px rgba(0,0,0,.55);}",
     ".auth-menu[hidden]{display:none;}",
@@ -141,8 +150,8 @@
           '<label for="authEmail">Email</label>' +
           '<input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email">' +
           '<div id="authSubjWrap">' +
-            '<label for="authSubject">Choose your subject (UGC NET)</label>' +
-            '<select class="auth-subj-select" id="authSubject" aria-label="Choose your subject (UGC NET)"></select>' +
+            '<label for="authSubject-btn">Choose your subject (UGC NET)</label>' +
+            '<div class="auth-subj-dd" id="authSubjDd"></div>' +
           '</div>' +
           '<button class="btn btn-dark" id="authSendCode" type="button">Create account &amp; send code</button>' +
         '</div>' +
@@ -168,7 +177,7 @@
     });
     $("authModeCreate").addEventListener("click", function () { setAuthMode("create"); });
     $("authModeSignin").addEventListener("click", function () { setAuthMode("signin"); });
-    buildSubjSelect();
+    buildSubjectDropdown($("authSubjDd"), "authSubject", SUBJECTS, "Choose your subject (UGC NET)");
     setAuthMode(authMode);
     $("authName").addEventListener("keydown", function (e) { if (e.key === "Enter") onSendCode(); });
     $("authEmail").addEventListener("keydown", function (e) { if (e.key === "Enter") onSendCode(); });
@@ -236,20 +245,95 @@
       btn.textContent = "Resend code in " + left + "s";
     }, 1000);
   }
-  function buildSubjSelect() {
-    var sel = $("authSubject");
-    if (!sel) return;
-    sel.innerHTML = "";
-    var ph = document.createElement("option");
-    ph.value = "";
-    ph.textContent = "Choose your subject (UGC NET)";
-    sel.appendChild(ph);
-    SUBJECTS.forEach(function (s) {
-      var o = document.createElement("option");
-      o.value = s[0];
-      o.textContent = s[1];
-      sel.appendChild(o);
+  function buildSubjectDropdown(wrap, inputId, items, placeholder) {
+    if (!wrap) return null;
+    wrap.innerHTML = "";
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.id = inputId;
+    input.value = "";
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "auth-subj-dd-btn";
+    btn.id = inputId + "-btn";
+    btn.setAttribute("aria-haspopup", "listbox");
+    btn.setAttribute("aria-expanded", "false");
+    var label = document.createElement("span");
+    label.className = "auth-subj-dd-label";
+    label.textContent = placeholder;
+    var chev = document.createElement("span");
+    chev.className = "auth-subj-dd-chev";
+    chev.textContent = "\u25be";
+    btn.appendChild(label);
+    btn.appendChild(chev);
+    var list = document.createElement("div");
+    list.className = "auth-subj-dd-list";
+    list.setAttribute("role", "listbox");
+    list.hidden = true;
+    var opts = [];
+    function findItem(slug) {
+      for (var i = 0; i < items.length; i++) { if (items[i][0] === slug) return items[i]; }
+      return null;
+    }
+    function close() { list.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+    function open() { list.hidden = false; btn.setAttribute("aria-expanded", "true"); }
+    function select(slug) {
+      input.value = slug || "";
+      var it = slug ? findItem(slug) : null;
+      label.textContent = it ? it[1] : placeholder;
+      opts.forEach(function (o) {
+        var on = o.getAttribute("data-value") === slug;
+        o.classList.toggle("on", on);
+        o.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      close();
+      try { btn.focus(); } catch (e) {}
+    }
+    items.forEach(function (it) {
+      var o = document.createElement("button");
+      o.type = "button";
+      o.className = "auth-subj-dd-opt";
+      o.setAttribute("role", "option");
+      o.setAttribute("data-value", it[0]);
+      o.setAttribute("aria-selected", "false");
+      o.textContent = it[1];
+      o.addEventListener("click", function () { select(it[0]); });
+      list.appendChild(o);
+      opts.push(o);
     });
+    function focusOpt(idx) {
+      var o = opts[Math.max(0, Math.min(opts.length - 1, idx))];
+      if (o) { try { o.focus(); } catch (e) {} }
+    }
+    function optIndex(el) {
+      for (var i = 0; i < opts.length; i++) { if (opts[i] === el) return i; }
+      return -1;
+    }
+    function selectedIndex() {
+      for (var i = 0; i < opts.length; i++) { if (opts[i].classList.contains("on")) return i; }
+      return -1;
+    }
+    btn.addEventListener("click", function (e) { e.stopPropagation(); if (list.hidden) { open(); } else { close(); } });
+    btn.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        if (list.hidden) { open(); var si = selectedIndex(); focusOpt(si >= 0 ? si : 0); }
+      } else if (e.key === "Escape") { close(); }
+    });
+    list.addEventListener("keydown", function (e) {
+      var idx = optIndex(document.activeElement);
+      if (e.key === "ArrowDown") { e.preventDefault(); focusOpt(idx + 1); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); focusOpt(idx - 1); }
+      else if (e.key === "Escape") { e.preventDefault(); close(); try { btn.focus(); } catch (err) {} }
+    });
+    document.addEventListener("click", function (e) { if (!wrap.contains(e.target)) close(); });
+    wrap.addEventListener("focusout", function (e) {
+      if (e.relatedTarget && !wrap.contains(e.relatedTarget)) close();
+    });
+    wrap.appendChild(input);
+    wrap.appendChild(btn);
+    wrap.appendChild(list);
+    return { set: select, get: function () { return input.value; } };
   }
   function sendBtnLabel() { return authMode === "create" ? "Create account & send code" : "Send sign-in code"; }
   function setAuthMode(m) {
@@ -435,6 +519,7 @@
   }
 
   window.CYAuth = {
+    buildSubjectDropdown: buildSubjectDropdown,
     openModal: openModal,
     closeModal: closeModal,
     refresh: function () { refreshNav(false); },
