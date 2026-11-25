@@ -520,6 +520,35 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 }
 @keyframes dash-orbit { to { transform: rotate(360deg); } }
 
+/* ---------- First-login site tour (2026-11-25) ----------
+   Spotlight tour shown once after account creation + first login.
+   The highlight ring dims everything around the target with a huge
+   box-shadow; the tooltip card sits above it. Centred steps hide the
+   ring and dim the whole screen instead. */
+.tour-dim { position: fixed; inset: 0; z-index: 300; background: rgba(0, 0, 0, 0.72); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.tour-highlight { position: fixed; z-index: 301; border: 2px solid #a78bfa; border-radius: 16px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72); pointer-events: none; transition: top .25s ease, left .25s ease, width .25s ease, height .25s ease; }
+.tour-tip { position: fixed; z-index: 302; width: min(420px, calc(100vw - 32px)); background: #0F172A; color: #f1f5f9; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5); }
+.tour-tip .tour-title { font-size: 1.1rem; font-weight: 700; margin: 0 0 8px; color: #fff; }
+.tour-tip p { font-size: 0.95rem; line-height: 1.55; color: #cbd5e1; margin: 0 0 16px; }
+.tour-tip .tour-steps { font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px; }
+.tour-tip .tour-dots { display: flex; gap: 6px; margin-bottom: 16px; }
+.tour-tip .tour-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); }
+.tour-tip .tour-dots i.on { background: #a78bfa; }
+.tour-tip .tour-actions { display: flex; gap: 10px; align-items: center; }
+.tour-tip .tour-actions .btn { flex: 1; }
+.tour-skip { background: none; border: 0; color: #94a3b8; font-size: 0.9rem; font-weight: 600; cursor: pointer; padding: 8px 4px; }
+.tour-skip:hover { color: #fff; }
+.tour-tip .tour-link { display: inline-block; margin-top: 12px; color: #a78bfa; font-weight: 700; font-size: 0.92rem; background: none; border: 0; cursor: pointer; padding: 0; text-align: left; }
+.tour-tip .tour-link:hover { color: #c4b5fd; }
+.tour-tip.centered { left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); }
+@media (max-width: 640px) {
+  .tour-tip { width: calc(100vw - 32px); left: 16px !important; right: 16px; top: auto !important; bottom: 16px; transform: none; }
+  .tour-tip.centered { transform: none; top: auto !important; bottom: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-highlight { transition: none; }
+}
+
 </style>
 </style>
   <link rel="icon" href="/logo.png">
@@ -710,6 +739,8 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
         <input type="range" id="dash-glass-edge" min="0" max="1" step="0.05" aria-label="Edge light"></label>
       <label class="dash-glass-tint">Glass tint <input type="color" id="dash-glass-tint" value="#ffffff" aria-label="Glass tint"></label>
       <button type="button" class="btn btn-dark" id="dash-glass-reset">Reset appearance</button>
+      <button type="button" class="btn btn-dark" id="dash-tour-replay" style="margin-top:10px;">Take the tour again</button>
+      <p class="muted" style="margin-top:8px;">Replay the 1-minute first-login tour of your dashboard.</p>
     </div>
 
     <!-- Practice reminders: off by default, and only ever a quiet
@@ -999,6 +1030,25 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 
 <!-- No dock on the dashboard: it is an app-like page, same as the mock-test and quiz pages. -->
 <div class="toast" id="toast" role="status"></div>
+
+<!-- First-login site tour (2026-11-25): spotlight overlay + tooltip.
+     Shown once after account creation + first login (see the tour
+     section in the dashboard script). Hidden until started. -->
+<div class="tour-dim" id="tour-dim" hidden></div>
+<div class="tour-highlight" id="tour-highlight" hidden></div>
+<div class="tour-tip" id="tour-tip" role="dialog" aria-modal="true" aria-labelledby="tour-title" hidden>
+  <p class="tour-steps" id="tour-steps"></p>
+  <div class="tour-title" id="tour-title"></div>
+  <p id="tour-body"></p>
+  <div class="tour-dots" id="tour-dots" aria-hidden="true"></div>
+  <div class="tour-actions">
+    <button type="button" class="tour-skip" id="tour-back">&larr; Back</button>
+    <button type="button" class="btn btn-white" id="tour-next">Next</button>
+  </div>
+  <button type="button" class="tour-link" id="tour-link" hidden></button>
+  <div><button type="button" class="tour-skip" id="tour-skip">Skip the tour</button></div>
+</div>
+
 <script src="/main.js"></script>
 <script src="/supabase.js"></script>
 <script src="/auth.js"></script>
@@ -2305,6 +2355,9 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     /* A chosen target subject focuses the whole dashboard on it. */
     if (profileRow && profileRow.target_subject) visibleSubjects = [profileRow.target_subject];
     renderAll();
+    /* First login with a completed profile: the site tour runs once
+       (it waits for the profile gate above to lift). */
+    maybeStartTour();
   }
   /* ---------- Per-subject entitlements ----------
      The plan card lists WHICH subjects are unlocked, not a generic
@@ -3504,6 +3557,243 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       renderAll();
     });
   });
+
+  /* ---------- First-login site tour (2026-11-25) ----------
+     Shown once, after account creation + first login, once the profile
+     is complete (the profile gate runs first, so the tour never
+     fights the profile form). Progress is stored on the profile row
+     (tour_completed, migration 014) with a guarded on-device mirror
+     (cy-tour-done-v1) so a failed write never nags the same device
+     twice. Replay lives in Settings -> Appearance. A step whose
+     target is hidden (customised away, small screen) is skipped. */
+  var TOUR_KEY = 'cy-tour-done-v1';
+  var tourActive = false, tourStep = 0, tourStartedThisLoad = false;
+  function tourMirrorDone() { try { return window.localStorage.getItem(TOUR_KEY) === '1'; } catch (e) { return false; } }
+  function tourMirrorSet() { try { window.localStorage.setItem(TOUR_KEY, '1'); } catch (e) {} }
+  function tourFirstName() {
+    var name = (profileRow && profileRow.full_name) || '';
+    if (!name && sessionUser && sessionUser.user_metadata) name = sessionUser.user_metadata.full_name || sessionUser.user_metadata.name || '';
+    return String(name || '').trim().split(/\s+/)[0] || 'there';
+  }
+  function tourSubjectSlug() { return (profileRow && profileRow.target_subject) || 'psychology'; }
+  function tourSubjectName() {
+    try { return SUBJECT_NAMES[tourSubjectSlug()] || 'Psychology'; } catch (e) { return 'Psychology'; }
+  }
+  var TOUR_STEPS = [
+    { id: 'welcome',
+      title: function () { return 'Welcome to ChangeYourself, ' + tourFirstName() + '!'; },
+      body: function () { return 'This is your home for UGC NET prep \u2014 mock tests, progress tracking and a private leaderboard. This 1-minute tour shows you where everything lives. You can skip any time.'; },
+      primary: 'Show me around' },
+    { id: 'plan', view: 'dashboard', target: 'dash-plan', title: 'Your plan',
+      body: 'Mock Tests 1\u20133 are free in every subject. \u20b9249 unlocks all 20 mock tests in one subject \u2014 a one-time payment, yours forever.' },
+    { id: 'progress', view: 'dashboard', target: 'dash-progress', title: 'Track your progress',
+      body: 'Your scores by subject live here. Finish all 20 sets in a subject to complete it \u2014 your best score per set is saved.' },
+    { id: 'badges', view: 'analytics', target: 'dash-badges-card', title: 'Badges, streaks & summaries',
+      body: 'Earn badges for milestones, keep your daily streak alive, and get a weekly summary plus recommendations on what to practise next.' },
+    { id: 'leaderboard', title: 'Compete privately',
+      body: 'The leaderboard ranks verified mock scores by alias only \u2014 never your name, email or photo. Rankings appear once at least 3 people have opted in.',
+      link: { label: 'See the leaderboard \u2192', href: '/changexed/leaderboard/' } },
+    { id: 'finish',
+      title: 'You\u2019re all set!',
+      body: function () { return 'Start with Mock Test 1 in ' + tourSubjectName() + ' \u2014 it\u2019s free, 150 questions, 3 hours, just like the real exam.'; },
+      primary: 'Start my first free mock test',
+      primaryHref: function () { return '/changexed/mock-tests/?subject=' + tourSubjectSlug(); } }
+  ];
+  function tourEl(id) { try { return document.getElementById(id); } catch (e) { return null; } }
+  function tourVisible(el) {
+    if (!el) return false;
+    try {
+      var cs = window.getComputedStyle(el);
+      return cs.display !== 'none' && cs.visibility !== 'hidden';
+    } catch (e) { return true; }
+  }
+  function tourMarkDone() {
+    tourMirrorSet();
+    try {
+      if (profileRow) profileRow.tour_completed = true;
+    } catch (e) {}
+    /* Best-effort server write (whitelisted in updateProfile). A
+       failure still leaves the on-device mirror, so the tour does
+       not nag this device again; a new device retries the write. */
+    try {
+      if (window.CYSupa && sessionUser && typeof window.CYSupa.updateProfile === 'function') {
+        window.CYSupa.updateProfile(sessionUser.id, sessionUser.email, { tour_completed: true }).catch(function () {});
+      }
+    } catch (e) {}
+  }
+  function tourHide() {
+    ['tour-dim', 'tour-highlight', 'tour-tip'].forEach(function (id) {
+      var el = tourEl(id);
+      if (el) el.hidden = true;
+    });
+    try { document.body.classList.remove('tour-open'); } catch (e) {}
+  }
+  function tourEnd(completed) {
+    if (!tourActive) return;
+    tourActive = false;
+    try { window.removeEventListener('keydown', tourOnKey); } catch (e) {}
+    try { window.removeEventListener('resize', tourReposition); } catch (e) {}
+    try { window.removeEventListener('scroll', tourReposition, true); } catch (e) {}
+    tourHide();
+    if (completed) tourMarkDone();
+  }
+  function tourOnKey(e) {
+    if (!tourActive) return;
+    try {
+      var t = e.target;
+      var tag = t && t.tagName ? String(t.tagName).toUpperCase() : '';
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+    } catch (err) {}
+    if (e.key === 'Escape') { e.preventDefault(); tourEnd(true); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); tourNext(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); tourBack(); }
+  }
+  function tourReposition() {
+    if (!tourActive) return;
+    try { tourPosition(TOUR_STEPS[tourStep], false); } catch (e) {}
+  }
+  function tourPosition(step, doScroll) {
+    var tip = tourEl('tour-tip'), hl = tourEl('tour-highlight'), dim = tourEl('tour-dim');
+    if (!tip) return;
+    var target = step && step.target ? tourEl(step.target) : null;
+    if (target && tourVisible(target)) {
+      if (doScroll) {
+        try { target.scrollIntoView({ block: 'nearest', behavior: 'auto' }); } catch (e) { try { target.scrollIntoView(); } catch (e2) {} }
+      }
+      var r = target.getBoundingClientRect();
+      var pad = 8;
+      if (hl) {
+        hl.hidden = false;
+        hl.style.left = Math.max(4, r.left - pad) + 'px';
+        hl.style.top = Math.max(4, r.top - pad) + 'px';
+        hl.style.width = Math.max(0, r.width + pad * 2) + 'px';
+        hl.style.height = Math.max(0, r.height + pad * 2) + 'px';
+      }
+      if (dim) dim.hidden = true;
+      tip.classList.remove('centered');
+      var vw = window.innerWidth || 1024, vh = window.innerHeight || 768;
+      var tw = Math.min(420, vw - 32);
+      var th = tip.offsetHeight || 220;
+      var left = Math.max(16, Math.min(r.left, vw - tw - 16));
+      var top = (r.bottom + 12 + th <= vh) ? (r.bottom + 12) : Math.max(16, r.top - th - 12);
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+      tip.style.right = 'auto';
+      tip.style.bottom = 'auto';
+    } else {
+      if (hl) hl.hidden = true;
+      if (dim) dim.hidden = false;
+      tip.classList.add('centered');
+      tip.style.left = '';
+      tip.style.top = '';
+      tip.style.right = '';
+      tip.style.bottom = '';
+    }
+  }
+  function tourShowStep(i) {
+    if (!tourActive) return;
+    if (i < 0 || i >= TOUR_STEPS.length) { tourEnd(true); return; }
+    tourStep = i;
+    var step = TOUR_STEPS[i];
+    if (step.view) {
+      try { if (typeof currentView === 'undefined' || currentView !== step.view) showView(step.view); } catch (e) {}
+    }
+    if (step.target && !tourVisible(tourEl(step.target))) { tourShowStep(i + 1); return; }
+    var title = typeof step.title === 'function' ? step.title() : step.title;
+    var body = typeof step.body === 'function' ? step.body() : step.body;
+    var tip = tourEl('tour-tip');
+    if (!tip) { tourEnd(false); return; }
+    var stepsEl = tourEl('tour-steps');
+    if (stepsEl) stepsEl.textContent = 'Step ' + (i + 1) + ' of ' + TOUR_STEPS.length;
+    var titleEl = tourEl('tour-title');
+    if (titleEl) titleEl.textContent = title || '';
+    var bodyEl = tourEl('tour-body');
+    if (bodyEl) bodyEl.textContent = body || '';
+    var dots = tourEl('tour-dots');
+    if (dots) {
+      dots.innerHTML = '';
+      TOUR_STEPS.forEach(function (s, j) {
+        var d = document.createElement('i');
+        if (j === i) d.className = 'on';
+        dots.appendChild(d);
+      });
+    }
+    var back = tourEl('tour-back');
+    if (back) back.style.visibility = i === 0 ? 'hidden' : 'visible';
+    var next = tourEl('tour-next');
+    if (next) next.textContent = step.primary || (i === TOUR_STEPS.length - 1 ? 'Done' : 'Next');
+    var link = tourEl('tour-link');
+    if (link) {
+      if (step.link) {
+        link.hidden = false;
+        link.textContent = step.link.label;
+      } else link.hidden = true;
+    }
+    tip.hidden = false;
+    /* Let the view switch + scroll settle before measuring. */
+    setTimeout(function () {
+      if (!tourActive || tourStep !== i) return;
+      try { tourPosition(step, true); } catch (e) {}
+      try { if (next) next.focus({ preventScroll: true }); } catch (e) { try { if (next) next.focus(); } catch (e2) {} }
+    }, 90);
+  }
+  function tourNext() {
+    if (!tourActive) return;
+    var step = TOUR_STEPS[tourStep];
+    if (tourStep >= TOUR_STEPS.length - 1) {
+      var href = step.primaryHref ? (typeof step.primaryHref === 'function' ? step.primaryHref() : step.primaryHref) : null;
+      tourEnd(true);
+      if (href) { try { window.location.href = href; } catch (e) {} }
+      return;
+    }
+    tourShowStep(tourStep + 1);
+  }
+  function tourBack() {
+    if (!tourActive) return;
+    if (tourStep > 0) tourShowStep(tourStep - 1);
+  }
+  function startTour(replay) {
+    if (tourActive) return;
+    tourActive = true;
+    tourStep = 0;
+    tourStartedThisLoad = true;
+    try { document.body.classList.add('tour-open'); } catch (e) {}
+    try { window.addEventListener('keydown', tourOnKey); } catch (e) {}
+    try { window.addEventListener('resize', tourReposition); } catch (e) {}
+    try { window.addEventListener('scroll', tourReposition, true); } catch (e) {}
+    tourShowStep(0);
+  }
+  function maybeStartTour() {
+    try {
+      if (tourStartedThisLoad || tourActive) return;
+      if (!sessionUser || !profileRow) return;
+      if (!profileComplete(profileRow)) return;
+      if (profileRow.tour_completed === true || tourMirrorDone()) return;
+      tourStartedThisLoad = true;
+      /* Let the dashboard finish its first render before the
+         overlay appears. */
+      setTimeout(function () { if (!tourActive) startTour(false); }, 400);
+    } catch (e) {}
+  }
+  (function tourWire() {
+    try {
+      var next = tourEl('tour-next');
+      if (next) next.addEventListener('click', function () { tourNext(); });
+      var back = tourEl('tour-back');
+      if (back) back.addEventListener('click', function () { tourBack(); });
+      var skip = tourEl('tour-skip');
+      if (skip) skip.addEventListener('click', function () { tourEnd(true); });
+      var link = tourEl('tour-link');
+      if (link) link.addEventListener('click', function () {
+        var step = TOUR_STEPS[tourStep];
+        var href = step && step.link ? step.link.href : null;
+        tourEnd(true);
+        if (href) { try { window.location.href = href; } catch (e) {} }
+      });
+      var replay = tourEl('dash-tour-replay');
+      if (replay) replay.addEventListener('click', function () { startTour(true); });
+    } catch (e) {}
+  })();
 
   loadDashboard();
 })();
