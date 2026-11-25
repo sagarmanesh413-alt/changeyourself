@@ -553,7 +553,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
    One small step after sign-up: only the required fields that are
    still missing (name and/or subject). Everything else is optional
    and lives in Settings. The subject picker buttons come from
-   auth.js (.auth-subj-select). */
+   auth.js (.auth-subj-dd). */
 .ob-back { position: fixed; inset: 0; z-index: 250; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(0, 0, 0, 0.72); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 .ob-back[hidden] { display: none; }
 .ob-card { width: min(480px, 100%); padding: 28px; border-radius: 20px; background: #0F172A; border: 1px solid rgba(255, 255, 255, 0.12); color: #f1f5f9; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
@@ -1080,8 +1080,8 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       <input type="text" id="dash-ob-name" autocomplete="name" placeholder="Your name">
     </div>
     <div id="dash-ob-subj-wrap" hidden>
-      <label for="dash-ob-subj">Choose your subject (UGC NET)</label>
-      <select class="auth-subj-select" id="dash-ob-subj" aria-label="Choose your subject (UGC NET)"></select>
+      <label for="dash-ob-subj-btn">Choose your subject (UGC NET)</label>
+      <div class="auth-subj-dd" id="dash-ob-subj-dd"></div>
     </div>
     <p class="auth-msg" id="dash-ob-msg" role="status"></p>
     <button class="btn btn-white" id="dash-ob-save" type="button">Continue to my dashboard</button>
@@ -3878,21 +3878,17 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     var hasSubject = profileRow && profileRow.target_subject;
     return { name: !hasName, subject: !hasSubject };
   }
+  var obSubjDd = null;
   function obBuildSubjects() {
-    var sel = $('dash-ob-subj');
-    if (!sel || sel.childNodes.length) return;
-    var ph = document.createElement('option');
-    ph.value = '';
-    ph.textContent = 'Choose your subject (UGC NET)';
-    sel.appendChild(ph);
-    SUBJECT_ORDER.filter(function (s) { return s !== 'most-probable'; }).forEach(function (slug) {
-      var o = document.createElement('option');
-      o.value = slug;
-      o.textContent = SUBJECT_NAMES[slug] || slug;
-      sel.appendChild(o);
+    var wrap = $('dash-ob-subj-dd');
+    if (!wrap || wrap.childNodes.length || !window.CYAuth || !window.CYAuth.buildSubjectDropdown) return;
+    var items = SUBJECT_ORDER.filter(function (s) { return s !== 'most-probable'; }).map(function (slug) {
+      return [slug, SUBJECT_NAMES[slug] || slug];
     });
+    obSubjDd = window.CYAuth.buildSubjectDropdown(wrap, 'dash-ob-subj', items, 'Choose your subject (UGC NET)');
   }
   function obSelectSubject(slug) {
+    if (obSubjDd) { obSubjDd.set(slug || ''); return; }
     var sel = $('dash-ob-subj');
     if (sel) sel.value = slug || '';
   }
