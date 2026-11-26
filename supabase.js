@@ -217,6 +217,7 @@
           .then(function (r) {
             if (r.error) {
               var msg = String(r.error.message || "");
+              if (/sign-in required/i.test(msg)) return { ok: false, signInRequired: true };
               if (/not entitled/i.test(msg)) return { ok: false, notEntitled: true };
               return { ok: false, error: msg };
             }
@@ -245,7 +246,11 @@
           p_answers: answers, p_duration_seconds: durationSeconds,
           p_client_key: clientKey || api._clientKey()
         }).then(function (r) {
-          if (r.error) return { ok: false, error: String(r.error.message || r.error) };
+          if (r.error) {
+            var msg = String(r.error.message || r.error);
+            if (/sign-in required/i.test(msg)) return { ok: false, signInRequired: true };
+            return { ok: false, error: msg };
+          }
           return { ok: true, result: r.data };
         }).catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
       });
