@@ -1656,8 +1656,33 @@ void main(){
         window.CYSupa.getQuestionSet(subject, n).then(function (res) {
           if (res && res.ok && res.questions && res.questions.length) { cb(res.questions); return; }
           if (res && res.notEntitled) { window.__unlockSubject = subject; showUnlock(n); return; }
+          /* Server backstop (2026-11-26, login-only): the session may have
+             expired after the exam started. Open sign-in instead of the
+             generic load error; the attempt is preserved for retry. */
+          if (res && res.signInRequired) { openSignInModal(); return; }
           tryOfflinePackage(subject, n, cb);
         }).catch(function () { tryOfflinePackage(subject, n, cb); });
+      }
+
+      /* ---------- Sign-in gate (2026-11-26) ----------
+         Mock tests are login-only: no anonymous attempts. The server
+         enforces it (get_question_set / submit_mock_attempt raise
+         'sign-in required' for signed-out callers); this gate is the
+         friendly front door — it opens the sign-in modal instead of
+         starting the test. The check is async (getUser reads the stored
+         session); on any error the flow continues and the server decides. */
+      function openSignInModal() {
+        if (window.CYAuth && window.CYAuth.openModal) { window.CYAuth.openModal(); return; }
+        var b = $('loginBtn');
+        if (b) b.click();
+      }
+      function requireSignIn(cb) {
+        if (!window.CYSupa || !window.CYSupa.getUser) { cb(); return; }
+        window.CYSupa.getUser().then(function (user) {
+          if (user) { cb(); return; }
+          if (window.CYToast) window.CYToast('Sign in to take mock tests — sets 1–3 are free.');
+          openSignInModal();
+        }).catch(function () { cb(); });
       }
 
       /* If the server cannot be reached, try a downloaded package before
@@ -1687,6 +1712,9 @@ void main(){
       var lastResult = null;
 
       function startSet(n) {
+        requireSignIn(function () { startSetSignedIn(n); });
+      }
+      function startSetSignedIn(n) {
         var cfg = subjectConfig(currentSubject);
         if (!cfg.free && n > 3) { window.__unlockSubject = currentSubject; showUnlock(n); return; }
         if (!currentSubject) return;
@@ -1967,6 +1995,9 @@ void main(){
         } catch (e) { return null; }
       }
       function resumeSavedExam(saved) {
+        requireSignIn(function () { resumeSavedExamSignedIn(saved); });
+      }
+      function resumeSavedExamSignedIn(saved) {
         if (!saved) return;
         currentSubject = saved.subject;
         TOTAL_Q = saved.totalQ; TOTAL_TIME = Math.max(1, Math.round((saved.endAt - Date.now()) / 1000));
@@ -2025,6 +2056,10 @@ void main(){
         if (exam.offline) { finishOfflineExam(auto, taken, answers); return; }
         if (!window.CYSupa || !window.CYSupa.submitMockAttempt) { showGradeError(auto); return; }
         window.CYSupa.submitMockAttempt(subject, setNum, answers, taken, exam.clientKey).then(function (res) {
+          /* Session expired mid-exam (login-only): open sign-in and keep
+             the grade-error overlay, so the user can sign in and retry —
+             answers are preserved, the exam is not marked finished. */
+          if (res && res.signInRequired) { openSignInModal(); showGradeError(auto); return; }
           if (!res || !res.ok || !res.result) { showGradeError(auto); return; }
           var r = res.result;
           exam.finished = true;
