@@ -559,6 +559,12 @@ body { padding-top: 76px; }
   html[data-theme="light"] .subject-picker { background: #ffffff; border-color: rgba(0, 0, 0, 0.10); }
   /* Subject dropdown stays black text on light with purple hover (do not regress). */
   html[data-theme="light"] .exam-bar { background: #ffffff; color: #111111; }
+  /* Focus button (2026-11-28): the dark-theme rule sets white text on a
+     transparent background, which is invisible on the white light-theme
+     bar (contrast 1.00:1 — the button was there and clickable but users
+     could not see it). Dark text + dark border on light. */
+  html[data-theme="light"] .focus-btn { color: #111111; border-color: rgba(0, 0, 0, 0.35); background: rgba(0, 0, 0, 0.04); }
+  html[data-theme="light"] .focus-btn[aria-pressed="true"] { background: #7C3AED; border-color: #7C3AED; color: #ffffff; }
   html[data-theme="light"] .timer { background: rgba(0, 0, 0, 0.08); }
   html[data-theme="light"] .submit-btn { background: #7C3AED; color: #ffffff; }
   html[data-theme="light"] .submit-btn:hover { background: #6D28D9; }
@@ -1471,6 +1477,11 @@ void main(){
 
       /* ---------- Screen switching ---------- */
       function showScreen(name) {
+        /* Leaving the exam always exits Focus Mode, or the results/home
+           screens would keep the site nav hidden (focus-mode hides .nav).
+           setFocusMode is hoisted in this IIFE; the typeof guard keeps
+           this safe if it ever moves scope. */
+        if (name !== 'exam' && typeof setFocusMode === 'function') { try { setFocusMode(false); } catch (e) {} }
         var screens = ['home', 'exam', 'results'];
         for (var i = 0; i < screens.length; i++) {
           $('screen-' + screens[i]).className = 'screen' + (screens[i] === name ? ' active' : '');
@@ -2205,6 +2216,9 @@ void main(){
         /* A modal is open if any modal-back carries the 'open' class
            (openModal lives in a separate IIFE below, so check the DOM). */
         if (document.querySelector('.modal-back.open')) return;
+        /* Escape exits Focus Mode (no modal open at this point — a modal
+           takes precedence). setFocusMode is hoisted in this IIFE. */
+        if (e.key === 'Escape' && document.body.classList.contains('focus-mode')) { e.preventDefault(); setFocusMode(false); return; }
         var ae = document.activeElement;
         if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'SELECT' || ae.tagName === 'TEXTAREA')) return;
         if (ae && ae.closest && ae.closest('.nav')) return;
