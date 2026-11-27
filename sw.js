@@ -5,13 +5,13 @@
  * or any Supabase/API response — those come from IndexedDB packages and
  * the server, not the cache.
  *
- * Version the cache name (cy-shell-v1) whenever the shell changes; the
+ * Version the cache name (cy-shell-v2) whenever the shell changes; the
  * activate handler deletes older caches. Install is per-file and
  * failure-tolerant, so a deployment-protection wall (staging preview)
  * cannot break the whole install — files that cannot be fetched are
  * simply skipped.
  */
-var CACHE = 'cy-shell-v1';
+var CACHE = 'cy-shell-v2';
 var SHELL = [
   '/changexed/mock-tests/',
   '/changexed/',
