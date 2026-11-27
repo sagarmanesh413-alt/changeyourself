@@ -528,12 +528,27 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 .tour-dim { position: fixed; inset: 0; z-index: 300; background: rgba(0, 0, 0, 0.72); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
 .tour-highlight { position: fixed; z-index: 301; border: 2px solid #a78bfa; border-radius: 16px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72); pointer-events: none; transition: top .25s ease, left .25s ease, width .25s ease, height .25s ease; }
 .tour-tip { position: fixed; z-index: 302; width: min(420px, calc(100vw - 32px)); background: #0F172A; color: #f1f5f9; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5); }
+/* Arrow pointing at the spotlighted target. JS sets the placement class
+   (tour-pos-below/above/right/left) and positions the arrow with
+   --tour-arrow-left / --tour-arrow-top. Never shown for centred or
+   bottom-sheet steps. */
+.tour-tip::after { content: ""; position: absolute; width: 0; height: 0; border: 9px solid transparent; display: none; }
+.tour-tip.tour-pos-below::after { display: block; top: -18px; left: var(--tour-arrow-left, 24px); border-bottom-color: #0F172A; }
+.tour-tip.tour-pos-above::after { display: block; bottom: -18px; left: var(--tour-arrow-left, 24px); border-top-color: #0F172A; }
+.tour-tip.tour-pos-right::after { display: block; left: -18px; top: var(--tour-arrow-top, 24px); border-right-color: #0F172A; }
+.tour-tip.tour-pos-left::after { display: block; right: -18px; top: var(--tour-arrow-top, 24px); border-left-color: #0F172A; }
+/* Auto-advance progress (2026-11-28): a thin bar that fills over the
+   step's dwell time, so the next step never arrives as a surprise. */
+.tour-progress { height: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); overflow: hidden; margin: 0 0 12px; }
+.tour-progress i { display: block; height: 100%; width: 0; background: #a78bfa; border-radius: inherit; }
+.tour-progress[hidden] { display: none; }
 .tour-tip .tour-title { font-size: 1.1rem; font-weight: 700; margin: 0 0 8px; color: #fff; }
 .tour-tip p { font-size: 0.95rem; line-height: 1.55; color: #cbd5e1; margin: 0 0 16px; }
 .tour-tip .tour-steps { font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px; }
 .tour-tip .tour-dots { display: flex; gap: 6px; margin-bottom: 16px; }
-.tour-tip .tour-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); }
-.tour-tip .tour-dots i.on { background: #a78bfa; }
+.tour-tip .tour-dots button { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); border: 0; padding: 0; cursor: pointer; }
+.tour-tip .tour-dots button.on { background: #a78bfa; }
+.tour-tip .tour-dots button:focus-visible { outline: 2px solid #a78bfa; outline-offset: 2px; }
 .tour-tip .tour-actions { display: flex; gap: 10px; align-items: center; }
 .tour-tip .tour-actions .btn { flex: 1; }
 .tour-skip { background: none; border: 0; color: #94a3b8; font-size: 0.9rem; font-weight: 600; cursor: pointer; padding: 8px 4px; }
@@ -542,8 +557,18 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 .tour-tip .tour-link:hover { color: #c4b5fd; }
 .tour-tip.centered { left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); }
 @media (max-width: 640px) {
-  .tour-tip { width: calc(100vw - 32px); left: 16px !important; right: 16px; top: auto !important; bottom: 16px; transform: none; }
-  .tour-tip.centered { transform: none; top: auto !important; bottom: 16px; }
+  /* Bottom sheet: the sheet geometry lives HERE, with !important, so the
+     inline top/bottom the desktop positioner writes can never shove the
+     card off-screen. (Before this fix the inline bottom:auto beat the
+     un-!important bottom:16px while top:auto !important killed the
+     inline top, so targeted steps landed thousands of pixels down the
+     document and Next was unreachable. Centred steps also sat at
+     left:50% with transform:none — half off-screen to the right.)
+     JS never positions the card on phones; it only scrolls the target
+     clear of the sheet. */
+  .tour-tip { width: calc(100vw - 32px); left: 16px !important; right: 16px; top: auto !important; bottom: 16px !important; transform: none; max-height: calc(100vh - 32px); overflow-y: auto; }
+  .tour-tip.centered { left: 16px !important; transform: none; top: auto !important; bottom: 16px !important; }
+  .tour-tip::after { display: none !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   .tour-highlight { transition: none; }
@@ -1057,10 +1082,11 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 <div class="tour-dim" id="tour-dim" hidden></div>
 <div class="tour-highlight" id="tour-highlight" hidden></div>
 <div class="tour-tip" id="tour-tip" role="dialog" aria-modal="true" aria-labelledby="tour-title" hidden>
+  <div class="tour-progress" id="tour-progress" hidden><i id="tour-progress-fill"></i></div>
   <p class="tour-steps" id="tour-steps"></p>
   <div class="tour-title" id="tour-title"></div>
   <p id="tour-body"></p>
-  <div class="tour-dots" id="tour-dots" aria-hidden="true"></div>
+  <div class="tour-dots" id="tour-dots" role="group" aria-label="Tour steps"></div>
   <div class="tour-actions">
     <button type="button" class="tour-skip" id="tour-back">&larr; Back</button>
     <button type="button" class="btn btn-white" id="tour-next">Next</button>
@@ -3617,16 +3643,26 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     });
   });
 
-  /* ---------- First-login site tour (2026-11-25) ----------
+  /* ---------- First-login site tour (2026-11-25, reworked 2026-11-28) ----------
      Shown once, after account creation + first login, once the profile
      is complete (the profile gate runs first, so the tour never
      fights the profile form). Progress is stored on the profile row
      (tour_completed, migration 014) with a guarded on-device mirror
      (cy-tour-done-v1) so a failed write never nags the same device
      twice. Replay lives in Settings -> Appearance. A step whose
-     target is hidden (customised away, small screen) is skipped. */
+     target is hidden (customised away, small screen) is skipped.
+     Placement (2026-11-28): the tooltip NEVER covers its target — the
+     positioner tries below, above, beside-right, beside-left, and only
+     then a bottom sheet; on phones the card is a CSS bottom sheet and
+     JS only scrolls the target clear of it. Navigation: Next/Back,
+     clickable dots, ArrowRight/ArrowLeft, and a gentle 7s auto-advance
+     with a visible progress bar (pauses on hover/focus, while a modal
+     is open, or in a hidden tab; never past the final step, which
+     carries the CTA, and off entirely under prefers-reduced-motion). */
   var TOUR_KEY = 'cy-tour-done-v1';
   var tourActive = false, tourStep = 0, tourStartedThisLoad = false;
+  var TOUR_AUTO_MS = 7000;
+  var tourAutoTimer = null, tourAutoEndsAt = 0, tourAutoLeft = 0, tourAutoPaused = false;
   function tourMirrorDone() { try { return window.localStorage.getItem(TOUR_KEY) === '1'; } catch (e) { return false; } }
   function tourMirrorSet() { try { window.localStorage.setItem(TOUR_KEY, '1'); } catch (e) {} }
   function tourFirstName() {
@@ -3690,6 +3726,7 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
   function tourEnd(completed) {
     if (!tourActive) return;
     tourActive = false;
+    tourAutoStop();
     try { window.removeEventListener('keydown', tourOnKey); } catch (e) {}
     try { window.removeEventListener('resize', tourReposition); } catch (e) {}
     try { window.removeEventListener('scroll', tourReposition, true); } catch (e) {}
@@ -3711,13 +3748,46 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     if (!tourActive) return;
     try { tourPosition(TOUR_STEPS[tourStep], false); } catch (e) {}
   }
+  function tourInstantScroll(fn) {
+    /* The page uses smooth scrolling (styles.css); the tour measures the
+       target rect in the same tick as its scroll, so a smooth (animated)
+       scroll leaves the tooltip placed against the pre-scroll rect until
+       a scroll event re-positions it — a visible jump on every targeted
+       step. Tour moves scroll instantly by briefly overriding
+       scroll-behavior, then restore it. */
+    var docEl = null, prev = '';
+    try { docEl = document.documentElement; prev = docEl.style.scrollBehavior || ''; docEl.style.scrollBehavior = 'auto'; } catch (e) {}
+    try { fn(); } catch (e) {}
+    try { if (docEl) docEl.style.scrollBehavior = prev; } catch (e) {}
+  }
+  function tourClearSheet(step, target, tip, vh) {
+    /* Keep the spotlighted target visible above a bottom sheet.
+       Only ever called on a step change (doScroll), never on plain
+       scroll/resize, so it cannot fight the user's own scrolling. */
+    try {
+      var th = tip.offsetHeight || 220;
+      var sheetTop = vh - th - 16;
+      var r = target.getBoundingClientRect();
+      if (r.height > sheetTop - 12 - 16) {
+        /* Target taller than the space above the sheet (e.g. the 891px
+           badges card on a phone): show its TOP — scrolling by the full
+           overlap would push the heading off-screen. */
+        tourInstantScroll(function () { window.scrollBy(0, r.top - 16); });
+      } else {
+        var overlap = r.bottom - (sheetTop - 12);
+        if (overlap > 0) tourInstantScroll(function () { window.scrollBy(0, overlap); });
+      }
+    } catch (e) {}
+  }
   function tourPosition(step, doScroll) {
     var tip = tourEl('tour-tip'), hl = tourEl('tour-highlight'), dim = tourEl('tour-dim');
     if (!tip) return;
     var target = step && step.target ? tourEl(step.target) : null;
     if (target && tourVisible(target)) {
       if (doScroll) {
-        try { target.scrollIntoView({ block: 'nearest', behavior: 'auto' }); } catch (e) { try { target.scrollIntoView(); } catch (e2) {} }
+        tourInstantScroll(function () {
+          try { target.scrollIntoView({ block: 'nearest', behavior: 'auto' }); } catch (e) { try { target.scrollIntoView(); } catch (e2) {} }
+        });
       }
       var r = target.getBoundingClientRect();
       var pad = 8;
@@ -3731,10 +3801,53 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       if (dim) dim.hidden = true;
       tip.classList.remove('centered');
       var vw = window.innerWidth || 1024, vh = window.innerHeight || 768;
+      /* Phones: the card is a CSS bottom sheet (see the media query) —
+         JS must NOT write inline top/bottom/left here, or the inline
+         values fight the sheet rules and the card lands off-screen.
+         Just clear the desktop inline styles and scroll the target
+         clear of the sheet. */
+      if (vw <= 640) {
+        tip.style.left = ''; tip.style.top = ''; tip.style.right = ''; tip.style.bottom = '';
+        tip.classList.remove('tour-pos-below', 'tour-pos-above', 'tour-pos-right', 'tour-pos-left');
+        if (doScroll) tourClearSheet(step, target, tip, vh);
+        return;
+      }
+      /* Desktop: take the first placement that fits WITHOUT covering
+         the target — below, above, beside-right, beside-left. The old
+         code only tried below/above and clamped the "above" fallback
+         to top:16, which dropped the tooltip on top of tall cards
+         (the 689px badges card was covered by 116,000 px^2). */
       var tw = Math.min(420, vw - 32);
       var th = tip.offsetHeight || 220;
+      var gap = 12;
       var left = Math.max(16, Math.min(r.left, vw - tw - 16));
-      var top = (r.bottom + 12 + th <= vh) ? (r.bottom + 12) : Math.max(16, r.top - th - 12);
+      var top = -1, pos = '';
+      if (r.bottom + gap + th <= vh - 8) { top = r.bottom + gap; pos = 'below'; }
+      else if (r.top - gap - th >= 8) { top = r.top - gap - th; pos = 'above'; }
+      else if (r.right + gap + tw <= vw - 8) { left = r.right + gap; top = Math.max(16, Math.min(r.top, vh - th - 16)); pos = 'right'; }
+      else if (r.left - gap - tw >= 8) { left = r.left - gap - tw; top = Math.max(16, Math.min(r.top, vh - th - 16)); pos = 'left'; }
+      else {
+        /* Nothing fits around the target as it stands (tall target in
+           a short viewport): scroll it to the top and try below again;
+           otherwise fall back to a bottom sheet and scroll the target
+           up as far as it will go. */
+        tourInstantScroll(function () { try { window.scrollBy(0, r.top - 16); } catch (e) {} });
+        r = target.getBoundingClientRect();
+        if (r.bottom + gap + th <= vh - 8) { top = r.bottom + gap; left = Math.max(16, Math.min(r.left, vw - tw - 16)); pos = 'below'; }
+        else { left = Math.max(16, Math.min(r.left, vw - tw - 16)); top = Math.max(16, vh - th - 16); pos = 'sheet'; if (doScroll) tourClearSheet(step, target, tip, vh); }
+      }
+      tip.classList.remove('tour-pos-below', 'tour-pos-above', 'tour-pos-right', 'tour-pos-left');
+      if (pos && pos !== 'sheet') tip.classList.add('tour-pos-' + pos);
+      /* Arrow: point at the target's centre, clamped inside the card. */
+      try {
+        if (pos === 'below' || pos === 'above') {
+          var ax = Math.max(24, Math.min(r.left + r.width / 2 - left, tw - 24)) - 9;
+          tip.style.setProperty('--tour-arrow-left', ax + 'px');
+        } else if (pos === 'right' || pos === 'left') {
+          var ay = Math.max(24, Math.min(r.top + r.height / 2 - top, th - 24)) - 9;
+          tip.style.setProperty('--tour-arrow-top', ay + 'px');
+        }
+      } catch (e) {}
       tip.style.left = left + 'px';
       tip.style.top = top + 'px';
       tip.style.right = 'auto';
@@ -3743,11 +3856,48 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       if (hl) hl.hidden = true;
       if (dim) dim.hidden = false;
       tip.classList.add('centered');
+      tip.classList.remove('tour-pos-below', 'tour-pos-above', 'tour-pos-right', 'tour-pos-left');
       tip.style.left = '';
       tip.style.top = '';
       tip.style.right = '';
       tip.style.bottom = '';
     }
+  }
+  function tourAutoStop() {
+    try { if (tourAutoTimer) clearInterval(tourAutoTimer); } catch (e) {}
+    tourAutoTimer = null;
+    var bar = tourEl('tour-progress');
+    if (bar) bar.hidden = true;
+  }
+  function tourAutoStart() {
+    tourAutoStop();
+    /* No auto-advance on the final step (it carries the CTA — advancing
+       would navigate the user away), while a modal is open, or when the
+       user asked for reduced motion. */
+    if (tourStep >= TOUR_STEPS.length - 1) return;
+    try { if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (e) {}
+    var bar = tourEl('tour-progress'), fill = tourEl('tour-progress-fill');
+    if (!bar || !fill) return;
+    bar.hidden = false;
+    tourAutoLeft = TOUR_AUTO_MS;
+    tourAutoEndsAt = Date.now() + TOUR_AUTO_MS;
+    tourAutoPaused = false;
+    fill.style.width = '0%';
+    tourAutoTimer = setInterval(function () {
+      if (!tourActive) { tourAutoStop(); return; }
+      if (tourAutoPaused || document.hidden) { tourAutoEndsAt = Date.now() + tourAutoLeft; return; }
+      try {
+        if (document.querySelector('.ob-back:not([hidden])') || document.querySelector('.modal-back.open')) { tourAutoEndsAt = Date.now() + tourAutoLeft; return; }
+      } catch (e) {}
+      var left = tourAutoEndsAt - Date.now();
+      if (left <= 0) { tourAutoStop(); tourNext(); return; }
+      tourAutoLeft = left;
+      fill.style.width = Math.round((1 - left / TOUR_AUTO_MS) * 100) + '%';
+    }, 100);
+  }
+  function tourAutoPause(on) {
+    tourAutoPaused = !!on;
+    if (!on) tourAutoEndsAt = Date.now() + tourAutoLeft;
   }
   function tourShowStep(i) {
     if (!tourActive) return;
@@ -3772,8 +3922,11 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     if (dots) {
       dots.innerHTML = '';
       TOUR_STEPS.forEach(function (s, j) {
-        var d = document.createElement('i');
+        var d = document.createElement('button');
+        d.type = 'button';
+        d.setAttribute('aria-label', 'Go to step ' + (j + 1) + ' of ' + TOUR_STEPS.length);
         if (j === i) d.className = 'on';
+        d.addEventListener('click', function () { tourShowStep(j); });
         dots.appendChild(d);
       });
     }
@@ -3789,12 +3942,23 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       } else link.hidden = true;
     }
     tip.hidden = false;
+    /* Arm the gentle auto-advance for this step (a no-op on the final
+       step, under reduced motion, or while a modal is open). Any manual
+       move re-arms it from the start. */
+    tourAutoStart();
     /* Let the view switch + scroll settle before measuring. */
     setTimeout(function () {
       if (!tourActive || tourStep !== i) return;
       try { tourPosition(step, true); } catch (e) {}
       try { if (next) next.focus({ preventScroll: true }); } catch (e) { try { if (next) next.focus(); } catch (e2) {} }
     }, 90);
+    /* Layout can still settle after the first measure (images, fonts,
+       late renders) and move the target under the tooltip — re-measure
+       once the page has had a moment to settle. No scrolling here. */
+    setTimeout(function () {
+      if (!tourActive || tourStep !== i) return;
+      try { tourPosition(step, false); } catch (e) {}
+    }, 700);
   }
   function tourNext() {
     if (!tourActive) return;
@@ -3851,6 +4015,22 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       });
       var replay = tourEl('dash-tour-replay');
       if (replay) replay.addEventListener('click', function () { startTour(true); });
+      /* Auto-advance pauses while the user is reading the card: hovering
+         it, or tabbing into any control except Next. Next is the default
+         focus each step, so pausing on it would stop the tour for
+         everyone — resting on Next still advances, and focus moves to
+         the next step's Next. Tabbing to Back, a dot or Skip pauses. */
+      var tip = tourEl('tour-tip');
+      if (tip) {
+        tip.addEventListener('mouseenter', function () { tourAutoPause(true); });
+        tip.addEventListener('mouseleave', function () { tourAutoPause(false); });
+        tip.addEventListener('focusin', function (e) {
+          if (e.target && e.target.id !== 'tour-next') tourAutoPause(true);
+        });
+        tip.addEventListener('focusout', function (e) {
+          if (e.target && e.target.id !== 'tour-next') tourAutoPause(false);
+        });
+      }
     } catch (e) {}
   })();
 
