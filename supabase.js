@@ -179,10 +179,11 @@
       });
     },
 
-    /* ---------- Plan (per-subject, F-06) ----------
-       The product is 'mocktests:<subject>' (e.g. 'mocktests:psychology'),
-       one entitlement per subject at ₹249. The old single product
-       'mocktests' no longer exists. */
+    /* ---------- Plan (legacy entitlement reads) ----------
+       Entitlements are no longer sold — the Test Series is free since
+       28 Nov 2026, so no new entitlement rows are created. These reads
+       stay for the dashboard plan card, which shows the free copy when
+       there are none. */
     getEntitlement: function (userId, subject) {
       if (!subject) return Promise.resolve(null);
       return loadClient().then(function (c) {
@@ -208,8 +209,10 @@
 
     /* ---------- Questions (server-side, F-01) ----------
        Fetches ONE set from the server (get_question_set) WITHOUT the answer
-       keys. The server enforces the free/paid rule. Returns
-       { ok, questions } or { ok:false, notEntitled:true } / { ok:false, error }. */
+       keys. The server enforces sign-in only (all mock tests are free).
+       Returns { ok, questions } or { ok:false, signInRequired:true } /
+       { ok:false, error }. The notEntitled mapping below is a defensive
+       backstop — the server no longer sends it to signed-in users. */
     getQuestionSet: function (subject, setNumber) {
       return loadClient().then(function (c) {
         if (!c) return { ok: false, error: "no-client" };
@@ -217,6 +220,7 @@
           .then(function (r) {
             if (r.error) {
               var msg = String(r.error.message || "");
+              if (/sign-in required/i.test(msg)) return { ok: false, signInRequired: true };
               if (/not entitled/i.test(msg)) return { ok: false, notEntitled: true };
               return { ok: false, error: msg };
             }
@@ -245,7 +249,11 @@
           p_answers: answers, p_duration_seconds: durationSeconds,
           p_client_key: clientKey || api._clientKey()
         }).then(function (r) {
-          if (r.error) return { ok: false, error: String(r.error.message || r.error) };
+          if (r.error) {
+            var msg = String(r.error.message || r.error);
+            if (/sign-in required/i.test(msg)) return { ok: false, signInRequired: true };
+            return { ok: false, error: msg };
+          }
           return { ok: true, result: r.data };
         }).catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
       });
@@ -253,9 +261,8 @@
     /* ---------- Offline packages (2026-11-25) ----------
        get_offline_package returns a downloadable package for one mock
        test — questions WITHOUT answer keys or explanations. The server
-       requires sign-in and enforces the subject entitlement; a free
-       set (1–3) is downloadable by any signed-in user. The package
-       carries package_md5 so a stale package is caught at sync time. */
+       requires sign-in; every set is downloadable by any signed-in user.
+       The package carries package_md5 so a stale package is caught at sync time. */
     getOfflinePackage: function (subject, setNumber) {
       return loadClient().then(function (c) {
         if (!c) return { ok: false, error: "no-client" };
@@ -275,7 +282,7 @@
     /* Sync an offline attempt: the server first checks the package
        version (a stale package is rejected, never graded against
        different questions), then delegates to submit_mock_attempt —
-       same entitlement check, same server-side grading, same
+       same sign-in check, same server-side grading, same
        idempotency via the client key. */
     submitOfflineMockAttempt: function (subject, setNumber, answers, durationSeconds, clientKey, packageMd5) {
       return loadClient().then(function (c) {
