@@ -468,7 +468,7 @@ body { padding-top: 76px; }
 }
 </style>
 <style>
-/* ---------- Free tier: sets 1-3 free, sets 4-20 locked (Rs 249 plan) ---------- */
+/* ---------- Badges: .locked is used by the offline section (Sync failed / Expired). All mock tests are free — there is no lock tier. ---------- */
 .badge.locked { background: rgba(245, 158, 11, 0.16); color: #fbbf24; }
 .start-btn.lock-btn { background: transparent; border: 1px solid var(--purple); color: #c4b5fd; }
 .free-note { margin-top: 12px; font-size: 0.95rem; color: var(--ink-soft); }
@@ -1188,7 +1188,7 @@ void main(){
           <h1>UGC NET Test Series</h1>
           <p class="by-changexed">by ChangeXed</p>
           <p class="sub">10 subjects · 20 full mock papers each, plus the 100 Most Probable Questions test, on the December 2026 syllabus — Paper 1 (General) + Paper 2, with real previous-year questions and new practice questions, each with an explanation. Pick a subject, sit the papers like the real exam, and learn from the full review afterwards.</p>
-          <p class="free-note">Mock Tests 1–3 are free. <a href="/pricing/">Unlock all 20 for ₹249</a>.</p>
+          <p class="free-note">All 20 mock tests are free in every subject. Sign in and start.</p>
           <div class="format-grid">
             <div class="format-cell"><b>150</b><span>Questions per paper</span></div>
             <div class="format-cell"><b>180 min</b><span>3 hours, auto-submit</span></div>
@@ -1211,7 +1211,7 @@ void main(){
           </div>
         </section>
         <p class="home-note"><a href="/changexed/leaderboard/">See the leaderboard →</a> — opt in to appear under a public alias. Only verified mock-test scores are ranked.</p>
-        <p class="home-note"><a href="/#platform">See everything you get →</a> — the full mock-test experience, offline mode, leaderboard, dashboard and achievements, with free and ₹249 options.</p>
+        <p class="home-note"><a href="/#platform">See everything you get →</a> — the full mock-test experience, offline mode, leaderboard, dashboard and achievements — all free.</p>
         <p class="home-note">Your best score for each set is saved on this device. During a test you can jump between questions with the palette, mark questions for review, and switch between Paper 1 and Paper 2 at any time — just like the real exam.</p>
       </div>
     </main>
@@ -1423,7 +1423,7 @@ void main(){
 
       /* ---------- Constants ---------- */
       var TOTAL_Q = 150, TOTAL_TIME = 180 * 60; // seconds
-      var PRICE_PER_SUBJECT = 249; // single source of truth for the price (₹249 per subject, one-time)
+      /* All mock tests are free (28 Nov 2026) — sign-in is the only gate. */
       var P1_UNITS = { I: 'Teaching Aptitude', II: 'Research Aptitude', III: 'Comprehension', IV: 'Communication', V: 'Mathematical Reasoning and Aptitude', VI: 'Logical Reasoning', VII: 'Data Interpretation', VIII: 'Information and Communication Technology (ICT)', IX: 'People, Development and Environment', X: 'Higher Education System' };
       var P2_UNITS = { '1': 'Emergence of Psychology', '2': 'Research Methodology and Statistics', '3': 'Psychological Testing', '4': 'Biological Basis of Behaviour', '5': 'Attention, Perception, Learning, Memory and Forgetting', '6': 'Thinking, Intelligence and Creativity', '7': 'Personality, Motivation, Emotion, Stress and Coping', '8': 'Social Psychology', '9': 'Human Development and Interventions', '10': 'Emerging Areas' };
       var LETTERS = ['A', 'B', 'C', 'D'];
@@ -1514,14 +1514,13 @@ void main(){
         }
         for (var n = 1; n <= cfg.sets; n++) {
           var b = best[currentSubject + ':' + n];
-          var locked = !cfg.free && n > 3;
           html += '<article class="set-card">' +
             '<div class="top"><h3>Mock Test ' + n + '</h3>' +
-            (locked ? '<span class="badge locked">Locked \u00b7 \u20b9' + PRICE_PER_SUBJECT + '</span>' : (b ? '<span class="badge done">Attempted</span>' : '<span class="badge fresh">Not attempted</span>')) + '</div>' +
+            (b ? '<span class="badge done">Attempted</span>' : '<span class="badge fresh">Not attempted</span>') + '</div>' +
             '<div class="meta">Paper 1 + Paper 2 \u00b7 ' + cfg.totalQ + ' questions \u00b7 ' + (cfg.totalQ * 2) + ' marks \u00b7 ' + cfg.timeMin + ' min</div>' +
             (b ? '<div class="best">Best score: <b>' + b.score + ' / ' + (cfg.totalQ * 2) + '</b> (' + b.pct + '%)</div>'
                : '<div class="best" style="color:var(--ink-soft)">No attempt yet \u2014 best score will appear here.</div>') +
-            '<button type="button" class="start-btn' + (locked ? ' lock-btn' : '') + '" data-set="' + n + '">' + (locked ? 'Unlock Mock Test ' + n + ' \u2014 \u20b9' + PRICE_PER_SUBJECT : (b ? 'Retake Mock Test ' + n : 'Start Mock Test ' + n)) + '</button>' +
+            '<button type="button" class="start-btn" data-set="' + n + '">' + (b ? 'Retake Mock Test ' + n : 'Start Mock Test ' + n) + '</button>' +
             '<button type="button" class="dl-btn" data-dl-set="' + n + '" data-dl-subject="' + currentSubject + '">Download for offline</button>' +
             '</article>';
         }
@@ -1541,9 +1540,9 @@ void main(){
       /* ---------- Offline downloads + sync (2026-11-25) ----------
          Download buttons live on the set cards; the downloaded-tests
          section lists what is on this device with its expiry and sync
-         state. The server is the authority for every download (sign-in +
-         entitlement are checked by get_offline_package), and for every
-         sync (submit_offline_mock_attempt re-checks the entitlement and
+         state. The server is the authority for every download (sign-in
+         is checked by get_offline_package), and for every
+         sync (submit_offline_mock_attempt re-checks sign-in and
          the package version before grading). */
       function wireDownloadButtons() {
         var dlBtns = $('set-grid').querySelectorAll('[data-dl-set]');
@@ -1658,15 +1657,14 @@ void main(){
 
       /* ---------- Set loading (server-side, one set at a time) ----------
          Questions are served by Supabase (get_question_set) WITHOUT the
-         answer keys. The server enforces the free/paid rule, so the lock
-         in renderHome/startSet is only a UI hint — the server is the
-         authority. If the server says "not entitled", show the unlock modal. */
+         answer keys. All mock tests are free; the server enforces
+         sign-in only — if the caller is signed out it raises
+         'sign-in required' and the sign-in modal opens. */
       var loadingSet = '';
       function loadSetData(subject, n, cb) {
         if (!window.CYSupa || !window.CYSupa.getQuestionSet) { showLoadError(n, cb); return; }
         window.CYSupa.getQuestionSet(subject, n).then(function (res) {
           if (res && res.ok && res.questions && res.questions.length) { cb(res.questions); return; }
-          if (res && res.notEntitled) { window.__unlockSubject = subject; showUnlock(n); return; }
           /* Server backstop (2026-11-26, login-only): the session may have
              expired after the exam started. Open sign-in instead of the
              generic load error; the attempt is preserved for retry. */
@@ -1691,7 +1689,7 @@ void main(){
         if (!window.CYSupa || !window.CYSupa.getUser) { cb(); return; }
         window.CYSupa.getUser().then(function (user) {
           if (user) { cb(); return; }
-          if (window.CYToast) window.CYToast('Sign in to take mock tests — sets 1–3 are free.');
+          if (window.CYToast) window.CYToast("Sign in to take mock tests — they're free.");
           openSignInModal();
         }).catch(function () { cb(); });
       }
@@ -1727,7 +1725,6 @@ void main(){
       }
       function startSetSignedIn(n) {
         var cfg = subjectConfig(currentSubject);
-        if (!cfg.free && n > 3) { window.__unlockSubject = currentSubject; showUnlock(n); return; }
         if (!currentSubject) return;
         /* Offline (2026-11-25): if the device reports no connection, run
            the test from a downloaded package instead of the server. */
@@ -2340,29 +2337,12 @@ void main(){
     })();
     </script>
   
-<div class="modal-back" id="unlock-modal">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="unlock-title">
-    <h3 id="unlock-title">Unlock all 20 mock tests</h3>
-    <p>Mock Tests 1&ndash;3 are free. Mock Test <span id="unlock-set">4</span> is part of the paid plan &mdash; <b>&#8377;249</b> unlocks all 20 mock tests in this subject.</p>
-    <div class="row">
-      <button type="button" id="unlock-close">Not now</button>
-      <button type="button" class="confirm" id="unlock-go">See the &#8377;249 plan</button>
-    </div>
-  </div>
-</div>
 <script>
 (function () {
-  function showUnlock(n) {
-    var s = document.getElementById('unlock-set');
-    if (s) s.textContent = n;
-    var m = document.getElementById('unlock-modal');
-    if (m) { m.className = 'modal-back open'; trapFocus(m); }
-  }
-  window.showUnlock = showUnlock;
   /* Escape closes any open modal; Tab is trapped inside the open modal
      so keyboard focus cannot leave it while it is open. (F-18) */
   function openModal() {
-    var ids = ['unlock-modal', 'submit-modal', 'quit-modal'];
+    var ids = ['submit-modal', 'quit-modal'];
     for (var i = 0; i < ids.length; i++) {
       var m = document.getElementById(ids[i]);
       if (m && m.className.indexOf('open') >= 0) return m;
@@ -2392,15 +2372,6 @@ void main(){
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); focusNoScroll(first); }
     }
   });
-  var closeBtn = document.getElementById('unlock-close');
-  if (closeBtn) closeBtn.addEventListener('click', function () { document.getElementById('unlock-modal').className = 'modal-back'; });
-  var goBtn = document.getElementById('unlock-go');
-  if (goBtn) goBtn.addEventListener('click', function () {
-    var s = window.__unlockSubject || '';
-    window.location.href = s ? '/pricing/?subject=' + encodeURIComponent(s) : '/pricing/';
-  });
-  var back = document.getElementById('unlock-modal');
-  if (back) back.addEventListener('click', function (e) { if (e.target === back) back.className = 'modal-back'; });
 })();
 </script>
 
