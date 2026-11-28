@@ -148,7 +148,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-side.open { transform: translateX(0); visibility: visible; }
 .dash-side-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, .55); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 @media (min-width: 1024px) {
-  .dash-side { position: fixed; top: 76px; bottom: auto; left: 20px; z-index: 5; width: 232px; max-width: none; height: calc(100vh - 92px); margin: 0; border-radius: 20px; transform: none; visibility: visible; transition: width .3s ease; }
+  .dash-side { position: fixed; top: 76px; bottom: auto; left: 20px; z-index: 5; width: 232px; max-width: none; height: auto; max-height: calc(100vh - 92px); margin: 0; border-radius: 20px; transform: none; visibility: visible; transition: width .3s ease; }
   .dash-main { margin-left: 252px; transition: margin-left .3s ease; }
   .dash-shell.side-collapsed .dash-main { margin-left: 92px; }
   .dash-shell { padding: 0 20px; }
