@@ -2518,10 +2518,10 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     var sideLink = $('dash-side-plan-link');
     if (sideText) sideText.textContent = names.length
       ? 'Test Series — unlocked in ' + names.join(', ') + '.'
-      : 'Tests 1–3 free · Unlock all 20 for ₹249 / subject.';
+      : 'All mock tests free.';
     if (sideLink) {
-      sideLink.href = names.length ? '/changexed/mock-tests/' : '/pricing/';
-      sideLink.textContent = names.length ? 'Take a mock test →' : 'See pricing →';
+      sideLink.href = '/changexed/mock-tests/';
+      sideLink.textContent = 'Take a mock test →';
     }
     if (names.length) {
       text.textContent = 'Test Series — Unlocked in ' + names.join(', ') + '. All 20 mock tests in each unlocked subject are available.' +
@@ -2532,16 +2532,11 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       a.textContent = 'Take a mock test →';
       actions.appendChild(a);
     } else {
-      text.textContent = 'Mock Tests 1–3 are free in every subject. Unlock all 20 tests in a subject for ₹249 (one-time, per subject).';
-      var u = document.createElement('a');
-      u.className = 'btn btn-white';
-      u.href = '/pricing/';
-      u.textContent = 'See pricing →';
-      actions.appendChild(u);
+      text.textContent = 'All 20 mock tests are free in every subject. Sign in and start — no payment, no plans.';
       var t = document.createElement('a');
-      t.className = 'btn btn-dark';
+      t.className = 'btn btn-white';
       t.href = '/changexed/mock-tests/';
-      t.textContent = 'Take a free test →';
+      t.textContent = 'Take a mock test →';
       actions.appendChild(t);
     }
   }
@@ -3679,8 +3674,8 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       title: function () { return 'Welcome to ChangeYourself, ' + tourFirstName() + '!'; },
       body: function () { return 'This is your home for UGC NET prep \u2014 mock tests, progress tracking and a private leaderboard. This 1-minute tour shows you where everything lives. You can skip any time.'; },
       primary: 'Show me around' },
-    { id: 'plan', view: 'dashboard', target: 'dash-plan', title: 'Your plan',
-      body: 'Mock Tests 1\u20133 are free in every subject. \u20b9249 unlocks all 20 mock tests in one subject \u2014 a one-time payment, yours forever.' },
+    { id: 'plan', view: 'dashboard', target: 'dash-plan', title: 'Free, forever',
+      body: 'All 20 mock tests are free in every subject — no payment, no plans. Sign in and start.' },
     { id: 'progress', view: 'dashboard', target: 'dash-progress', title: 'Track your progress',
       body: 'Your scores by subject live here. Finish all 20 sets in a subject to complete it \u2014 your best score per set is saved.' },
     { id: 'badges', view: 'analytics', target: 'dash-badges-card', title: 'Badges, streaks & summaries',
