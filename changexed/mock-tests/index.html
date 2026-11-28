@@ -456,6 +456,18 @@ body { padding-top: 76px; }
 .cy-toast.show { display: block; }
 /* Keep the exam's sticky bar and modals clear of the fixed site nav. */
 .exam-bar { top: 76px; }
+/* Shield above the sticky exam bar (2026-11-28): the bar sticks 76px down
+   so the nav clears it, but the nav is a floating pill that does not cover
+   the full width — and in practice it scrolls away with the page (the
+   liquid-glass header puts a transform on an ancestor, so the nav is not
+   truly fixed). Scrolled question text used to reappear in the 76px strip
+   above the bar, splitting the stem in two. This band paints that strip
+   the bar's own colour, so content disappears behind the header instead
+   of showing through above it. top/height must match the sticky top. */
+.exam-bar::before {
+  content: ""; position: absolute; left: 0; right: 0; top: -76px; height: 76px;
+  background: var(--navy-deep);
+}
 @media (max-width: 640px) { .nav { gap: 0; padding: 6px 7px; top: calc(10px + env(safe-area-inset-top, 0px)); } .nav a.nav-link { padding: 6px 9px; font-size: 13px; } .login-btn { padding: 7px 12px; font-size: 13px; } }
 /* Phones: tighter exam bar, question card and result hero so the
    exam fits small screens without crowding. */
