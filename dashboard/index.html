@@ -153,7 +153,7 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
   .dash-shell.side-collapsed .dash-main { margin-left: 92px; }
   .dash-shell { padding: 0 20px; }
   .dash-side.collapsed { width: 72px; }
-  .dash-side.collapsed .dash-side-link span, .dash-side.collapsed .dash-side-plan { display: none; }
+  .dash-side.collapsed .dash-side-link span { display: none; }
   .dash-side.collapsed .dash-side-link { justify-content: center; padding: 11px 0; }
   .dash-side.collapsed .dash-side-head { justify-content: center; padding: 4px 0 12px; }
   .dash-side.collapsed .dash-side-collapse svg { transform: rotate(180deg); }
@@ -169,11 +169,6 @@ body.dash-onboarding .dash-hide-until-profile { display: none !important; }
 .dash-side-link:hover { color: var(--text); background: rgba(124, 58, 237, .08); }
 .dash-side-link.active { color: #ffffff; background: rgba(124, 58, 237, .22); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12); }
 .dash-side-link svg { width: 20px; height: 20px; flex-shrink: 0; }
-.dash-side-plan { margin-top: auto; padding: 14px; border: 1px solid rgba(124, 58, 237, .18); border-radius: 14px; background: rgba(124, 58, 237, .10); }
-.dash-side-plan-icon { display: block; width: 28px; height: 28px; color: #fbbf24; margin-bottom: 8px; }
-.dash-side-plan-icon svg { width: 28px; height: 28px; }
-.dash-side-plan p { font-size: 13px; color: var(--muted); margin: 0 0 10px; line-height: 1.5; }
-.dash-side-plan .card-link { font-size: 14px; }
 
 /* View tabs: the sidebar is hidden on phones, so these switch views
    there. Hidden on desktop, where the sidebar does the job. */
@@ -609,7 +604,8 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
 <div class="dash-shell">
   <!-- Sidebar: the reference layout's left nav. Dashboard / My Tests /
        Analytics / Settings jump to sections on this page; Learn goes to
-       the mock tests. The bottom card is the real plan, not an upsell. -->
+       the mock tests. (The bottom plan card was removed 2026-11-28: there
+       is no paid plan anymore, so there is nothing for it to show.) -->
   <aside class="dash-side dash-hide-until-profile" id="dash-side" aria-label="Dashboard sections">
     <div class="dash-side-head">
       <button class="dash-side-collapse" id="dash-collapse" type="button" aria-label="Collapse sidebar" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button>
@@ -621,11 +617,6 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
       <a class="dash-side-link" href="/changexed/mock-tests/" data-tip="Learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>Learn</span></a>
       <button type="button" class="dash-side-link" data-side-view="settings" data-tip="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span>Settings</span></button>
     </nav>
-    <div class="dash-side-plan">
-      <span class="dash-side-plan-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/></svg></span>
-      <p id="dash-side-plan-text">Checking your plan…</p>
-      <a class="card-link" id="dash-side-plan-link" href="/pricing/">See pricing →</a>
-    </div>
   </aside>
   <div class="dash-side-backdrop" id="dash-side-backdrop" hidden></div>
   <div class="dash-main">
@@ -2513,16 +2504,6 @@ html[data-theme="light"] .dash-view-tabs { border-color: rgba(0, 0, 0, 0.10); ba
     var list = Array.isArray(ents) ? ents : (ents ? [ents] : []);
     list = list.filter(function (e) { return e && e.subject; });
     var names = list.map(function (e) { return SUBJECT_NAMES[e.subject] || e.subject; });
-    /* The sidebar's plan card shows the same status, one line. */
-    var sideText = $('dash-side-plan-text');
-    var sideLink = $('dash-side-plan-link');
-    if (sideText) sideText.textContent = names.length
-      ? 'Test Series — unlocked in ' + names.join(', ') + '.'
-      : 'All mock tests free.';
-    if (sideLink) {
-      sideLink.href = '/changexed/mock-tests/';
-      sideLink.textContent = 'Take a mock test →';
-    }
     if (names.length) {
       text.textContent = 'Test Series — Unlocked in ' + names.join(', ') + '. All 20 mock tests in each unlocked subject are available.' +
         (list[0].purchased_at ? ' First purchased on ' + fmtDate(list[0].purchased_at) + '.' : '');
