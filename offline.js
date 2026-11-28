@@ -122,7 +122,7 @@
     }).then(function (res) {
       if (!res || !res.ok) {
         if (res && res.signInRequired) throw new Error('Sign in to download a test for offline use.');
-        if (res && res.notEntitled) throw new Error('This test is part of the paid plan — unlock it first, then download it.');
+        if (res && res.notEntitled) throw new Error('This test is not available for download right now — sign in and try again.');
         throw new Error((res && res.error) || 'Could not download this test.');
       }
       if (downloadCancelled) throw new Error('Download cancelled.');
